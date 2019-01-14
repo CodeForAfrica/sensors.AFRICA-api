@@ -2,8 +2,10 @@
 import os
 import sys
 
+from sensors_africa.environment import SETTINGS_MODULE
+
 if __name__ == "__main__":
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sensors_africa.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", SETTINGS_MODULE)
     try:
         from django.core.management import execute_from_command_line
     except ImportError:
