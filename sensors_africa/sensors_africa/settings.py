@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     #API
     'api.accounts.apps.AccountsConfig',
     'api.sensors.apps.SensorsConfig',
+    'api.manager',
     #Feinstaub
     'feinstaub',
     'feinstaub.main',
@@ -88,11 +89,11 @@ WSGI_APPLICATION = 'sensors_africa.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'sensorsafrica',
-        'USER': 'postgres',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'sensorsafrica'),
+        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'sensorsafrica'),
+        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', 'sensorsafrica'),
+        'HOST': os.environ.get('SENSORSAFRICA_DBHOST', 'localhost'),
+        'PORT': os.environ.get('SENSORSAFRICA_DBPORT', '5432'),
     }
 }
 

@@ -1,0 +1,89 @@
+[{
+  "model": "sensors.sensortype",
+  "pk": 1,
+  "fields": {
+    "created": "2017-07-31T09:07:51.904Z",
+    "modified": "2018-01-15T08:05:22.696Z",
+    "uid": "sds011",
+    "name": "SDS011",
+    "manufacturer": "Nova Fiteness",
+    "description": ""
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 2,
+  "fields": {
+    "created": "2017-07-31T09:08:37.703Z",
+    "modified": "2017-07-31T09:08:37.703Z",
+    "uid": "dht22",
+    "name": "DHT22",
+    "manufacturer": "Ada Fruit",
+    "description": ""
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 3,
+  "fields": {
+    "created": "2017-07-31T10:43:30.683Z",
+    "modified": "2017-07-31T10:43:30.683Z",
+    "uid": "mq7",
+    "name": "MQ-7",
+    "manufacturer": "HANWEI ELECTRONICS",
+    "description": ""
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 4,
+  "fields": {
+    "created": "2017-07-31T10:44:31.307Z",
+    "modified": "2017-07-31T10:44:31.307Z",
+    "uid": "ppd42ns",
+    "name": "PPD42NS",
+    "manufacturer": "SHINYEI",
+    "description": ""
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 5,
+  "fields": {
+    "created": "2017-08-01T08:09:17.323Z",
+    "modified": "2017-08-01T08:09:17.323Z",
+    "uid": "dht11",
+    "name": "DHT11",
+    "manufacturer": "Adafruit",
+    "description": "Temperature and Humidity"
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 6,
+  "fields": {
+    "created": "2017-08-01T08:10:52.305Z",
+    "modified": "2017-08-01T08:10:52.305Z",
+    "uid": "GPS",
+    "name": "UltimateGPS",
+    "manufacturer": "Adafruit",
+    "description": "Longitude & Latitude"
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 7,
+  "fields": {
+    "created": "2017-08-18T07:10:14.008Z",
+    "modified": "2017-08-18T07:10:14.008Z",
+    "uid": "gp2y1010au0f",
+    "name": "GP2Y1010AU0F",
+    "manufacturer": "WaveShare",
+    "description": "Optical data sensor"
+  }
+}, {
+  "model": "sensors.sensortype",
+  "pk": 8,
+  "fields": {
+    "created": "2018-10-22T13:59:33.260Z",
+    "modified": "2018-10-22T13:59:33.260Z",
+    "uid": "mq135",
+    "name": "MQ135",
+    "manufacturer": "Olimex",
+    "description": "Ammonia, Nitrogen Oxides, Carbon Dioxide, benzene and alcohol"
+  }
+}]
