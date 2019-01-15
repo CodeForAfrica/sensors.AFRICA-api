@@ -10,9 +10,21 @@
     "description": "Mobile sensor 001",
     "height": 1,
     "sensor_position": 1,
-    "location": 7,
+    "location": 1,
     "email": "",
     "description_internal": ""
+  }
+}, {
+  "model": "sensors.sensor",
+  "pk": 1,
+  "fields": {
+    "created": "2017-07-31T09:13:05.613Z",
+    "modified": "2017-07-31T09:21:52.871Z",
+    "node": 1,
+    "pin": "1",
+    "sensor_type": 1,
+    "description": "",
+    "public": true
   }
 }, {
   "model": "sensors.sensorlocation",
@@ -35,17 +47,5 @@
     "owner": 1,
     "description": "",
     "timestamp": "2019-01-14T09:19:33Z"
-  }
-}, {
-  "model": "sensors.sensor",
-  "pk": 1,
-  "fields": {
-    "created": "2017-07-31T09:13:05.613Z",
-    "modified": "2017-07-31T09:21:52.871Z",
-    "node": 1,
-    "pin": "1",
-    "sensor_type": 1,
-    "description": "",
-    "public": true
   }
 }]

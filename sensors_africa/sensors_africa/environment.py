@@ -1,5 +1,5 @@
-# ENVIRONMENT = 'development'
-ENVIRONMENT = 'production'
+ENVIRONMENT = 'development'
+# ENVIRONMENT = 'production'
 
 if ENVIRONMENT == 'development':
     SETTINGS_MODULE = 'sensors_africa.settings.development'
