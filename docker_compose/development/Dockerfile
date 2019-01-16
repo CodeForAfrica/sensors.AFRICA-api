@@ -7,15 +7,13 @@ RUN mkdir /sensors_africa
 WORKDIR /sensors_africa
 
 # Create application subdirectories
-WORKDIR /src
-RUN mkdir media static logs
-VOLUME ["/src/logs/"]
+RUN mkdir static logs
 
 # Copy the current directory contents into the container at sensors_africa
 ADD . /sensors_africa
 
 # Install any needed packages
-RUN pip install -q ./feinstaub
+RUN pip install -q git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api
 RUN pip install -q -U pip setuptools
 RUN pip install -q .
 
@@ -30,6 +28,3 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 # Server
 EXPOSE 8000
-
-COPY ./sensors_africa/start.sh /
-CMD ["/start.sh "]

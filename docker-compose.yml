@@ -1,21 +1,24 @@
 version: '3'
 
 volumes:
-  postgres_data: {}
-  postgres_backup: {}
+  postgres_data_dev: {}
+  postgres_backup_dev: {}
 
 services:
   postgres:
-    image: postgres:9.6
+    build: ./docker_compose/postgres
     volumes:
       - postgres_data_dev:/var/lib/postgresql/data
       - postgres_backup_dev:/backups
   web:
     build:
       context: .
-      dockerfile: ./docker_compose/production/Dockerfile
+      dockerfile: ./docker_compose/development/Dockerfile
     command: /start.sh
     container_name: sensors_africa
+    environment:
+      DJANGO_SETTINGS_MODULE: sensors_africa.settings.docker
+      PYTHONUNBUFFERED: 0
     depends_on:
       - postgres
     links:
@@ -24,10 +27,3 @@ services:
       - .:/sensors_africa
     ports:
       - "8000:8000"
-  nginx:
-    container_name: nginx_server
-    build: ./docker_compose/nginx
-    depends_on:
-      - web
-    ports:
-      - "0.0.0.0:80:80"
