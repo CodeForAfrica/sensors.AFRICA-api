@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-web:
-  build: .
-  command: "runserver 0.0.0.0:8000"
-  entrypoint:
-    - './sensors_africa/manage.py'
-  links:
-    - db
-  volumes:
-    - .:/src
-  ports:
-    - "8000:8000"
-db:
-  image: postgres:9.6
-  ports:
-    - "5432:5432"
-=======
 version: '3'
 
 volumes:
@@ -41,10 +24,6 @@ services:
       - .:/sensors_africa
     ports:
       - "8000:8000"
-<<<<<<< HEAD
->>>>>>> Initial
-=======
-
   nginx:
     container_name: nginx_server
     build: ./docker_compose/nginx
@@ -52,4 +31,3 @@ services:
       - web
     ports:
       - "0.0.0.0:80:80"
->>>>>>> Initial
