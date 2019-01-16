@@ -7,3 +7,6 @@ coreapi==2.3.3
 # git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
 
 gunicorn==19.9.0
+
+pytest==4.1.1
+pytest-django==3.4.5
