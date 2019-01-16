@@ -2,6 +2,8 @@ django>=1.11,<2.0 #LTS
 django-extensions==2.1.4
 django-filter==2.0.0
 djangorestframework==3.9.0
-gunicorn==19.9.0
 psycopg2==2.7.6.1
-git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
+coreapi==2.3.3
+# git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
+
+gunicorn==19.9.0
