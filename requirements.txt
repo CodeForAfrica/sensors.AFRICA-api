@@ -1,9 +1,12 @@
-django>=1.11,<2.0
-django-extensions
-django-filter>=1.0.1,<1.1
-django-redis>=4.7.0,<4.8
-djangorestframework>=3.6,<3.7
-gunicorn>=19.6.0,<19.7
-ipython>=5.2.2,<5.3
-psycopg2>=2.6.2,<2.7
-git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
+django>=1.11,<2.0 #LTS
+django-extensions==2.1.4
+django-filter==2.0.0
+djangorestframework==3.9.0
+psycopg2==2.7.6.1
+coreapi==2.3.3
+# git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
+
+gunicorn==19.9.0
+
+pytest==4.1.1
+pytest-django==3.4.5
