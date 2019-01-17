@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     #API
     'api.accounts.apps.AccountsConfig',
     'api.sensors.apps.SensorsConfig',
+    'api.manager',
     #Feinstaub
     'feinstaub',
     'feinstaub.main',
