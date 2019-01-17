@@ -1,15 +1,16 @@
-version: '3'
-
-volumes:
-  postgres_data_dev: {}
-  postgres_backup_dev: {}
+version: '3.7'
 
 services:
   postgres:
-    build: ./docker_compose/postgres
+    image: postgres:9.6
+    ports:
+      - "54321:5432"
+    environment:
+      - POSTGRES_USER=sensorsafrica
+      - POSTGRES_PASSWORD=sensorsafrica
+      - POSTGRES_DB=sensorsafrica
     volumes:
-      - postgres_data_dev:/var/lib/postgresql/data
-      - postgres_backup_dev:/backups
+      - ./data/postgres:/var/lib/postgresql/data
   web:
     build:
       context: .
@@ -17,8 +18,15 @@ services:
     command: /start.sh
     container_name: sensors_africa
     environment:
-      DJANGO_SETTINGS_MODULE: sensors_africa.settings.docker
       PYTHONUNBUFFERED: 0
+      #Used in entrypoint
+      DATABASE_URL: postgresql://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica 
+      #Used in settings
+      DBNAME: sensorsafrica
+      DBUSER: sensorsafrica
+      DBPASS: sensorsafrica
+      DBHOST: postgres
+      DBPORT: 5432
     depends_on:
       - postgres
     links:
