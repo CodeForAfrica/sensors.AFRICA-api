@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.3'
 
 services:
   postgres:
@@ -11,6 +11,7 @@ services:
       - POSTGRES_DB=sensorsafrica
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
+      - ./data/postgres/:/backups
   web:
     build:
       context: .

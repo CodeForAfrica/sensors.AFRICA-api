@@ -9,11 +9,17 @@ WORKDIR /sensors_africa
 # Create application subdirectories
 RUN mkdir media static logs
 
+RUN useradd uid1000 -d /home/uid1000 \
+	&& mkdir -p /home/uid1000 \
+	&& chown uid1000: /home/uid1000
+
+VOLUME /home/uid1000
+
 # Copy the current directory contents into the container at sensors_africa
 ADD . /sensors_africa
 
 # Install any needed packages
-RUN pip install -q ./feinstaub
+RUN pip install -q git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api
 RUN pip install -q -U pip setuptools
 RUN pip install -q . \
     && groupadd -r web \
@@ -26,8 +32,8 @@ COPY ./docker_compose/entrypoint.sh /entrypoint.sh
 RUN sed -i 's/\r//' /entrypoint.sh \
     && sed -i 's/\r//' /start.sh \
     && chmod +x /entrypoint.sh \
-    && chown django /entrypoint.sh \
+    && chown web /entrypoint.sh \
     && chmod +x /start.sh \
-    && chown django /start.sh
+    && chown web /start.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
