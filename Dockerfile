@@ -8,7 +8,7 @@ RUN mkdir /src
 # Create application subdirectories
 WORKDIR /src
 RUN mkdir media static logs
-VOLUME [ "src/logs" ]
+VOLUME [ "/src/logs" ]
 
 # Copy the current directory contents into the container at sensors_africa
 ADD . /src/
