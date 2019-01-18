@@ -12,10 +12,20 @@ pip install -d git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #
 
 **Using docker**
 
-```docker-compose run web pytest sensors_africa/```
+```
+docker-compose run web pytest sensors_africa/
+```
 
 **Without Docker**
 
 You have to set environment variables like the following command.
 
-```DBNAME=test_sensorsafricapytest DBUSER=postgres DBPASS= pytest pytest ./sensors_africa```
+```
+SENSORSAFRICA_DBNAME=test_sensorsafricapytest SENSORSAFRICA_DBUSER=postgres SENSORSAFRICA_DBPASS= pytest ./sensors_africa
+```
+
+**NOTE:** If entrypoint and start scripts are changed, make sure they have permissions since we don't grant permissions to the files using the Dockerfile. Run the commands:
+```
+chmod +x entrypoint.sh
+chmod +x start.sh
+```
