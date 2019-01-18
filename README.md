@@ -16,7 +16,7 @@ currently using: `https://www.gitignore.io/api/linux,macos,python,virtualenv,vis
 **Using docker**
 
 ```
-docker-compose run web pytest sensors_africa/
+docker-compose run api pytest sensors_africa/
 ```
 
 **Without Docker**

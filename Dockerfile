@@ -16,8 +16,10 @@ ADD . /src/
 # Install feinstaub from sensors.AFRICA-AQ-api
 RUN pip install -q git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api
 RUN pip install -q -U pip setuptools
+RUN pip install -q -U .
 
 COPY ./start.sh /start.sh
 COPY ./entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
+CMD [ "/start.sh" ]

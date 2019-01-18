@@ -12,10 +12,9 @@ services:
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
       - ./data/postgres/:/backups
-  web:
+  api:
     build:
       context: .
-    command: /start.sh
     container_name: sensors_africa
     environment:
       PYTHONUNBUFFERED: 0
