@@ -18,4 +18,3 @@ exec gunicorn \
     --access-logfile=/src/logs/access.log \
     --name sensors_africa --reload sensors_africa.wsgi:application \
     --chdir sensors_africa/
-    
