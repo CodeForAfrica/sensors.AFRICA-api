@@ -12,7 +12,6 @@ services:
   api:
     build:
       context: .
-    container_name: sensors_africa
     environment:
       PYTHONUNBUFFERED: 0
       SENSORSAFRICA_DBNAME: sensorsafrica
@@ -28,4 +27,3 @@ services:
       - .:/src
     ports:
       - "8000:8000"
-      
