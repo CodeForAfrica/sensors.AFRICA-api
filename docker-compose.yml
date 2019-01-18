@@ -13,7 +13,6 @@ services:
     build:
       context: .
     environment:
-      PYTHONUNBUFFERED: 0
       SENSORSAFRICA_DBNAME: sensorsafrica
       SENSORSAFRICA_DBUSER: sensorsafrica
       SENSORSAFRICA_DBPASS: sensorsafrica
