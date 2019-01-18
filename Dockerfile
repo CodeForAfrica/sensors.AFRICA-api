@@ -27,11 +27,5 @@ RUN chown -R web /src
 
 COPY ./start.sh /start.sh
 COPY ./entrypoint.sh /entrypoint.sh
-RUN sed -i 's/\r//' /entrypoint.sh \
-    && sed -i 's/\r//' /start.sh \
-    && chmod +x /entrypoint.sh \
-    && chown web /entrypoint.sh \
-    && chmod +x /start.sh \
-    && chown web /start.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
