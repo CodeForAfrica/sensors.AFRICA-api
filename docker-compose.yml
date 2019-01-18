@@ -19,14 +19,11 @@ services:
     container_name: sensors_africa
     environment:
       PYTHONUNBUFFERED: 0
-      #Used in entrypoint
-      DATABASE_URL: postgresql://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica 
-      #Used in settings
-      DBNAME: sensorsafrica
-      DBUSER: sensorsafrica
-      DBPASS: sensorsafrica
-      DBHOST: postgres
-      DBPORT: 5432
+      SENSORSAFRICA_DBNAME: sensorsafrica
+      SENSORSAFRICA_DBUSER: sensorsafrica
+      SENSORSAFRICA_DBPASS: sensorsafrica
+      SENSORSAFRICA_DBHOST: postgres
+      SENSORSAFRICA_DBPORT: 5432
     depends_on:
       - postgres
     links:

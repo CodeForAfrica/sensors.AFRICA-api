@@ -89,11 +89,11 @@ WSGI_APPLICATION = 'sensors_africa.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DBNAME', 'sensorsafrica'),
-        'USER': os.environ.get('DBUSER', 'sensorsafrica'),
-        'PASSWORD': os.environ.get('DBPASS', 'sensorsafrica'),
-        'HOST': os.environ.get('DBHOST', 'localhost'),
-        'PORT': os.environ.get('DBPORT', '5432'),
+        'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'sensorsafrica'),
+        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'sensorsafrica'),
+        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', 'sensorsafrica'),
+        'HOST': os.environ.get('SENSORSAFRICA_DBHOST', 'localhost'),
+        'PORT': os.environ.get('SENSORSAFRICA_DBPORT', '5432'),
     }
 }
 
