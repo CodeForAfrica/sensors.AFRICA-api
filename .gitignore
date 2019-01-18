@@ -104,5 +104,5 @@ ENV/
 .mypy_cache
 .idea
 
-#
+# Postgres Volume
 data
