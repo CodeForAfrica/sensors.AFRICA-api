@@ -9,9 +9,6 @@ services:
       - POSTGRES_USER=sensorsafrica
       - POSTGRES_PASSWORD=sensorsafrica
       - POSTGRES_DB=sensorsafrica
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-      - ./data/postgres/:/backups
   api:
     build:
       context: .
@@ -28,6 +25,6 @@ services:
     links:
       - postgres
     volumes:
-      - .:/sensors_africa
+      - .:/src
     ports:
       - "8000:8000"
