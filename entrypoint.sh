@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+cmd="$@"
 
 function postgres_ready(){
 python << END
@@ -22,3 +23,4 @@ until postgres_ready; do
 done
 
 >&2 echo "Postgres is up - continuing..."
+exec $cmd
