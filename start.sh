@@ -16,4 +16,5 @@ exec gunicorn \
     --log-level=info \
     --log-file=/src/logs/gunicorn.log \
     --access-logfile=/src/logs/access.log \
-    "$@"
+    --name sensors_africa --reload sensors_africa.wsgi:application \
+    --chdir sensors_africa/
