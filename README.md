@@ -5,10 +5,10 @@ API to save data from deployed sensors in Africa.
 pip install -d git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
 
 standardize gitignore using [gitignore.io](https://www.gitignore.io/)
-currently using: `https://www.gitignore.io/api/linux,macos,python,virtualenv,visualstudiocode`
+currently using: `https://www.gitignore.io/api/vim,venv,emacs,linux,macos,python,django,virtualenv,intellij+all,visualstudiocode `
 
 **NOTE:** 
-- `docker-compose` is scritly for development and testing purposes. 
+- `docker-compose` is strictly for development and testing purposes. 
 - The Dockerfile is written for production since dokku is being used and it will look for Dockerfile. Option to look into production and development as an enhancement with plugins such as [dokku-dockerfile](https://github.com/mimischi/dokku-dockerfile)
 
 ## Tests
