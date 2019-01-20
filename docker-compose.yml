@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres:9.6
+    ports:
+      - "54321:5432"
+    environment:
+      - POSTGRES_USER=sensorsafrica
+      - POSTGRES_PASSWORD=sensorsafrica
+      - POSTGRES_DB=sensorsafrica
+  api:
+    build:
+      context: .
+    environment:
+      SENSORSAFRICA_DBNAME: sensorsafrica
+      SENSORSAFRICA_DBUSER: sensorsafrica
+      SENSORSAFRICA_DBPASS: sensorsafrica
+      SENSORSAFRICA_DBHOST: postgres
+      SENSORSAFRICA_DBPORT: 5432
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    volumes:
+      - .:/src
+    ports:
+      - "8000:8000"
