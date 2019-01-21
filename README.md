@@ -1,4 +1,4 @@
-# sensors.AFRICA API
+# sensors.AFRICA API [![Build Status](https://travis-ci.org/CodeForAfricaLabs/sensors.AFRICA-api.svg?branch=master)](https://travis-ci.org/CodeForAfricaLabs/sensors.AFRICA-api)
 
 API to save data from deployed sensors in Africa.
 

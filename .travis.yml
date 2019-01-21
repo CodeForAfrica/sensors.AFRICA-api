@@ -1,0 +1,9 @@
+language: python
+
+services:
+  - docker
+
+script:
+  - docker-compose build --pull
+  - docker-compose up -d
+  - docker-compose exec api ./entrypoint.sh pytest sensors_africa/
