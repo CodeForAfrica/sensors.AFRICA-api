@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
 from django.contrib import admin
 from django.conf.urls import include, url
 
@@ -26,7 +25,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 from api.sensors.base.router import api_urls as sensors_api_v1
 from api.accounts.base.router import api_urls as accounts_api_v1
 
-from api.sensors.base.views import AddSensordeviceView
+from feinstaub.sensors.views import AddSensordeviceView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

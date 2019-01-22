@@ -39,14 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    #Django Rest Framework
+    # Django Rest Framework
     'rest_framework',
     'rest_framework.authtoken',
-    #API
-    'api.accounts.apps.AccountsConfig',
-    'api.sensors.apps.SensorsConfig',
+    # API
     'api.manager',
-    #Feinstaub
+    'api.apps.AccountsConfig',
+    'api.apps.SensorsConfig',
+    # Feinstaub
     'feinstaub',
     'feinstaub.main',
     'feinstaub.sensors'
@@ -90,8 +90,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'sensorsafrica'),
-        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'sensorsafrica'),
-        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', 'sensorsafrica'),
+        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'Karim'),
+        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', ''),
         'HOST': os.environ.get('SENSORSAFRICA_DBHOST', 'localhost'),
         'PORT': os.environ.get('SENSORSAFRICA_DBPORT', '5432'),
     }
@@ -103,16 +103,20 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.\
+        password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.\
+        password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.\
+        password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.\
+        password_validation.NumericPasswordValidator',
     },
 ]
 

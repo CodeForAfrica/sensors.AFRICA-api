@@ -3,14 +3,23 @@ import pytest
 
 from django.core.management import call_command
 
-from feinstaub.sensors.models import Sensor, SensorLocation, SensorType, Node
+from feinstaub.sensors.models import (
+    Sensor, 
+    SensorLocation, 
+    SensorType, 
+    Node,
+    SensorData,
+    SensorDataValue
+)
 
-@pytest.fixture(scope='session')
+import datetime
+from django.utils import timezone
+
+@pytest.fixture
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command("loaddata", "auth.json")
-        call_command("loaddata", "sensortypes.json")
-        call_command("loaddata", "sensors.json")
+
 
 @pytest.fixture
 def logged_in_user():
@@ -33,8 +42,7 @@ def location():
 
 @pytest.fixture
 def sensor_type():
-    st, x = SensorType.objects.get_or_create(uid="A", name="B",
-                                             manufacturer="C")
+    st, x = SensorType.objects.get_or_create(uid="a", name="b", manufacturer="c")
     return st
 
 
