@@ -38,9 +38,9 @@ class TestSensorDataPushFull:
 
         assert sd.sensordatavalues.count() == 2
         assert sd.sensordatavalues.get(value_type="P1").value ==\
-            data_fixture['sensordatavalues'][0]['value']
+            str(data_fixture['sensordatavalues'][0]['value'])
         assert sd.sensordatavalues.get(value_type="P2").value ==\
-            data_fixture['sensordatavalues'][1]['value']
+            str(data_fixture['sensordatavalues'][1]['value'])
 
         assert sd.location == sensor.node.location
 
