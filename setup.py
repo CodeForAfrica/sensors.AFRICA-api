@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open('VERSION', "r") as f:
-  version = f.read().strip()
+    version = f.read().strip()
 
 with open('requirements.txt') as f:
     install_requires = f.read().splitlines()

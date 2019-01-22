@@ -5,6 +5,7 @@ from rest_framework.test import APIRequestFactory
 from feinstaub.sensors.views import PostSensorDataView
 from feinstaub.sensors.models import SensorData
 
+
 @pytest.mark.django_db
 class TestSensorDataPushFull:
 
