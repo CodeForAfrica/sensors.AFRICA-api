@@ -1,1 +1,0 @@
-from feinstaub.sensors.serializers import *

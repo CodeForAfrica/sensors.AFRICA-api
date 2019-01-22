@@ -1,12 +1,11 @@
 from rest_framework import routers
-from django.conf.urls import include, url
 
-from .views import (
+from feinstaub.sensors.views import (
     NodeView,
     PostSensorDataView,
     SensorDataView,
     SensorView,
-    NowView,
+    NowView
 )
 
 router = routers.DefaultRouter()

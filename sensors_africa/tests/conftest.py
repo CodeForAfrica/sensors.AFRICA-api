@@ -5,12 +5,14 @@ from django.core.management import call_command
 
 from feinstaub.sensors.models import Sensor, SensorLocation, SensorType, Node
 
+
 @pytest.fixture(scope='session')
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command("loaddata", "auth.json")
         call_command("loaddata", "sensortypes.json")
         call_command("loaddata", "sensors.json")
+
 
 @pytest.fixture
 def logged_in_user():
