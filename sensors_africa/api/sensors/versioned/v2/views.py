@@ -7,7 +7,7 @@ from rest_framework import mixins, generics, viewsets, pagination
 from rest_framework.response import Response
 
 from .models import Sensor, SensorData
-from ...base.views import StandardResultsSetPagination
+from feinstaub.sensors.views import StandardResultsSetPagination
 
 from .serializers import SensorSerializer
 
