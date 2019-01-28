@@ -19,8 +19,6 @@ from django.utils import timezone
 def django_db_setup(django_db_setup, django_db_blocker):
     with django_db_blocker.unblock():
         call_command("loaddata", "auth.json")
-        # call_command("loaddata", "sensortypes.json")
-        # call_command("loaddata", "sensors.json")
 
 
 @pytest.fixture

@@ -24,7 +24,7 @@ docker-compose run api pytest sensors_africa/
 You have to set environment variables like the following command.
 
 ```
-SENSORSAFRICA_DBNAME=test_sensorsafricapytest SENSORSAFRICA_DBUSER=postgres SENSORSAFRICA_DBPASS= pytest ./sensors_africa
+SENSORSAFRICA_DBNAME=sensorsafrica SENSORSAFRICA_DBUSER=Karim SENSORSAFRICA_DBPASS= pytest ./sensors_africa
 ```
 
 **NOTE:** If entrypoint and start scripts are changed, make sure they have permissions since we don't grant permissions to the files using the Dockerfile. Run the commands:
