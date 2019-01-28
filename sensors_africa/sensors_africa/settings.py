@@ -44,9 +44,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     # API
     'api.manager',
-    'api.apps.StatsConfig',
     'api.apps.AccountsConfig',
     'api.apps.SensorsConfig',
+    'api.apps.DataConfig',
     # Feinstaub
     'feinstaub',
     'feinstaub.main',

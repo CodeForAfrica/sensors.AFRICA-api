@@ -109,7 +109,7 @@ def sensordata(sensors, locations):
     below_active_threshold_time = now - datetime.timedelta(minutes=40)
     data =  SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
-        SensorData(sensor=sensors[1], location=locations[0]),
+        SensorData(sensor=sensors[1], location=locations[1]),
     ])
 
     data[1].update_modified = False

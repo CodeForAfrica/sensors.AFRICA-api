@@ -1,12 +1,12 @@
 from django.apps import AppConfig
 
 
-class StatsConfig(AppConfig):
-    name = 'api.statistics'
-
-
 class AccountsConfig(AppConfig):
     name = 'api.accounts'
+
+
+class DataConfig(AppConfig):
+    name = 'api.data'
 
 
 class SensorsConfig(AppConfig):
