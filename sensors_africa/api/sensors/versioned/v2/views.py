@@ -6,10 +6,9 @@ from django.db.models import Q, Subquery
 from rest_framework import mixins, generics, viewsets, pagination
 from rest_framework.response import Response
 
-from .models import Sensor, SensorData
+from feinstaub.sensors.serializers import SensorSerializer
+from feinstaub.sensors.models import Sensor, SensorData
 from feinstaub.sensors.views import StandardResultsSetPagination
-
-from .serializers import SensorSerializer
 
 
 class SensorsView(mixins.ListModelMixin,
