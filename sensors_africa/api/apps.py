@@ -1,7 +1,9 @@
 from django.apps import AppConfig
 
+
 class AccountsConfig(AppConfig):
     name = 'api.accounts'
+
 
 class SensorsConfig(AppConfig):
     name = 'api.sensors'
