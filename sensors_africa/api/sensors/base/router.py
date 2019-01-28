@@ -1,7 +1,8 @@
 # The base version is entirely based on feinstaub
 from rest_framework import routers
 
-from .views import (
+from feinstaub.main.views import UsersView
+from feinstaub.sensors.views import (
     NodeView,
     PostSensorDataView,
     SensorDataView,

@@ -25,12 +25,15 @@ from rest_framework.authtoken.views import obtain_auth_token
 from api.sensors.base.router import api_urls as sensors_api_v1
 from api.accounts.base.router import api_urls as accounts_api_v1
 
+from api.statistics.base.router import api_urls as stats_api_v2
+
 from feinstaub.sensors.views import AddSensordeviceView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^v1/', include(sensors_api_v1)),
     url(r'^v1/', include(accounts_api_v1)),
+    url(r'^v2/readings/', include(stats_api_v2)),
     url(r'^get-auth-token/', obtain_auth_token),
     url(r'^auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^docs/', include_docs_urls(title='sensors.Africa API')),

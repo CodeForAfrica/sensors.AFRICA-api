@@ -1,6 +1,10 @@
 from django.apps import AppConfig
 
 
+class StatsConfig(AppConfig):
+    name = 'api.statistics'
+
+
 class AccountsConfig(AppConfig):
     name = 'api.accounts'
 
