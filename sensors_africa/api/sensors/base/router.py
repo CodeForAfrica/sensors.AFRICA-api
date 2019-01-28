@@ -1,8 +1,7 @@
 # The base version is entirely based on feinstaub
 from rest_framework import routers
 
-from feinstaub.main.views import UsersView
-from feinstaub.sensors.views import (
+from .views import (
     NodeView,
     PostSensorDataView,
     SensorDataView,
@@ -17,7 +16,6 @@ router.register(r'node', NodeView)
 router.register(r'sensor', SensorView)
 router.register(r'data', SensorDataView)
 router.register(r'statistics', StatisticsView, basename='statistics')
-router.register(r'user', UsersView)
 router.register(r'now', NowView)
 
 api_urls = router.urls

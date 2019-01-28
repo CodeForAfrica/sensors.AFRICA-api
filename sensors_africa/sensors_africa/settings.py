@@ -43,9 +43,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     # API
-    'api.accounts.apps.AccountsConfig',
-    'api.sensors.apps.SensorsConfig',
     'api.manager',
+    'api.apps.AccountsConfig',
+    'api.apps.SensorsConfig',
     # Feinstaub
     'feinstaub',
     'feinstaub.main',
@@ -90,8 +90,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'sensorsafrica'),
-        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'sensorsafrica'),
-        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', 'sensorsafrica'),
+        'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'Karim'),
+        'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', ''),
         'HOST': os.environ.get('SENSORSAFRICA_DBHOST', 'localhost'),
         'PORT': os.environ.get('SENSORSAFRICA_DBPORT', '5432'),
     }
