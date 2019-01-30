@@ -28,9 +28,13 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data["average"] == 4.5
-        assert data["max"] == 8.0
-        assert data["min"] == 1.0
+        assert data["P2"]["average"] == 4.5
+        assert data["P2"]["max"] == 8.0
+        assert data["P2"]["min"] == 1.0
+
+        assert data["P1"]["average"] == 0.0
+        assert data["P1"]["max"] == 0.0
+        assert data["P1"]["min"] == 0.0
 
 
     def test_getting_current_readings_all_cities(self, client, datavalues):
