@@ -15,6 +15,9 @@ from django.db.models.functions import Cast
 
 from feinstaub.sensors.serializers import SensorDataValueSerializer
 
+value_types = {
+	"air" : [ "P1", "P2" ]
+}
 class ReadingsView(mixins.ListModelMixin, 
 									mixins.RetrieveModelMixin, 
 									viewsets.GenericViewSet):
@@ -30,14 +33,14 @@ class ReadingsView(mixins.ListModelMixin,
 
 class ReadingsNowView(viewsets.GenericViewSet):
 
-	def get_stats(self, location):
+	def get_stats(self, location, sensor_type):
 		sensor_data = SensorData.objects.filter(location=location)
 
 		lte = timezone.now()
 		gte = lte - datetime.timedelta(24 * 60)
 
 		stats = {}
-		for value_type in ["P2", "P1"]:
+		for value_type in value_types[sensor_type]:
 			stats[value_type] = SensorDataValue.objects\
 			.filter(sensordata__in=sensor_data, created__lte=lte, created__gte=gte, value_type=value_type)\
 			.annotate(float_value=Case(
@@ -48,14 +51,12 @@ class ReadingsNowView(viewsets.GenericViewSet):
 		
 		return stats
 
-	def list(self, request):
+	def list(self, request, sensor_type):
 		city = request.query_params.get('city')
 		if city:
-			stats = self.get_stats(SensorLocation.objects.get(city=city))
+			stats = self.get_stats(SensorLocation.objects.get(city=city), sensor_type)
 		else:
 			stats = {}
 			for location in SensorLocation.objects.all():
-				stats[location.city] = self.get_stats(location)
-		
-		print(stats)
+				stats[location.city] = self.get_stats(location, sensor_type)
 		return Response(stats)
