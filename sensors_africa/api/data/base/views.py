@@ -9,19 +9,11 @@ from feinstaub.sensors.models import SensorData, SensorDataValue, SensorLocation
 import datetime
 from django.utils import timezone
 
-class SensorDataValueSerializer(serializers.ModelSerializer):
+from rest_framework.response import Response
+from django.db.models import Avg, Max, Min, FloatField, Case, When, Q
+from django.db.models.functions import Cast
 
-	class Meta:
-		model = SensorDataValue
-		fields = ('value', 'value_type',)
-
-class SensorDataSerializer(serializers.ModelSerializer):
-	sensordatavalues = SensorDataValueSerializer(many=True)
-
-	class Meta:
-		model = SensorData
-		fields = ('sensordatavalues',)
-		read_only = ('location')
+from feinstaub.sensors.serializers import SensorDataValueSerializer
 
 class ReadingsView(mixins.ListModelMixin, 
 									mixins.RetrieveModelMixin, 
@@ -35,10 +27,6 @@ class ReadingsView(mixins.ListModelMixin,
 			sensor_data = SensorData.objects.filter(location=SensorLocation.objects.get(city=city))
 			return SensorDataValue.objects.filter(sensordata__in=sensor_data)
 		return SensorDataValue.objects.all()
-
-from rest_framework.response import Response
-from django.db.models import Avg, Max, Min, FloatField, Case, When, Q
-from django.db.models.functions import Cast
 
 class ReadingsNowView(viewsets.GenericViewSet):
 
@@ -66,6 +54,5 @@ class ReadingsNowView(viewsets.GenericViewSet):
 			stats = {}
 			for location in SensorLocation.objects.all():
 				stats[location.city] = self.get_location_stats(location)
-
-			return Response(stats)
-		return Response({})
+		
+		return Response(stats)
