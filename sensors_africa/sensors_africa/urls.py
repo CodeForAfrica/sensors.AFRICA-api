@@ -30,15 +30,12 @@ from api.data.base.router import api_urls as data_api_v2
 from feinstaub.sensors.views import AddSensordeviceView
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    
-    url(r'^v1/', include(sensors_api_v1)),
-    url(r'^v1/', include(accounts_api_v1)),
-
-    url(r'^v2/(?P<sensor_type>[air].+)/readings/', include(data_api_v2)),
-
-    url(r'^get-auth-token/', obtain_auth_token),
-    url(r'^auth/', include('rest_framework.urls', namespace='rest_framework')),
-    url(r'^docs/', include_docs_urls(title='sensors.Africa API')),
-    url(r'^adddevice/', AddSensordeviceView.as_view(), name='adddevice'),
+    url(r"^admin/", admin.site.urls),
+    url(r"^v1/", include(sensors_api_v1)),
+    url(r"^v1/", include(accounts_api_v1)),
+    url(r"^v2/(?P<sensor_type>[air].+)/readings/", include(data_api_v2)),
+    url(r"^get-auth-token/", obtain_auth_token),
+    url(r"^auth/", include("rest_framework.urls", namespace="rest_framework")),
+    url(r"^docs/", include_docs_urls(title="sensors.Africa API")),
+    url(r"^adddevice/", AddSensordeviceView.as_view(), name="adddevice"),
 ] + staticfiles_urlpatterns()

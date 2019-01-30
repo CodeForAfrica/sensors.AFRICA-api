@@ -1,11 +1,6 @@
 from rest_framework import routers
 
-from django.conf.urls import include, url
-
-from .views import (
-  ReadingsView,
-  ReadingsNowView
-)
+from .views import ReadingsNowView, ReadingsView
 
 router = routers.DefaultRouter()
 
