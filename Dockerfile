@@ -10,16 +10,20 @@ WORKDIR /src
 RUN mkdir media static logs
 VOLUME [ "/src/logs" ]
 
-# Copy the current directory contents into the container at sensors_africa
+# Copy the current directory contents into the container at sensorsafrica
 ADD . /src/
+
+# Upgrade pip and setuptools
+RUN pip install -q -U pip setuptools
 
 # Install feinstaub from sensors.AFRICA-AQ-api
 RUN pip install -q git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api
-RUN pip install -q -U pip setuptools
+
+# Install sensors.AFRICA-api and its dependencies
 RUN pip install -q -U .
 
-COPY ./start.sh /start.sh
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./contrib/start.sh /start.sh
+COPY ./contrib/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD [ "/start.sh" ]
