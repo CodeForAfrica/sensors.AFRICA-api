@@ -138,9 +138,10 @@ def datavalues(sensors, sensordata):
     data_values = [
         # Bagamoyo
         SensorDataValue(sensordata=sensordata[0], value="2", value_type="humidity"),
-        # Dar es salaam
+        # Dar es salaam a day ago's data
         SensorDataValue(sensordata=sensordata[1], value="1", value_type="P2"),
         SensorDataValue(sensordata=sensordata[2], value="2", value_type="P2"),
+        # Dar es salaam today's data avg 5.5
         SensorDataValue(sensordata=sensordata[3], value="3", value_type="P2"),
         SensorDataValue(sensordata=sensordata[4], value="4", value_type="P2"),
         SensorDataValue(sensordata=sensordata[5], value="5", value_type="P2"),
@@ -159,6 +160,7 @@ def datavalues(sensors, sensordata):
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
+    # Set Dar es salaam a day ago's data
     values[1].update_modified = False
     values[1].created = timezone.now() - datetime.timedelta(days=1)
     values[1].save()

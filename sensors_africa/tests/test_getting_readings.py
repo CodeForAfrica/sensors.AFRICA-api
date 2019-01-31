@@ -25,8 +25,6 @@ class TestGettingData:
 
         data = response.json()
 
-        print(data)
-
         assert len(data) == 2
         assert data[0]["city"] == "Dar es Salaam"
         assert data[0]["value_type"] == "P1"
@@ -36,9 +34,9 @@ class TestGettingData:
 
         assert data[1]["city"] == "Dar es Salaam"
         assert data[1]["value_type"] == "P2"
-        assert data[1]["average"] == 4.5
+        assert data[1]["average"] == 5.5
         assert data[1]["max"] == 8.0
-        assert data[1]["min"] == 1.0
+        assert data[1]["min"] == 3.0
 
     def test_getting_current_readings_all_cities(self, client, datavalues):
         response = client.get("/v2/air/readings/now/", format="json")
