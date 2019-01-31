@@ -1,5 +1,6 @@
 import datetime
 
+import django_filters
 from django.db.models import Avg, Case, F, FloatField, Max, Min, Q, When
 from django.db.models.functions import Cast
 from django.utils import timezone
@@ -17,10 +18,19 @@ class StandardResultsSetPagination(pagination.PageNumberPagination):
     max_page_size = 1000
 
 
+class ReadingsFilter(django_filters.FilterSet):
+    class Meta:
+        model = SensorDataValue
+        fields = {"created": ["date__range"]}
+
+
 class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = SensorDataValue.objects.none()
     serializer_class = ReadingsSerializer
     pagination_class = StandardResultsSetPagination
+
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
+    filter_class = ReadingsFilter
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
@@ -28,15 +38,9 @@ class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         sensordata = SensorData.objects.filter(location__city=city)
 
-        now = timezone.now()
-        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        last = midnight - datetime.timedelta(days=7)
-
         return (
             SensorDataValue.objects.filter(
-                sensordata__in=sensordata,
-                value_type__in=value_types[sensor_type],
-                created__range=[last, now],
+                sensordata__in=sensordata, value_type__in=value_types[sensor_type]
             )
             .extra({"day": "DATE_TRUNC('day', created)"})
             .values("day", "value_type")
@@ -73,8 +77,7 @@ class ReadingsNowView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         return (
             queryset.filter(
-                created__range=[prev, now],
-                value_type__in=value_types[sensor_type],
+                created__range=[prev, now], value_type__in=value_types[sensor_type]
             )
             .values("value_type", "sensordata__location__city")
             .order_by()

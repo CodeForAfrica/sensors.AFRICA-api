@@ -1,4 +1,6 @@
 import pytest
+import datetime
+from django.utils import timezone
 
 
 @pytest.mark.django_db
@@ -9,7 +11,7 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data['count'] == 0
+        assert data["count"] == 0
 
     def test_getting_all_readings_by_city(self, client, datavalues):
         response = client.get("/v2/air/readings/?city=Dar es Salaam", format="json")
@@ -17,7 +19,20 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data['count'] == 3
+        assert data["count"] == 3
+
+    def test_getting_all_readings_by_city_date_range(self, client, datavalues):
+        now = timezone.now()
+        response = client.get(
+            "/v2/air/readings/?city=Dar es Salaam&created__date__range=%s,%s"
+            % (str(now.date()), str(now.date())),
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 2
 
     def test_getting_current_readings_by_city(self, client, datavalues):
         response = client.get("/v2/air/readings/now/?city=Dar es Salaam", format="json")

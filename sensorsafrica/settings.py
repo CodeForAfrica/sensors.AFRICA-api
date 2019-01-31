@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django_filters',
     # Django Rest Framework
     'rest_framework',
     'rest_framework.authtoken',
@@ -89,7 +90,7 @@ WSGI_APPLICATION = 'sensorsafrica.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'sensorsafrica'),
+        'NAME': os.environ.get('SENSORSAFRICA_DBNAME', 'htools-airquality-api'),
         'USER': os.environ.get('SENSORSAFRICA_DBUSER', 'Karim'),
         'PASSWORD': os.environ.get('SENSORSAFRICA_DBPASS', ''),
         'HOST': os.environ.get('SENSORSAFRICA_DBHOST', 'localhost'),
