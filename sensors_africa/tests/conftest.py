@@ -89,11 +89,13 @@ def nodes(logged_in_user, locations):
 def sensors(sensor_type, nodes):
     return Sensor.objects.bulk_create(
         [
+            # Active Dar Sensor
             Sensor(node=nodes[0], sensor_type=sensor_type),
             # Inactive with last data push beyond active threshold
             Sensor(node=nodes[1], sensor_type=sensor_type),
             # Inactive without any data
             Sensor(node=nodes[2], sensor_type=sensor_type),
+            # Active Nairobi Sensor
             Sensor(node=nodes[3], sensor_type=sensor_type),
         ]
     )
@@ -103,21 +105,25 @@ def sensors(sensor_type, nodes):
 def sensordata(sensors, locations):
     now = timezone.now()
     below_active_threshold_time = now - datetime.timedelta(minutes=40)
-    data = SensorData.objects.bulk_create(
-        [
-            # Bagamoyo SensorData
-            SensorData(sensor=sensors[1], location=locations[1]),
-            # Dar es Salaam SensorData
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-            SensorData(sensor=sensors[0], location=locations[0]),
-        ]
-    )
+
+    sensor_datas = [
+        # Bagamoyo SensorData
+        SensorData(sensor=sensors[1], location=locations[1]),
+        # Dar es Salaam SensorData
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+    ]
+    # Nairobi SensorData
+    for i in range(100):
+        sensor_datas.append(SensorData(sensor=sensors[3], location=locations[3]))
+
+    data = SensorData.objects.bulk_create(sensor_datas)
 
     # Bagamoyo Data is below active threshold
     data[0].update_modified = False
@@ -129,25 +135,30 @@ def sensordata(sensors, locations):
 
 @pytest.fixture
 def datavalues(sensors, sensordata):
-    values = SensorDataValue.objects.bulk_create(
-        [
-            SensorDataValue(sensordata=sensordata[0], value="2", value_type="humidity"),
-            SensorDataValue(sensordata=sensordata[1], value="1", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[2], value="2", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[3], value="3", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[4], value="4", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[5], value="5", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[6], value="6", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[7], value="7", value_type="P2"),
-            SensorDataValue(sensordata=sensordata[8], value="0", value_type="P1"),
-            SensorDataValue(sensordata=sensordata[8], value="8", value_type="P2"),
-            SensorDataValue(
-                sensordata=sensordata[8],
-                value=0,
-                value_type="timestamp",
-            ),
-        ]
-    )
+    data_values = [
+        # Bagamoyo
+        SensorDataValue(sensordata=sensordata[0], value="2", value_type="humidity"),
+        # Dar es salaam
+        SensorDataValue(sensordata=sensordata[1], value="1", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[2], value="2", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[3], value="3", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[4], value="4", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[5], value="5", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[6], value="6", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[7], value="7", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[8], value="0", value_type="P1"),
+        SensorDataValue(sensordata=sensordata[8], value="8", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[8], value="some time stamp", value_type="timestamp"),
+    ]
+
+    # Nairobi SensorDataValues
+    for i in range(100):
+        data_values.append(
+            SensorDataValue(sensordata=sensordata[9 + i], value="10.0", value_type="P2")
+        )
+
+    values = SensorDataValue.objects.bulk_create(data_values)
+
     values[1].update_modified = False
     values[1].created = timezone.now() - datetime.timedelta(days=1)
     values[1].save()

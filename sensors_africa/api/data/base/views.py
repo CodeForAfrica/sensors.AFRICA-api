@@ -24,7 +24,7 @@ class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
-        city = self.request.query_params.get("city")
+        city = self.request.query_params.get("city", None)
 
         sensordata = SensorData.objects.filter(location__city=city)
 
@@ -61,12 +61,18 @@ class ReadingsNowView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
+        city = self.request.query_params.get("city", None)
+
+        if city is not None:
+            queryset = SensorDataValue.objects.filter(sensordata__location__city=city)
+        else:
+            queryset = SensorDataValue.objects.filter()
 
         lte = timezone.now()
-        gte = lte - datetime.timedelta(24 * 60)
+        gte = lte - datetime.timedelta(hours=24)
 
         return (
-            SensorDataValue.objects.filter(
+            queryset.filter(
                 created__lte=lte,
                 created__gte=gte,
                 value_type__in=value_types[sensor_type],

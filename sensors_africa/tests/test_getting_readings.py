@@ -46,5 +46,6 @@ class TestGettingData:
 
         data = response.json()
 
-        assert len(data) == 2
+        assert len(data) == 3
         assert data[0]["city"] == "Dar es Salaam"
+        assert data[2]["city"] == "Nairobi"
