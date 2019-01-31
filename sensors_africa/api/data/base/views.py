@@ -68,13 +68,12 @@ class ReadingsNowView(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             queryset = SensorDataValue.objects.filter()
 
-        lte = timezone.now()
-        gte = lte - datetime.timedelta(hours=24)
+        now = timezone.now()
+        prev = now - datetime.timedelta(hours=24)
 
         return (
             queryset.filter(
-                created__lte=lte,
-                created__gte=gte,
+                created__range=[prev, now],
                 value_type__in=value_types[sensor_type],
             )
             .values("value_type", "sensordata__location__city")
