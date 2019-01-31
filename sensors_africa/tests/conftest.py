@@ -129,7 +129,7 @@ def sensordata(sensors, locations):
 
 @pytest.fixture
 def datavalues(sensors, sensordata):
-    return SensorDataValue.objects.bulk_create(
+    values = SensorDataValue.objects.bulk_create(
         [
             SensorDataValue(sensordata=sensordata[0], value="2", value_type="humidity"),
             SensorDataValue(sensordata=sensordata[1], value="1", value_type="P2"),
@@ -143,8 +143,15 @@ def datavalues(sensors, sensordata):
             SensorDataValue(sensordata=sensordata[8], value="8", value_type="P2"),
             SensorDataValue(
                 sensordata=sensordata[8],
-                value="some time stamp",
+                value=0,
                 value_type="timestamp",
             ),
         ]
     )
+    values[1].update_modified = False
+    values[1].created = timezone.now() - datetime.timedelta(days=1)
+    values[1].save()
+    values[2].update_modified = False
+    values[2].created = timezone.now() - datetime.timedelta(days=1)
+    values[2].save()
+
