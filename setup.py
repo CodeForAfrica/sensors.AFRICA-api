@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
     install_requires = f.read().splitlines()
 
 setuptools.setup(
-    name='sensors_africa',
+    name='sensorsafrica',
     version=version,
     author="CodeForAfrica",
     author_email="hello@codeforafrica.org",

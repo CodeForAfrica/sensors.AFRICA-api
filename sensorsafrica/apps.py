@@ -2,14 +2,14 @@ from django.apps import AppConfig
 
 
 class AccountsConfig(AppConfig):
-    name = 'api.accounts'
+    name = 'sensorsafrica.accounts'
 
 
 class DataConfig(AppConfig):
-    name = 'api.data'
+    name = 'sensorsafrica.data'
 
 
 class SensorsConfig(AppConfig):
-    name = 'api.sensors'
+    name = 'sensorsafrica.sensors'
     # This is to not conflict with feinstaub sensors app label
-    label = 'sensors_africa.sensors'
+    label = 'sensorsafrica.sensors'
