@@ -1,6 +1,6 @@
 #!/bin/sh
-python sensorsafrica/manage.py migrate --noinput                # Apply database migrations
-python sensorsafrica/manage.py collectstatic --clear --noinput  # Collect static files
+python manage.py migrate --noinput                # Apply database migrations
+python manage.py collectstatic --clear --noinput  # Collect static files
 
 # Prepare log files and start outputting logs to stdout
 touch /src/logs/gunicorn.log

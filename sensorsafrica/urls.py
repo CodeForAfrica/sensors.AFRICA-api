@@ -22,8 +22,8 @@ from rest_framework.documentation import include_docs_urls
 
 from rest_framework.authtoken.views import obtain_auth_token
 
-from api.sensors.base.router import api_urls as sensors_api_v1
-from api.accounts.base.router import api_urls as accounts_api_v1
+from .api.sensors.base.router import api_urls as sensors_api_v1
+from .api.accounts.base.router import api_urls as accounts_api_v1
 
 from feinstaub.sensors.views import AddSensordeviceView
 
