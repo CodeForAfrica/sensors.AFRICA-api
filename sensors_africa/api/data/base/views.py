@@ -1,16 +1,12 @@
 import datetime
 
-from django.db.models import Avg, Case, Count, F, FloatField, Max, Min, Q, When
+from django.db.models import Avg, Case, F, FloatField, Max, Min, Q, When
 from django.db.models.functions import Cast
 from django.utils import timezone
-from feinstaub.sensors.models import SensorData, SensorDataValue, SensorLocation
-from feinstaub.sensors.serializers import SensorDataValueSerializer
+from feinstaub.sensors.models import SensorData, SensorDataValue
 from rest_framework import mixins, pagination, viewsets
-from rest_framework.response import Response
 
 from .serializers import ReadingsNowSerializer, ReadingsSerializer
-
-import django_filters
 
 value_types = {"air": ["P1", "P2"]}
 
