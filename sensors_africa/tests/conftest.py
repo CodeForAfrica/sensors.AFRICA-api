@@ -154,4 +154,3 @@ def datavalues(sensors, sensordata):
     values[2].update_modified = False
     values[2].created = timezone.now() - datetime.timedelta(days=1)
     values[2].save()
-
