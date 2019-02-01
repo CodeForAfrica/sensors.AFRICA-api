@@ -25,5 +25,7 @@ RUN pip install -q -U .
 COPY ./contrib/start.sh /start.sh
 COPY ./contrib/entrypoint.sh /entrypoint.sh
 
+EXPOSE 8000
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD [ "/start.sh" ]
