@@ -1,4 +1,4 @@
-"""sensors_africa URL Configuration
+"""sensorsafrica URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.11/topics/http/urls/
@@ -23,8 +23,8 @@ from rest_framework.documentation import include_docs_urls
 
 from rest_framework.authtoken.views import obtain_auth_token
 
-from api.sensors.base.router import api_urls as sensors_api_v1
-from api.accounts.base.router import api_urls as accounts_api_v1
+from .sensors.base.router import api_urls as sensors_api_v1
+from .accounts.base.router import api_urls as accounts_api_v1
 
 from feinstaub.sensors.views import AddSensordeviceView
 
