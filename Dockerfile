@@ -22,6 +22,9 @@ RUN pip install -q git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-ap
 # Install sensors.AFRICA-api and its dependencies
 RUN pip install -q -U .
 
+# Expose port server
+EXPOSE 8000
+
 COPY ./contrib/start.sh /start.sh
 COPY ./contrib/entrypoint.sh /entrypoint.sh
 
