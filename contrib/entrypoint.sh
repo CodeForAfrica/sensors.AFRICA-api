@@ -7,7 +7,7 @@ python << END
 import sys
 import psycopg2
 try:
-    conn = psycopg2.connect("$SENSORSAFRICA_DATABASE_URL")
+    conn = psycopg2.connect("$DATABASE_URL")
 except psycopg2.OperationalError:
     sys.exit(-1)
 sys.exit(0)
