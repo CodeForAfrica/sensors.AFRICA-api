@@ -13,23 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.conf.urls import include, url
-
+from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
+from django.views.generic.base import RedirectView
+from feinstaub.sensors.views import AddSensordeviceView
+from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.documentation import include_docs_urls
 
-from rest_framework.authtoken.views import obtain_auth_token
-
-from .sensors.base.router import api_urls as sensors_api_v1
 from .accounts.base.router import api_urls as accounts_api_v1
-
 from .data.base.router import api_urls as data_api_v2
-
-from feinstaub.sensors.views import AddSensordeviceView
+from .sensors.base.router import api_urls as sensors_api_v1
 
 urlpatterns = [
+    url(r"^$", RedirectView.as_view(url="/docs/", permanent=False)),
     url(r"^admin/", admin.site.urls),
     url(r"^v1/", include(sensors_api_v1)),
     url(r"^v1/", include(accounts_api_v1)),
