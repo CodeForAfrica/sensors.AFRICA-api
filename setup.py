@@ -3,14 +3,14 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open('VERSION', "r") as f:
+with open("VERSION", "r") as f:
     version = f.read().strip()
 
-with open('requirements.txt') as f:
+with open("requirements.txt") as f:
     install_requires = f.read().splitlines()
 
 setuptools.setup(
-    name='sensorsafrica',
+    name="sensorsafrica",
     version=version,
     author="CodeForAfrica",
     author_email="hello@codeforafrica.org",
@@ -22,7 +22,7 @@ setuptools.setup(
     install_requires=install_requires,
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: OS Independent",
-    ]
+    ],
 )

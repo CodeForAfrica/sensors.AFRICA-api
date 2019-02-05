@@ -1,34 +1,83 @@
 # sensors.AFRICA API [![Build Status](https://travis-ci.org/CodeForAfricaLabs/sensors.AFRICA-api.svg?branch=master)](https://travis-ci.org/CodeForAfricaLabs/sensors.AFRICA-api)
 
-API to save data from deployed sensors in Africa.
+API to save and access data from deployed sensors in cities all around Africa.
 
-pip install -d git+https://github.com/CodeForAfricaLabs/sensors.AFRICA-AQ-api/ #feinstaub
+## Development
 
-standardize gitignore using [gitignore.io](https://www.gitignore.io/)
-currently using: `https://www.gitignore.io/api/vim,venv,emacs,linux,macos,python,django,virtualenv,intellij+all,visualstudiocode `
+Gitignore is standardized for this project using [gitignore.io](https://www.gitignore.io/) to support various development platforms.
+To get the project up and running:
 
-**NOTE:** 
-- `docker-compose` is strictly for development and testing purposes. 
-- The Dockerfile is written for production since dokku is being used and it will look for Dockerfile. Option to look into production and development as an enhancement with plugins such as [dokku-dockerfile](https://github.com/mimischi/dokku-dockerfile)
+- Clone this repo
 
-## Tests
+### Virtual environment
 
-**Using docker**
+- Use virtualenv to create your virtual environment; `virtualenv venv`
+- Activate the virtual environment; `source venv/bin/activate`
+- Install the requirements; `pip install .`
+- Create a sensorsafrica database with the following sql script:
 
-```
-docker-compose run api pytest sensorsafrica/
-```
-
-**Without Docker**
-
-You have to set environment variables like the following command.
-
-```
-SENSORSAFRICA_DBNAME=sensorsafrica SENSORSAFRICA_DBUSER=Karim SENSORSAFRICA_DBPASS= pytest ./sensorsafrica
+```sql
+CREATE DATABASE sensorsafrica;
+CREATE USER sensorsafrica WITH ENCRYPTED PASSWORD 'sensorsafrica';
+GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 ```
 
-**NOTE:** If entrypoint and start scripts are changed, make sure they have permissions since we don't grant permissions to the files using the Dockerfile. Run the commands:
+- Migrate the database; `python manage.py migrate`
+- Run the server; `python manage.py runserver`
+
+### Docker
+
+Using docker compose:
+
+- Build the project; `docker-compose build`
+- Run the project; `docker-compose up -d`
+
+**NOTE:**
+`docker-compose` is strictly for development and testing purposes.
+The Dockerfile is written for production since dokku is being used and it will look for Dockerfile.
+
+### Tests
+
+- Virtual Environment; `pytest --pylama`
+- Docker; `docker-compose run api pytest --pylama`
+
+**NOTE:**
+If entrypoint and start scripts are changed, make sure they have correct/required permissions since we don't grant permissions to the files using the Dockerfile.
+Run the commands:
+
+```bash
+chmod +x contrib/entrypoint.sh
+chmod +x contrib/start.sh
 ```
-chmod +x entrypoint.sh
-chmod +x start.sh
+
+## Deployment
+
+### Dokku
+
+On your local machine run:
+
+```bash
+git remote add dokku dokku@dokku.me:sensorsafrica-api
+git push dokku master
 ```
+
+For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/deployment/application-deployment/#deploying-to-dokku).
+
+## License
+
+GNU GPLv3
+
+Copyright (C) 2018 Code for Africa
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
