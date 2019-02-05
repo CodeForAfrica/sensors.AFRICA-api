@@ -4,6 +4,9 @@ API to save and access data from deployed sensors in cities all around Africa.
 
 ## Development
 
+Gitignore is standardized for this project using [gitignore.io](https://www.gitignore.io/) to support various development platforms.
+To get the project up and running:
+
 - Clone this repo
 
 ### Virtual environment
