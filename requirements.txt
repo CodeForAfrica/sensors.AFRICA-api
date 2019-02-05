@@ -9,6 +9,7 @@ dj-database-url==0.5.0
 gunicorn==19.9.0
 gevent==1.2.2
 greenlet==0.4.12
+whitenoise==4.1.2
 
 pylama==7.6.6
 pytest==4.1.1
