@@ -23,11 +23,11 @@ SITE_ROOT = os.path.dirname(BASE_DIR)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv(
-    "SENSOSAFRICA_SECRET_KEY", "-kc8keig#xrdhi1l$rrj&s*s@3pz*4he)8u8h^w$2-_4y6@z3g"
+    "SENSORSAFRICA_SECRET_KEY", "-kc8keig#xrdhi1l$rrj&s*s@3pz*4he)8u8h^w$2-_4y6@z3g"
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("SENSOSAFRICA_DEBUG", "True") == "True"
+DEBUG = os.getenv("SENSORSAFRICA_DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -90,7 +90,7 @@ WSGI_APPLICATION = "sensorsafrica.wsgi.application"
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgres://Karim:@localhost:5432/sensorsafrica"
+    "SENSORSAFRICA_DATABASE_URL", "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica"
 )
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 
