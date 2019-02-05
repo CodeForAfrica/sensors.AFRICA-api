@@ -5,17 +5,11 @@ from django.db.models import Avg, Case, F, FloatField, Max, Min, Q, When
 from django.db.models.functions import Cast
 from django.utils import timezone
 from feinstaub.sensors.models import SensorData, SensorDataValue
-from rest_framework import mixins, pagination, viewsets
+from rest_framework import mixins, viewsets
 
 from .serializers import ReadingsNowSerializer, ReadingsSerializer
 
 value_types = {"air": ["P1", "P2"]}
-
-
-class StandardResultsSetPagination(pagination.PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 1000
 
 
 class ReadingsFilter(django_filters.FilterSet):
@@ -27,7 +21,6 @@ class ReadingsFilter(django_filters.FilterSet):
 class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = SensorDataValue.objects.none()
     serializer_class = ReadingsSerializer
-    pagination_class = StandardResultsSetPagination
 
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_class = ReadingsFilter
