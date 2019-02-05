@@ -117,12 +117,6 @@ STATIC_URL = "/static/"
 
 STATIC_ROOT = "static"
 
-# Extra places for collectstatic to find static files.
-STATICFILES_FINDERS = [
-    "django.contrib.staticfiles.finders.FileSystemFinder",
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
-]
-
 
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
