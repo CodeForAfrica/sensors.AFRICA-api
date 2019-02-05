@@ -49,12 +49,16 @@ chmod +x contrib/start.sh
 
 ## Deployment
 
-We deploy to staging first and then deploy to production after confirming everything works fine.
-
 ### Dokku
 
-- Add the dokku remote url for the evironment you want to deploy to such as stanging and production; `git remote add staging dokku@dokku-2.sensors.africa:sensorsfrica-staging`
-- Then push a branch to the staging master; `git push staging <branch>:master`
+On your local machine run:
+
+```bash
+git remote add dokku dokku@dokku.me:sensorsafrica-api
+git push dokku master
+```
+
+For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/deployment/application-deployment/#deploying-to-dokku).
 
 ## License
 
