@@ -10,7 +10,7 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data["count"] == 0
+        assert len(data) == 0
 
     def test_getting_all_readings_by_city(self, client, datavalues):
         response = client.get("/v2/air/readings/?city=Dar es Salaam", format="json")
@@ -18,7 +18,7 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data["count"] == 3
+        assert len(data) == 3
 
     def test_getting_all_readings_by_city_date_range(self, client, datavalues):
         now = timezone.now()
@@ -31,7 +31,7 @@ class TestGettingData:
 
         data = response.json()
 
-        assert data["count"] == 2
+        assert len(data) == 2
 
     def test_getting_current_readings_by_city(self, client, datavalues):
         response = client.get("/v2/air/readings/now/?city=Dar es Salaam", format="json")

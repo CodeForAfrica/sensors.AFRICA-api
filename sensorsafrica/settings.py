@@ -92,7 +92,7 @@ WSGI_APPLICATION = "sensorsafrica.wsgi.application"
 
 DATABASE_URL = os.getenv(
     "SENSORSAFRICA_DATABASE_URL",
-    "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
+    "postgres://Karim:sensorsafrica@localhost:5432/sensorsafrica",
 )
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 
