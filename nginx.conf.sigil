@@ -44,7 +44,6 @@ server {
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
 
 
-{{ end }}
 }
 {{ else if eq $scheme "https"}}
 server {
