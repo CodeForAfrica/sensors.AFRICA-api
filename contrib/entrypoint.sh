@@ -7,10 +7,7 @@ python << END
 import sys
 import psycopg2
 try:
-    conn = psycopg2.connect(dbname="$SENSORSAFRICA_DBNAME", 
-                            user="$SENSORSAFRICA_DBUSER", 
-                            password="$SENSORSAFRICA_DBPASS", 
-                            host="$SENSORSAFRICA_DBHOST")
+    conn = psycopg2.connect("$SENSORSAFRICA_DATABASE_URL")
 except psycopg2.OperationalError:
     sys.exit(-1)
 sys.exit(0)
