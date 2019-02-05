@@ -90,7 +90,7 @@ WSGI_APPLICATION = "sensorsafrica.wsgi.application"
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASE_URL = os.getenv(
-    "SENSORSAFRICA_DATABASE_URL", "postgres://Karim:@localhost:5432/sensorsafrica"
+    "SENSORSAFRICA_DATABASE_URL", "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica"
 )
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 
