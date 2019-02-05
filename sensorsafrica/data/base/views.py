@@ -9,7 +9,7 @@ from rest_framework import mixins, viewsets
 
 from .serializers import ReadingsNowSerializer, ReadingsSerializer
 
-value_types = {"air": ["P1", "P2"]}
+value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
 
 class ReadingsFilter(django_filters.FilterSet):
