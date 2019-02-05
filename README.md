@@ -8,7 +8,7 @@ API to save and access data from deployed sensors in cities all around Africa.
 
 ### Virtual environment
 
-- Use virtualenv to crete your virtual environment; `virtualenv venv`
+- Use virtualenv to create your virtual environment; `virtualenv venv`
 - Activate the virtual environment; `source venv/bin/activate`
 - Install the requirements; `pip install .`
 - Create a sensorsafrica database with the following sql script:
@@ -35,11 +35,11 @@ The Dockerfile is written for production since dokku is being used and it will l
 
 ### Tests
 
-- Using docker; `docker-compose run api pytest --pylama`
-- Without Docker; `pytest --pylama`
+- Virtual Environment; `pytest --pylama`
+- Docker; `docker-compose run api pytest --pylama`
 
 **NOTE:**
-If entrypoint and start scripts are changed, make sure they have permissions since we don't grant permissions to the files using the Dockerfile.
+If entrypoint and start scripts are changed, make sure they have correct/required permissions since we don't grant permissions to the files using the Dockerfile.
 Run the commands:
 
 ```bash
@@ -49,7 +49,7 @@ chmod +x contrib/start.sh
 
 ## Deployment
 
-We deploy to staging firs and then deploy to production after confirming everything works fine.
+We deploy to staging first and then deploy to production after confirming everything works fine.
 
 ### Dokku
 
