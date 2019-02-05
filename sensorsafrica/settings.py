@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     # API
+    "sensorsafrica",
     "sensorsafrica.manager",
     "sensorsafrica.apps.AccountsConfig",
     "sensorsafrica.apps.SensorsConfig",
@@ -70,7 +71,6 @@ ROOT_URLCONF = "sensorsafrica.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.normpath(os.path.join(BASE_DIR, "sensorsafrica/templates"))],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
