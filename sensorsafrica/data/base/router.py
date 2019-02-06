@@ -1,10 +1,9 @@
 from rest_framework import routers
 
-from .views import ReadingsNowView, ReadingsView
+from .views import ReadingsView
 
 router = routers.DefaultRouter()
 
-router.register(r'now', ReadingsNowView)
-router.register(r'', ReadingsView)
+router.register(r"(?P<city>[\w-]+)", ReadingsView)
 
 api_urls = router.urls

@@ -1,104 +1,59 @@
-import datetime
-
-import django_filters
-from django.db.models import Avg, Case, F, FloatField, Max, Min, Q, When
+from django.db.models import Avg, F, FloatField, Max, Min
 from django.db.models.functions import Cast
 from django.utils import timezone
-from feinstaub.sensors.models import SensorData, SensorDataValue
-from rest_framework import mixins, viewsets
+from feinstaub.sensors.models import SensorDataValue
+from rest_framework import mixins, pagination, viewsets
 
-from .serializers import ReadingsNowSerializer, ReadingsSerializer
+from .serializers import ReadingsSerializer
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
 
-class ReadingsFilter(django_filters.FilterSet):
-    class Meta:
-        model = SensorDataValue
-        fields = {"created": ["date__range"]}
+class StandardResultsSetPagination(pagination.PageNumberPagination):
+    page_size = 100
+    page_size_query_param = "page_size"
+    max_page_size = 1000
 
 
 class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = SensorDataValue.objects.none()
     serializer_class = ReadingsSerializer
-
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = ReadingsFilter
+    pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
-        city = self.request.query_params.get("city", None)
+        city = self.kwargs["city"]
 
-        sensordata = SensorData.objects.filter(location__city=city)
+        from_date = self.request.query_params.get("from", None)
+        to_date = self.request.query_params.get("to", None)
+
+        if not from_date:
+            from_date = timezone.now().date()
+
+        if not to_date:
+            to_date = timezone.now().date()
+
+        types = self.request.query_params.get("type", None)
+
+        filter_value_types = value_types[sensor_type]
+        if types:
+            filter_value_types = set(types.split(",")) & set(value_types[sensor_type])
 
         return (
             SensorDataValue.objects.filter(
-                sensordata__in=sensordata, value_type__in=value_types[sensor_type]
+                sensordata__location__city__iexact=city.replace("-", " "),
+                value_type__in=filter_value_types,
+                created__date__gte=from_date,
+                created__date__lte=to_date,
             )
-            .extra({"day": "DATE_TRUNC('day', created)"})
-            .values("day", "value_type")
+            .datetimes("created", "day")
+            .values("datetimefield", "value_type")
             .order_by()
             .annotate(
-                average=Avg(
-                    Case(
-                        When(
-                            ~Q(value_type="timestamp"), then=Cast("value", FloatField())
-                        ),
-                        output_field=FloatField(),
-                    )
-                )
+                day=F("datetimefield"),
+                average=Avg(Cast("value", FloatField())),
+                minimum=Min(Cast("value", FloatField())),
+                maximum=Max(Cast("value", FloatField())),
             )
             .order_by("-day")
-        )
-
-
-class ReadingsNowView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = SensorDataValue.objects.none()
-    serializer_class = ReadingsNowSerializer
-
-    def get_queryset(self):
-        sensor_type = self.kwargs["sensor_type"]
-        city = self.request.query_params.get("city", None)
-
-        if city is not None:
-            queryset = SensorDataValue.objects.filter(sensordata__location__city=city)
-        else:
-            queryset = SensorDataValue.objects.filter()
-
-        now = timezone.now()
-        prev = now - datetime.timedelta(hours=24)
-
-        return (
-            queryset.filter(
-                created__range=[prev, now], value_type__in=value_types[sensor_type]
-            )
-            .values("value_type", "sensordata__location__city")
-            .order_by()
-            .annotate(
-                city=F("sensordata__location__city"),
-                average=Avg(
-                    Case(
-                        When(
-                            ~Q(value_type="timestamp"), then=Cast("value", FloatField())
-                        ),
-                        output_field=FloatField(),
-                    )
-                ),
-                min=Min(
-                    Case(
-                        When(
-                            ~Q(value_type="timestamp"), then=Cast("value", FloatField())
-                        ),
-                        output_field=FloatField(),
-                    )
-                ),
-                max=Max(
-                    Case(
-                        When(
-                            ~Q(value_type="timestamp"), then=Cast("value", FloatField())
-                        ),
-                        output_field=FloatField(),
-                    )
-                ),
-            )
         )

@@ -1,29 +1,56 @@
+import datetime
+
 import pytest
 from django.utils import timezone
 
 
 @pytest.mark.django_db
 class TestGettingData:
-    def test_getting_all_readings(self, client, datavalues):
-        response = client.get("/v2/air/readings/", format="json")
+    def test_getting_air_readings_now(self, client, datavalues):
+        response = client.get("/v2/air/readings/dar-es-salaam/", format="json")
         assert response.status_code == 200
 
         data = response.json()
 
-        assert len(data) == 0
+        assert data["count"] == 2
 
-    def test_getting_all_readings_by_city(self, client, datavalues):
-        response = client.get("/v2/air/readings/?city=Dar es Salaam", format="json")
+        results = data["results"]
+
+        assert results[0]["value_type"] == "P1"
+        assert results[0]["average"] == 0.0
+        assert results[0]["max"] == 0.0
+        assert results[0]["min"] == 0.0
+
+        assert results[1]["value_type"] == "P2"
+        assert results[1]["average"] == 5.5
+        assert results[1]["max"] == 8.0
+        assert results[1]["min"] == 3.0
+
+    def test_getting_air_readings_value_type(self, client, datavalues):
+        response = client.get("/v2/air/readings/dar-es-salaam/?type=P2", format="json")
         assert response.status_code == 200
 
         data = response.json()
 
-        assert len(data) == 3
+        assert data["count"] == 1
+        assert data["results"][0]["value_type"] == "P2"
 
-    def test_getting_all_readings_by_city_date_range(self, client, datavalues):
+    def test_getting_air_readings_from_date(self, client, datavalues):
+        response = client.get(
+            "/v2/air/readings/dar-es-salaam/?from=%s"
+            % (timezone.now() - datetime.timedelta(days=1)).date(),
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 3
+
+    def test_getting_air_readings_from_date_to_date(self, client, datavalues):
         now = timezone.now()
         response = client.get(
-            "/v2/air/readings/?city=Dar es Salaam&created__date__range=%s,%s"
+            "/v2/air/readings/dar-es-salaam/?from=%s&to=%s"
             % (str(now.date()), str(now.date())),
             format="json",
         )
@@ -31,33 +58,4 @@ class TestGettingData:
 
         data = response.json()
 
-        assert len(data) == 2
-
-    def test_getting_current_readings_by_city(self, client, datavalues):
-        response = client.get("/v2/air/readings/now/?city=Dar es Salaam", format="json")
-        assert response.status_code == 200
-
-        data = response.json()
-
-        assert len(data) == 2
-        assert data[0]["city"] == "Dar es Salaam"
-        assert data[0]["value_type"] == "P1"
-        assert data[0]["average"] == 0.0
-        assert data[0]["max"] == 0.0
-        assert data[0]["min"] == 0.0
-
-        assert data[1]["city"] == "Dar es Salaam"
-        assert data[1]["value_type"] == "P2"
-        assert data[1]["average"] == 5.5
-        assert data[1]["max"] == 8.0
-        assert data[1]["min"] == 3.0
-
-    def test_getting_current_readings_all_cities(self, client, datavalues):
-        response = client.get("/v2/air/readings/now/", format="json")
-        assert response.status_code == 200
-
-        data = response.json()
-
-        assert len(data) == 3
-        assert data[0]["city"] == "Dar es Salaam"
-        assert data[2]["city"] == "Nairobi"
+        assert data["count"] == 2
