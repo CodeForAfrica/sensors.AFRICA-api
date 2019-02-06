@@ -18,13 +18,13 @@ class TestGettingData:
 
         assert results[0]["value_type"] == "P1"
         assert results[0]["average"] == 0.0
-        assert results[0]["max"] == 0.0
-        assert results[0]["min"] == 0.0
+        assert results[0]["maximum"] == 0.0
+        assert results[0]["minimum"] == 0.0
 
         assert results[1]["value_type"] == "P2"
         assert results[1]["average"] == 5.5
-        assert results[1]["max"] == 8.0
-        assert results[1]["min"] == 3.0
+        assert results[1]["maximum"] == 8.0
+        assert results[1]["minimum"] == 3.0
 
     def test_getting_air_readings_value_type(self, client, datavalues):
         response = client.get("/v2/air/readings/dar-es-salaam/?type=P2", format="json")
