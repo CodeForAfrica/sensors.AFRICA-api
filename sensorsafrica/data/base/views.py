@@ -1,9 +1,9 @@
-from django.db.models import Avg, F, FloatField, Max, Min
-from django.db.models.functions import Cast
-from django.utils import timezone
-from feinstaub.sensors.models import SensorDataValue
+import datetime
+
+from django.db.models import Avg, Max, Min
 from rest_framework import mixins, pagination, viewsets
 
+from ..models import SensorDataStat
 from .serializers import ReadingsSerializer
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
@@ -16,7 +16,7 @@ class StandardResultsSetPagination(pagination.PageNumberPagination):
 
 
 class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = SensorDataValue.objects.none()
+    queryset = SensorDataStat.objects.none()
     serializer_class = ReadingsSerializer
     pagination_class = StandardResultsSetPagination
 
@@ -28,10 +28,10 @@ class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
         to_date = self.request.query_params.get("to", None)
 
         if not from_date:
-            from_date = timezone.now().date()
+            from_date = str(datetime.date.today())
 
         if not to_date:
-            to_date = timezone.now().date()
+            to_date = str(datetime.date.today())
 
         types = self.request.query_params.get("type", None)
 
@@ -40,20 +40,16 @@ class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
             filter_value_types = set(types.split(",")) & set(value_types[sensor_type])
 
         return (
-            SensorDataValue.objects.filter(
-                sensordata__location__city__iexact=city.replace("-", " "),
+            SensorDataStat.objects.filter(
+                city_slug=city,
                 value_type__in=filter_value_types,
-                created__date__gte=from_date,
-                created__date__lte=to_date,
+                day__gte=from_date,
+                day__lte=to_date,
             )
-            .datetimes("created", "day")
-            .values("datetimefield", "value_type")
+            .values("day", "value_type")
             .order_by()
             .annotate(
-                day=F("datetimefield"),
-                average=Avg(Cast("value", FloatField())),
-                minimum=Min(Cast("value", FloatField())),
-                maximum=Max(Cast("value", FloatField())),
+                average=Avg("average"), minimum=Min("minimum"), maximum=Max("maximum")
             )
             .order_by("-day")
         )
