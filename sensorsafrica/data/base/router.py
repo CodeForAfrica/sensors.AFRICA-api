@@ -4,6 +4,6 @@ from .views import ReadingsView
 
 router = routers.DefaultRouter()
 
-router.register(r"(?P<city>[\w-]+)", ReadingsView)
+router.register(r"(?P<sensor_type>[air]+)/readings/(?P<city>[\w-]+)", ReadingsView)
 
 api_urls = router.urls
