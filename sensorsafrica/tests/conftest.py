@@ -57,42 +57,36 @@ def sensor(logged_in_user, sensor_type, node):
 
 @pytest.fixture
 def locations():
-    return SensorLocation.objects.bulk_create(
-        [
-            SensorLocation(city="Dar es Salaam", description="active"),
-            SensorLocation(city="Bagamoyo", description="inactive"),
-            SensorLocation(city="Mombasa", description="inactive"),
-            SensorLocation(city="Nairobi", description="inactive"),
-        ]
-    )
+    return [
+        SensorLocation.objects.get_or_create(city="Dar es Salaam", description="active")[0],
+        SensorLocation.objects.get_or_create(city="Bagamoyo", description="inactive")[0],
+        SensorLocation.objects.get_or_create(city="Mombasa", description="inactive")[0],
+        SensorLocation.objects.get_or_create(city="Nairobi", description="inactive")[0],
+    ]
 
 
 @pytest.fixture
 def nodes(logged_in_user, locations):
-    return Node.objects.bulk_create(
-        [
-            Node(uid="0", owner=logged_in_user, location=locations[0]),
-            Node(uid="1", owner=logged_in_user, location=locations[1]),
-            Node(uid="2", owner=logged_in_user, location=locations[2]),
-            Node(uid="3", owner=logged_in_user, location=locations[3]),
-        ]
-    )
+    return [
+        Node.objects.get_or_create(uid="0", owner=logged_in_user, location=locations[0])[0],
+        Node.objects.get_or_create(uid="1", owner=logged_in_user, location=locations[1])[0],
+        Node.objects.get_or_create(uid="2", owner=logged_in_user, location=locations[2])[0],
+        Node.objects.get_or_create(uid="3", owner=logged_in_user, location=locations[3])[0],
+    ]
 
 
 @pytest.fixture
 def sensors(sensor_type, nodes):
-    return Sensor.objects.bulk_create(
-        [
+    return [
             # Active Dar Sensor
-            Sensor(node=nodes[0], sensor_type=sensor_type),
-            # Inactive with last data push beyond active threshold
-            Sensor(node=nodes[1], sensor_type=sensor_type),
-            # Inactive without any data
-            Sensor(node=nodes[2], sensor_type=sensor_type),
-            # Active Nairobi Sensor
-            Sensor(node=nodes[3], sensor_type=sensor_type),
-        ]
-    )
+        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type)[0],
+        # Inactive with last data push beyond active threshold
+        Sensor.objects.get_or_create(node=nodes[1], sensor_type=sensor_type)[0],
+        # Inactive without any data
+        Sensor.objects.get_or_create(node=nodes[2], sensor_type=sensor_type)[0],
+        # Active Nairobi Sensor
+        Sensor.objects.get_or_create(node=nodes[3], sensor_type=sensor_type)[0],
+    ]
 
 
 @pytest.fixture
@@ -167,6 +161,26 @@ def datavalues(sensors, sensordata):
 
 @pytest.fixture
 def sensorsdatastats(datavalues):
+    from django.core.management import call_command
+
+    call_command("calculate_data_statistics")
+
+
+@pytest.fixture
+def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
+    sensordata = SensorData.objects.bulk_create([
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+        SensorData(sensor=sensors[0], location=locations[0]),
+    ])
+
+    SensorDataValue.objects.bulk_create([
+        # Dar es salaam today's additional datavalues avg 4 for P2
+        SensorDataValue(sensordata=sensordata[0], value="4", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[1], value="4", value_type="P2"),
+        SensorDataValue(sensordata=sensordata[2], value="4", value_type="P2"),
+    ])
+
     from django.core.management import call_command
 
     call_command("calculate_data_statistics")

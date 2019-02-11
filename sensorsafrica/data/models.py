@@ -15,6 +15,11 @@ class SensorDataStat(TimeStampedModel):
     maximum = models.FloatField(null=False, blank=False)
     minimum = models.FloatField(null=False, blank=False)
 
+    # Number of data points averaged
+    sample_size = models.IntegerField(default=0, null=False, blank=False)
+    # Last datetime of calculated stats
+    last_datetime = models.DateTimeField(null=True)
+
     date = models.DateField()
 
     def __str__(self):

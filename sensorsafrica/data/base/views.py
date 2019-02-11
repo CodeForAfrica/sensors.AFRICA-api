@@ -51,7 +51,9 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .values("date", "value_type")
             .order_by()
             .annotate(
-                average=Avg("average"), minimum=Min("minimum"), maximum=Max("maximum")
+                average=Avg("average"),
+                minimum=Min("minimum"),
+                maximum=Max("maximum")
             )
             .order_by("-date")
         )

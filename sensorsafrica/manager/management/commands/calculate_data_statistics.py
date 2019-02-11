@@ -1,7 +1,7 @@
 import math
 
 from django.core.management import BaseCommand
-from django.db.models import Avg, F, FloatField, Max, Min, Q
+from django.db.models import Avg, F, FloatField, Count, Max, Min, Q
 from django.db.models.functions import Cast
 from django.utils.text import slugify
 from feinstaub.sensors.models import Node, Sensor, SensorDataValue, SensorLocation
@@ -19,6 +19,8 @@ def map_stat(stat, city):
         average=stat["average"],
         minimum=stat["minimum"],
         maximum=stat["maximum"],
+        sample_size=stat["sample_size"],
+        last_datetime=stat["last_datetime"]
     )
 
 
@@ -39,17 +41,19 @@ class Command(BaseCommand):
             if not city:
                 continue
 
-            last_date = (
+            last_date_time = (
                 SensorDataStat.objects.filter(city_slug=slugify(city))
-                .values_list("date", flat=True)
-                .order_by("-date")[:1]
+                .values_list("last_datetime", flat=True)
+                .order_by("-last_datetime")[:1]
             )
 
-            if last_date:
+            print(last_date_time)
+
+            if last_date_time:
                 queryset = SensorDataValue.objects.filter(
                     Q(sensordata__location__city__iexact=city),
                     # Get dates greater than last stat calculation
-                    Q(created__date__gt=last_date),
+                    Q(created__gt=last_date_time),
                     # Ignore timestamp values
                     ~Q(value_type="timestamp"),
                     # Match only valid float text
@@ -78,9 +82,11 @@ class Command(BaseCommand):
                 .order_by()
                 .annotate(
                     date=F("datetimefield"),
+                    last_datetime=Max("created"),
                     average=Avg(Cast("value", FloatField())),
                     minimum=Min(Cast("value", FloatField())),
                     maximum=Max(Cast("value", FloatField())),
+                    sample_size=Count("created", FloatField())
                 )
                 .order_by("-date")
             )
