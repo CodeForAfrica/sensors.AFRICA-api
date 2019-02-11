@@ -22,7 +22,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
-        city = self.kwargs["city"]
+        city_slug = self.kwargs["city_slug"]
 
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
@@ -33,15 +33,17 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         if not to_date:
             to_date = str(datetime.date.today())
 
-        types = self.request.query_params.get("type", None)
+        value_type_to_filter = self.request.query_params.get("value_type", None)
 
         filter_value_types = value_types[sensor_type]
-        if types:
-            filter_value_types = set(types.split(",")) & set(value_types[sensor_type])
+        if value_type_to_filter:
+            filter_value_types = set(value_type_to_filter.split(",")) & set(
+                value_types[sensor_type]
+            )
 
         return (
             SensorDataStat.objects.filter(
-                city_slug=city,
+                city_slug=city_slug,
                 value_type__in=filter_value_types,
                 date__gte=from_date,
                 date__lte=to_date,
