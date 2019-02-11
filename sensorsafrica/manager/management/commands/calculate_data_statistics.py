@@ -15,8 +15,6 @@ def map_stat(stat, city):
         value_type=stat["value_type"],
         location=SensorLocation(pk=stat["sensordata__location"]),
         sensor=Sensor(pk=stat["sensordata__sensor"]),
-        latitude=stat["sensordata__location__latitude"],
-        longitude=stat["sensordata__location__longitude"],
         node=Node(pk=stat["sensordata__sensor__node"]),
         average=stat["average"],
         minimum=stat["minimum"],

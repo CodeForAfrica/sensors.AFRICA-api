@@ -28,8 +28,6 @@ class Migration(migrations.Migration):
                 ('maximum', models.FloatField()),
                 ('minimum', models.FloatField()),
                 ('date', models.DateField()),
-                ('latitude', models.DecimalField(blank=True, decimal_places=11, max_digits=14, null=True)),
-                ('longitude', models.DecimalField(blank=True, decimal_places=11, max_digits=14, null=True)),
                 ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.SensorLocation')),
                 ('node', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.Node')),
                 ('sensor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.Sensor')),

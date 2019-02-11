@@ -16,8 +16,6 @@ class SensorDataStatAdmin(admin.ModelAdmin):
         "maximum",
         "minimum",
         "date",
-        "latitude",
-        "longitude",
         "created",
         "modified",
     ]
