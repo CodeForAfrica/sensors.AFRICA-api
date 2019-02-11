@@ -22,7 +22,12 @@ class TestGettingData:
         assert results[0]["minimum"] == 0.0
 
         assert results[1]["value_type"] == "P2"
-        assert results[1]["average"] == 5.5
+
+        # One node has an average of 5.5 for sample size 6
+        # Another node has an average of 0 for sample size 6
+        # The average for the city will be (5.5 * 6 + 0 * 6) / (6 + 6) = 2.75
+        assert results[1]["average"] == 2.75
+
         assert results[1]["maximum"] == 8.0
         assert results[1]["minimum"] == 3.0
 
@@ -78,9 +83,11 @@ class TestGettingData:
         assert results[0]["minimum"] == 0.0
 
         assert results[1]["value_type"] == "P2"
-        # The previous average was 5.5 for sample size 6
-        # The addional data average is 4 for sample size 3
-        # The new average is (5.5 * 6 + 4 * 3) / (6 + 3)
-        assert results[1]["average"] == 5
+
+        # The previous average was 2.75 for sample size 12
+        # The addional data average is 4 for sample size 3 
+        # The new average is (2.75 * 12 + 4 * 3) / (12 + 3) = 3
+        assert results[1]["average"] == 3
+
         assert results[1]["maximum"] == 8.0
         assert results[1]["minimum"] == 3.0

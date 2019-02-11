@@ -62,6 +62,7 @@ def locations():
         SensorLocation.objects.get_or_create(city="Bagamoyo", description="inactive")[0],
         SensorLocation.objects.get_or_create(city="Mombasa", description="inactive")[0],
         SensorLocation.objects.get_or_create(city="Nairobi", description="inactive")[0],
+        SensorLocation.objects.get_or_create(city="Dar es Salaam", description="active | some other node location")[0],
     ]
 
 
@@ -72,13 +73,14 @@ def nodes(logged_in_user, locations):
         Node.objects.get_or_create(uid="1", owner=logged_in_user, location=locations[1])[0],
         Node.objects.get_or_create(uid="2", owner=logged_in_user, location=locations[2])[0],
         Node.objects.get_or_create(uid="3", owner=logged_in_user, location=locations[3])[0],
+        Node.objects.get_or_create(uid="4", owner=logged_in_user, location=locations[4])[0],
     ]
 
 
 @pytest.fixture
 def sensors(sensor_type, nodes):
     return [
-            # Active Dar Sensor
+        # Active Dar Sensor
         Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type)[0],
         # Inactive with last data push beyond active threshold
         Sensor.objects.get_or_create(node=nodes[1], sensor_type=sensor_type)[0],
@@ -86,6 +88,8 @@ def sensors(sensor_type, nodes):
         Sensor.objects.get_or_create(node=nodes[2], sensor_type=sensor_type)[0],
         # Active Nairobi Sensor
         Sensor.objects.get_or_create(node=nodes[3], sensor_type=sensor_type)[0],
+        # Active Dar Sensor another location
+        Sensor.objects.get_or_create(node=nodes[4], sensor_type=sensor_type)[0],
     ]
 
 
@@ -110,6 +114,10 @@ def sensordata(sensors, locations):
     # Nairobi SensorData
     for i in range(100):
         sensor_datas.append(SensorData(sensor=sensors[3], location=locations[3]))
+
+    # Dar es Salaam another node location SensorData
+    for i in range(6):
+        sensor_datas.append(SensorData(sensor=sensors[4], location=locations[4]))
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
@@ -145,8 +153,12 @@ def datavalues(sensors, sensordata):
     # Nairobi SensorDataValues
     for i in range(100):
         data_values.append(
-            SensorDataValue(sensordata=sensordata[9 + i], value="10.0", value_type="P2")
+            SensorDataValue(sensordata=sensordata[9 + i], value="0", value_type="P2")
         )
+
+    # Dar es Salaam another node location SensorDataValues
+    for i in range(6):
+        data_values.append(SensorDataValue(sensordata=sensordata[109 + i], value="0.0", value_type="P2"))
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
