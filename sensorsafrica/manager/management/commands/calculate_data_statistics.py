@@ -38,7 +38,7 @@ class Command(BaseCommand):
         )
 
         for city in cities:
-            if city == "" or city is None:
+            if not city:
                 continue
 
             last_date = (
