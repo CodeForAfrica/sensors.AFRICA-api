@@ -29,7 +29,7 @@ class TestGettingData:
         assert results[1]["average"] == 2.75
 
         assert results[1]["maximum"] == 8.0
-        assert results[1]["minimum"] == 3.0
+        assert results[1]["minimum"] == 0.0
 
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
         response = client.get("/v2/air/data/dar-es-salaam/?value_type=P2", format="json")
@@ -90,4 +90,4 @@ class TestGettingData:
         assert results[1]["average"] == 3
 
         assert results[1]["maximum"] == 8.0
-        assert results[1]["minimum"] == 3.0
+        assert results[1]["minimum"] == 0.0
