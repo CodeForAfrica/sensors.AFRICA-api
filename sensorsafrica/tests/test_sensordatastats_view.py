@@ -32,7 +32,9 @@ class TestGettingData:
         assert results[1]["minimum"] == 0.0
 
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
-        response = client.get("/v2/air/data/dar-es-salaam/?value_type=P2", format="json")
+        response = client.get(
+            "/v2/air/data/dar-es-salaam/?value_type=P2", format="json"
+        )
         assert response.status_code == 200
 
         data = response.json()
@@ -65,7 +67,9 @@ class TestGettingData:
 
         assert data["count"] == 2
 
-    def test_getting_air_data_now_with_additional_values(self, client, additional_sensorsdatastats):
+    def test_getting_air_data_now_with_additional_values(
+        self, client, additional_sensorsdatastats
+    ):
         response = client.get("/v2/air/data/dar-es-salaam/", format="json")
         assert response.status_code == 200
 
@@ -85,7 +89,7 @@ class TestGettingData:
         assert results[1]["value_type"] == "P2"
 
         # The previous average was 2.75 for sample size 12
-        # The addional data average is 4 for sample size 3 
+        # The addional data average is 4 for sample size 3
         # The new average is (2.75 * 12 + 4 * 3) / (12 + 3) = 3
         assert results[1]["average"] == 3
 
