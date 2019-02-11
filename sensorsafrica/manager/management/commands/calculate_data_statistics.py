@@ -37,8 +37,6 @@ class Command(BaseCommand):
             )
         )
 
-        print("Cities: ", cities)
-
         for city in cities:
             if city == "" or city is None:
                 continue
@@ -50,7 +48,6 @@ class Command(BaseCommand):
             )
 
             if last_date:
-                print("Start: ", city, last_date)
                 queryset = SensorDataValue.objects.filter(
                     Q(sensordata__location__city__iexact=city),
                     # Get dates greater than last stat calculation
@@ -61,7 +58,6 @@ class Command(BaseCommand):
                     Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
                 )
             else:
-                print("Start: ", city)
                 queryset = SensorDataValue.objects.filter(
                     Q(sensordata__location__city__iexact=city),
                     # Ignore timestamp values
@@ -103,5 +99,3 @@ class Command(BaseCommand):
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )
-
-            print("Done: ", city, len(stats))
