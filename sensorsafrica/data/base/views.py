@@ -1,6 +1,7 @@
 import datetime
 
-from django.db.models import Avg, Max, Min
+from django.db.models import (Count, ExpressionWrapper, F, FloatField, Max,
+                              Min, Sum)
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat
@@ -51,9 +52,13 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .values("date", "value_type")
             .order_by()
             .annotate(
-                average=Avg("average"),
+                average=ExpressionWrapper(
+                    Sum(F("average") * F("sample_size")) / Sum("sample_size"),
+                    output_field=FloatField(),
+                ),
                 minimum=Min("minimum"),
-                maximum=Max("maximum")
+                maximum=Max("maximum"),
+                c=Count("date"),
             )
             .order_by("-date")
         )
