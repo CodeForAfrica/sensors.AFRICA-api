@@ -15,10 +15,10 @@ class SensorDataStatAdmin(admin.ModelAdmin):
         "average",
         "maximum",
         "minimum",
-        "day",
+        "date",
         "latitude",
         "longitude",
         "created",
         "modified",
     ]
-    list_filter = ["day", "node", "sensor", "location"]
+    list_filter = ["date", "node", "sensor", "location"]

@@ -15,14 +15,14 @@ class SensorDataStat(TimeStampedModel):
     maximum = models.FloatField(null=False, blank=False)
     minimum = models.FloatField(null=False, blank=False)
 
-    day = models.DateField()
+    date = models.DateField()
 
     latitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
     longitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
 
     def __str__(self):
         return "%s %s %s avg=%s min=%s max=%s" % (
-            self.day,
+            self.date,
             self.city_slug,
             self.value_type,
             self.average,

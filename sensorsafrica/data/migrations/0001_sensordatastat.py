@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('average', models.FloatField()),
                 ('maximum', models.FloatField()),
                 ('minimum', models.FloatField()),
-                ('day', models.DateField()),
+                ('date', models.DateField()),
                 ('latitude', models.DecimalField(blank=True, decimal_places=11, max_digits=14, null=True)),
                 ('longitude', models.DecimalField(blank=True, decimal_places=11, max_digits=14, null=True)),
                 ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.SensorLocation')),

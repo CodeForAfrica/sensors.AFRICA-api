@@ -4,7 +4,7 @@ from django.db.models import Avg, Max, Min
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat
-from .serializers import ReadingsSerializer
+from .serializers import SensorDataStatSerializer
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
@@ -15,9 +15,9 @@ class StandardResultsSetPagination(pagination.PageNumberPagination):
     max_page_size = 1000
 
 
-class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
+class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = SensorDataStat.objects.none()
-    serializer_class = ReadingsSerializer
+    serializer_class = SensorDataStatSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
@@ -43,13 +43,13 @@ class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
             SensorDataStat.objects.filter(
                 city_slug=city,
                 value_type__in=filter_value_types,
-                day__gte=from_date,
-                day__lte=to_date,
+                date__gte=from_date,
+                date__lte=to_date,
             )
-            .values("day", "value_type")
+            .values("date", "value_type")
             .order_by()
             .annotate(
                 average=Avg("average"), minimum=Min("minimum"), maximum=Max("maximum")
             )
-            .order_by("-day")
+            .order_by("-date")
         )

@@ -11,7 +11,7 @@ from sensorsafrica.data.models import SensorDataStat
 def map_stat(stat, city):
     return SensorDataStat(
         city_slug=slugify(city),
-        day=stat["date"],
+        date=stat["date"],
         value_type=stat["value_type"],
         location=SensorLocation(pk=stat["sensordata__location"]),
         sensor=Sensor(pk=stat["sensordata__sensor"]),
@@ -45,8 +45,8 @@ class Command(BaseCommand):
 
             last_date = (
                 SensorDataStat.objects.filter(city_slug=slugify(city))
-                .values_list("day", flat=True)
-                .order_by("-day")[:1]
+                .values_list("date", flat=True)
+                .order_by("-date")[:1]
             )
 
             if last_date:
