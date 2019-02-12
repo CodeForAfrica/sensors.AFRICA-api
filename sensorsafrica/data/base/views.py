@@ -4,7 +4,7 @@ import pytz
 from rest_framework.exceptions import ValidationError
 
 from django.utils import timezone
-from django.db.models import Count, ExpressionWrapper, F, FloatField, Max, Min, Sum
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum
 from django.db.models.functions import TruncDate
 from rest_framework import mixins, pagination, viewsets
 

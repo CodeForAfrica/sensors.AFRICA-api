@@ -7,7 +7,6 @@ from feinstaub.sensors.models import (Node, Sensor, SensorData,
                                       SensorDataValue, SensorLocation,
                                       SensorType)
 
-from sensorsafrica.data.models import SensorDataStat
 
 @pytest.fixture
 def django_db_setup(django_db_setup, django_db_blocker):
