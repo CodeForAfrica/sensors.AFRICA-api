@@ -1,8 +1,8 @@
 import math
 
 from django.core.management import BaseCommand
-from django.db.models import Avg, F, FloatField, Count, Max, Min, Q
-from django.db.models.functions import Cast
+from django.db.models import Avg, Count, FloatField, Max, Min, Q
+from django.db.models.functions import Cast, TruncHour
 from django.utils.text import slugify
 from feinstaub.sensors.models import Node, Sensor, SensorDataValue, SensorLocation
 from sensorsafrica.data.models import SensorDataStat
@@ -11,7 +11,7 @@ from sensorsafrica.data.models import SensorDataStat
 def map_stat(stat, city):
     return SensorDataStat(
         city_slug=slugify(city),
-        date=stat["date"],
+        datehour=stat["datehour"],
         value_type=stat["value_type"],
         location=SensorLocation(pk=stat["sensordata__location"]),
         sensor=Sensor(pk=stat["sensordata__sensor"]),
@@ -20,7 +20,7 @@ def map_stat(stat, city):
         minimum=stat["minimum"],
         maximum=stat["maximum"],
         sample_size=stat["sample_size"],
-        last_datetime=stat["last_datetime"]
+        last_datetime=stat["last_datetime"],
     )
 
 
@@ -47,8 +47,6 @@ class Command(BaseCommand):
                 .order_by("-last_datetime")[:1]
             )
 
-            print(last_date_time)
-
             if last_date_time:
                 queryset = SensorDataValue.objects.filter(
                     Q(sensordata__location__city__iexact=city),
@@ -69,26 +67,24 @@ class Command(BaseCommand):
                 )
 
             stats = list(
-                queryset.datetimes("created", "day")
+                queryset
+                .annotate(datehour=TruncHour("created"))
                 .values(
-                    "datetimefield",
+                    "datehour",
                     "value_type",
                     "sensordata__sensor",
                     "sensordata__location",
-                    "sensordata__location__latitude",
-                    "sensordata__location__longitude",
                     "sensordata__sensor__node",
                 )
                 .order_by()
                 .annotate(
-                    date=F("datetimefield"),
                     last_datetime=Max("created"),
                     average=Avg(Cast("value", FloatField())),
                     minimum=Min(Cast("value", FloatField())),
                     maximum=Max(Cast("value", FloatField())),
-                    sample_size=Count("created", FloatField())
+                    sample_size=Count("created", FloatField()),
                 )
-                .order_by("-date")
+                .order_by("-datehour")
             )
 
             if len(stats):
@@ -100,6 +96,7 @@ class Command(BaseCommand):
                         stats,
                     )
                 )
+
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )

@@ -15,6 +15,7 @@ class TestGettingData:
         assert data["count"] == 2
 
         results = data["results"]
+        print(results)
 
         assert results[0]["value_type"] == "P1"
         assert results[0]["average"] == 0.0
@@ -45,7 +46,7 @@ class TestGettingData:
     def test_getting_air_data_from_date(self, client, sensorsdatastats):
         response = client.get(
             "/v2/air/data/dar-es-salaam/?from=%s"
-            % (timezone.now() - datetime.timedelta(days=1)).date(),
+            % (timezone.now() - datetime.timedelta(days=2)).date(),
             format="json",
         )
         assert response.status_code == 200
@@ -57,8 +58,7 @@ class TestGettingData:
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?from=%s&to=%s"
-            % (str(now.date()), str(now.date())),
+            "/v2/air/data/dar-es-salaam/?from=%s&to=%s" % (now.date(), now.date()),
             format="json",
         )
         assert response.status_code == 200
@@ -66,6 +66,12 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 2
+
+    def test_getting_air_data_with_invalid_request(self, client, sensorsdatastats):
+        response = client.get(
+            "/v2/air/data/dar-es-salaam/?to=2019-02-08", format="json"
+        )
+        assert response.status_code == 400
 
     def test_getting_air_data_now_with_additional_values(
         self, client, additional_sensorsdatastats

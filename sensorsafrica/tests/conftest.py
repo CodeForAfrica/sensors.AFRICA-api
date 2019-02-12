@@ -7,6 +7,7 @@ from feinstaub.sensors.models import (Node, Sensor, SensorData,
                                       SensorDataValue, SensorLocation,
                                       SensorType)
 
+from sensorsafrica.data.models import SensorDataStat
 
 @pytest.fixture
 def django_db_setup(django_db_setup, django_db_blocker):
@@ -162,13 +163,26 @@ def datavalues(sensors, sensordata):
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
+    now = timezone.now()
+
     # Set Dar es salaam a day ago's data
     values[1].update_modified = False
-    values[1].created = timezone.now() - datetime.timedelta(days=1)
+    values[1].created = now - datetime.timedelta(days=2)
     values[1].save()
     values[2].update_modified = False
-    values[2].created = timezone.now() - datetime.timedelta(days=1)
+    values[2].created = now - datetime.timedelta(days=2)
     values[2].save()
+
+    # Set data received at different hours
+    values[3].update_modified = False
+    values[3].created = now - datetime.timedelta(hours=1)
+    values[3].save()
+    values[4].update_modified = False
+    values[4].created = now - datetime.timedelta(hours=2)
+    values[4].save()
+    values[5].update_modified = False
+    values[5].created = now - datetime.timedelta(hours=3)
+    values[5].save()
 
 
 @pytest.fixture
@@ -176,6 +190,8 @@ def sensorsdatastats(datavalues):
     from django.core.management import call_command
 
     call_command("calculate_data_statistics")
+
+    # print(list(SensorDataStat.objects.all()))
 
 
 @pytest.fixture

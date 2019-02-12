@@ -20,11 +20,11 @@ class SensorDataStat(TimeStampedModel):
     # Last datetime of calculated stats
     last_datetime = models.DateTimeField(null=True)
 
-    date = models.DateField()
+    datehour = models.DateTimeField()
 
     def __str__(self):
         return "%s %s %s avg=%s min=%s max=%s" % (
-            self.date,
+            self.datehour,
             self.city_slug,
             self.value_type,
             self.average,
