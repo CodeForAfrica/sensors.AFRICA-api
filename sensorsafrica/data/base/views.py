@@ -52,7 +52,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         to_date = self.request.query_params.get("to", None)
 
         if to_date and not from_date:
-            raise ValidationError({"from_date": "Must be provide along with to_date"})
+            raise ValidationError({"from": "Must be provide along with to"})
 
         value_type_to_filter = self.request.query_params.get("value_type", None)
 
