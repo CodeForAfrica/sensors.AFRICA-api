@@ -3,5 +3,6 @@
   "python.linting.pylamaEnabled": true,
   "python.linting.enabled": true,
   "python.formatting.provider": "black",
-  "editor.detectIndentation": false
+  "editor.detectIndentation": false,
+  "python.pythonPath": "venv/bin/python3.6"
 }

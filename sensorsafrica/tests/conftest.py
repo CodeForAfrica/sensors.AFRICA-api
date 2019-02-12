@@ -1,17 +1,11 @@
-import pytest
-
 import datetime
-from django.utils import timezone
-from django.core.management import call_command
 
-from feinstaub.sensors.models import (
-    Sensor,
-    SensorLocation,
-    SensorType,
-    Node,
-    SensorData,
-    SensorDataValue,
-)
+import pytest
+from django.core.management import call_command
+from django.utils import timezone
+from feinstaub.sensors.models import (Node, Sensor, SensorData,
+                                      SensorDataValue, SensorLocation,
+                                      SensorType)
 
 
 @pytest.fixture
@@ -149,7 +143,9 @@ def datavalues(sensors, sensordata):
         SensorDataValue(sensordata=sensordata[7], value="7", value_type="P2"),
         SensorDataValue(sensordata=sensordata[8], value="0", value_type="P1"),
         SensorDataValue(sensordata=sensordata[8], value="8", value_type="P2"),
-        SensorDataValue(sensordata=sensordata[8], value="some time stamp", value_type="timestamp"),
+        SensorDataValue(
+            sensordata=sensordata[8], value="some time stamp", value_type="timestamp"
+        ),
     ]
 
     # Nairobi SensorDataValues
@@ -167,3 +163,10 @@ def datavalues(sensors, sensordata):
     values[2].update_modified = False
     values[2].created = timezone.now() - datetime.timedelta(days=1)
     values[2].save()
+
+
+@pytest.fixture
+def sensorsdatastats(datavalues):
+    from django.core.management import call_command
+
+    call_command("calculate_data_statistics")
