@@ -1,10 +1,10 @@
-from django.db.models import Avg, F, FloatField, Max, Min
-from django.db.models.functions import Cast
-from django.utils import timezone
-from feinstaub.sensors.models import SensorDataValue
+import datetime
+
+from django.db.models import Avg, Max, Min
 from rest_framework import mixins, pagination, viewsets
 
-from .serializers import ReadingsSerializer
+from ...models import SensorDataStat
+from .serializers import SensorDataStatSerializer
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
@@ -15,45 +15,43 @@ class StandardResultsSetPagination(pagination.PageNumberPagination):
     max_page_size = 1000
 
 
-class ReadingsView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    queryset = SensorDataValue.objects.none()
-    serializer_class = ReadingsSerializer
+class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = SensorDataStat.objects.none()
+    serializer_class = SensorDataStatSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
-        city = self.kwargs["city"]
+        city_slug = self.kwargs["city_slug"]
 
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
 
         if not from_date:
-            from_date = timezone.now().date()
+            from_date = str(datetime.date.today())
 
         if not to_date:
-            to_date = timezone.now().date()
+            to_date = str(datetime.date.today())
 
-        types = self.request.query_params.get("type", None)
+        value_type_to_filter = self.request.query_params.get("value_type", None)
 
         filter_value_types = value_types[sensor_type]
-        if types:
-            filter_value_types = set(types.split(",")) & set(value_types[sensor_type])
+        if value_type_to_filter:
+            filter_value_types = set(value_type_to_filter.split(",")) & set(
+                value_types[sensor_type]
+            )
 
         return (
-            SensorDataValue.objects.filter(
-                sensordata__location__city__iexact=city.replace("-", " "),
+            SensorDataStat.objects.filter(
+                city_slug=city_slug,
                 value_type__in=filter_value_types,
-                created__date__gte=from_date,
-                created__date__lte=to_date,
+                date__gte=from_date,
+                date__lte=to_date,
             )
-            .datetimes("created", "day")
-            .values("datetimefield", "value_type")
+            .values("date", "value_type")
             .order_by()
             .annotate(
-                day=F("datetimefield"),
-                average=Avg(Cast("value", FloatField())),
-                minimum=Min(Cast("value", FloatField())),
-                maximum=Max(Cast("value", FloatField())),
+                average=Avg("average"), minimum=Min("minimum"), maximum=Max("maximum")
             )
-            .order_by("-day")
+            .order_by("-date")
         )
