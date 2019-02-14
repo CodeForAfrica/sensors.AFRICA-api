@@ -21,8 +21,8 @@ from feinstaub.sensors.views import AddSensordeviceView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.documentation import include_docs_urls
 
-from .sensors.base.router import api_urls as sensors_api_v1
-from .sensors.versioned.v2.router import api_urls as sensors_api_v2
+from .base.router import api_urls as sensors_api_v1
+from .versioned.v2.router import api_urls as sensors_api_v2
 
 urlpatterns = [
     url(r"^$", RedirectView.as_view(url="/docs/", permanent=False)),

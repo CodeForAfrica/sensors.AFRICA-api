@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     # API
     "sensorsafrica",
-    "sensorsafrica.apps.SensorsConfig",
     # Feinstaub
     "feinstaub",
     "feinstaub.main",
