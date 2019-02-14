@@ -33,8 +33,7 @@ def beginning_of_day(from_date):
 
 
 def end_of_day(to_date):
-    date = datetime.datetime.strptime(to_date, "%Y-%m-%d")
-    return (date + datetime.timedelta(hours=24)).replace(tzinfo=pytz.UTC)
+    return beginning_of_day(to_date) + datetime.timedelta(hours=24)
 
 
 def validate_date(date_text, error):
