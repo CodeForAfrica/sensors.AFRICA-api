@@ -90,6 +90,8 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .values("value_type")
             .order_by()
             .annotate(
+                start_datetime=Min("timestamp"),
+                end_datetime=Max("timestamp"),
                 average=ExpressionWrapper(
                     Sum(F("average") * F("sample_size")) / Sum("sample_size"),
                     output_field=FloatField(),
@@ -118,6 +120,8 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
+                start_datetime=Min("timestamp"),
+                end_datetime=Max("timestamp"),
                 average=ExpressionWrapper(
                     Sum(F("average") * F("sample_size")) / Sum("sample_size"),
                     output_field=FloatField(),
