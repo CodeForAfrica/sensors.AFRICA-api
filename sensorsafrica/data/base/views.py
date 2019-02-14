@@ -108,23 +108,6 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
 
-        print(SensorDataStat.objects.filter(
-                city_slug=city_slug,
-                value_type__in=filter_value_types,
-                datehour__gte=from_date,
-                datehour__lt=to_date,
-            )
-            .annotate(date=TruncDate("datehour"))
-            .values("date", "value_type")
-            .annotate(
-                average=ExpressionWrapper(
-                    Sum(F("average") * F("sample_size")) / Sum("sample_size"),
-                    output_field=FloatField(),
-                ),
-                minimum=Min("minimum"),
-                maximum=Max("maximum"),
-            )
-            .order_by("-date").query)
         return (
             SensorDataStat.objects.filter(
                 city_slug=city_slug,

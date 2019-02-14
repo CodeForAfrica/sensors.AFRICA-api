@@ -15,7 +15,6 @@ class TestGettingData:
         assert data["count"] == 2
 
         results = data["results"]
-        print(results)
 
         assert results[0]["value_type"] == "P1"
         assert results[0]["average"] == 0.0
@@ -101,8 +100,6 @@ class TestGettingData:
         assert response.status_code == 200
 
         data = response.json()
-
-        print(data)
 
         assert data["count"] == 2
 
