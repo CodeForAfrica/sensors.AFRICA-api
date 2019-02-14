@@ -1,4 +1,5 @@
 import math
+import decimal
 
 from django.core.management import BaseCommand
 from django.db.models import Avg, Count, FloatField, Max, Min, Q
@@ -67,8 +68,7 @@ class Command(BaseCommand):
                 )
 
             stats = list(
-                queryset
-                .annotate(datehour=TruncHour("created"))
+                queryset.annotate(datehour=TruncHour("created"))
                 .values(
                     "datehour",
                     "value_type",
@@ -84,19 +84,15 @@ class Command(BaseCommand):
                     maximum=Max(Cast("value", FloatField())),
                     sample_size=Count("created", FloatField()),
                 )
+                .filter(
+                    ~Q(average=float("NaN")),
+                    ~Q(minimum=float("NaN")),
+                    ~Q(maximum=float("NaN")),
+                )
                 .order_by("-datehour")
             )
 
             if len(stats):
-                stats = list(
-                    filter(
-                        lambda stat: math.isfinite(stat["average"])
-                        and math.isfinite(stat["maximum"])
-                        and math.isfinite(stat["minimum"]),
-                        stats,
-                    )
-                )
-
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )
