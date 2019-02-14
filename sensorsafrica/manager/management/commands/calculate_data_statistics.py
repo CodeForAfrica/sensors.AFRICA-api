@@ -1,6 +1,3 @@
-import math
-import decimal
-
 from django.core.management import BaseCommand
 from django.db.models import Avg, Count, FloatField, Max, Min, Q
 from django.db.models.functions import Cast, TruncHour
