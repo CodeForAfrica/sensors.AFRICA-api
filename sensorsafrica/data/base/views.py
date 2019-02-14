@@ -84,8 +84,8 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             SensorDataStat.objects.filter(
                 city_slug=city_slug,
                 value_type__in=filter_value_types,
-                datehour__gte=from_date,
-                datehour__lte=to_date,
+                timestamp__gte=from_date,
+                timestamp__lte=to_date,
             )
             .values("value_type")
             .order_by()
@@ -112,10 +112,10 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             SensorDataStat.objects.filter(
                 city_slug=city_slug,
                 value_type__in=filter_value_types,
-                datehour__gte=from_date,
-                datehour__lt=to_date,
+                timestamp__gte=from_date,
+                timestamp__lt=to_date,
             )
-            .annotate(date=TruncDate("datehour"))
+            .annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
                 average=ExpressionWrapper(

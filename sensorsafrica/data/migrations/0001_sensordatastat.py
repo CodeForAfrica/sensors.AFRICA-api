@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                 ('minimum', models.FloatField()),
                 ('sample_size', models.IntegerField()),
                 ('last_datetime', models.DateTimeField()),
-                ('datehour', models.DateTimeField()),
+                ('timestamp', models.DateTimeField()),
                 ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.SensorLocation')),
                 ('node', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.Node')),
                 ('sensor', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.Sensor')),

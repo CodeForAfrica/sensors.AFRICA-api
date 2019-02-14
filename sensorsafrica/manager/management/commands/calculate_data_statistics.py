@@ -9,7 +9,7 @@ from sensorsafrica.data.models import SensorDataStat
 def map_stat(stat, city):
     return SensorDataStat(
         city_slug=slugify(city),
-        datehour=stat["datehour"],
+        timestamp=stat["timestamp"],
         value_type=stat["value_type"],
         location=SensorLocation(pk=stat["sensordata__location"]),
         sensor=Sensor(pk=stat["sensordata__sensor"]),
@@ -65,9 +65,9 @@ class Command(BaseCommand):
                 )
 
             stats = list(
-                queryset.annotate(datehour=TruncHour("created"))
+                queryset.annotate(timestamp=TruncHour("created"))
                 .values(
-                    "datehour",
+                    "timestamp",
                     "value_type",
                     "sensordata__sensor",
                     "sensordata__location",
@@ -86,7 +86,7 @@ class Command(BaseCommand):
                     ~Q(minimum=float("NaN")),
                     ~Q(maximum=float("NaN")),
                 )
-                .order_by("-datehour")
+                .order_by("-timestamp")
             )
 
             if len(stats):
