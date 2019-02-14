@@ -27,6 +27,8 @@ class Migration(migrations.Migration):
                 ('average', models.FloatField()),
                 ('maximum', models.FloatField()),
                 ('minimum', models.FloatField()),
+                ('sample_size', models.IntegerField()),
+                ('last_datetime', models.DateTimeField()),
                 ('datehour', models.DateTimeField()),
                 ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.SensorLocation')),
                 ('node', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sensors.Node')),
