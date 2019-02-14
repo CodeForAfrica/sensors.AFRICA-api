@@ -190,8 +190,6 @@ def sensorsdatastats(datavalues):
 
     call_command("calculate_data_statistics")
 
-    # print(list(SensorDataStat.objects.all()))
-
 
 @pytest.fixture
 def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
