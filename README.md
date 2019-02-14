@@ -79,7 +79,7 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 - To calculate data statistics add the following:
 
 ```bash
-0 0 * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
+0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
 ```
 
 ## License
