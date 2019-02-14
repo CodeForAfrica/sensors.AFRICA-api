@@ -5,5 +5,6 @@ class SensorDataStatSerializer(serializers.Serializer):
     average = serializers.FloatField()
     minimum = serializers.FloatField()
     maximum = serializers.FloatField()
-    date = serializers.DateField()
     value_type = serializers.CharField(max_length=200)
+    start_datetime = serializers.DateTimeField()
+    end_datetime = serializers.DateTimeField()

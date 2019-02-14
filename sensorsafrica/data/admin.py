@@ -14,7 +14,7 @@ class SensorDataStatAdmin(admin.ModelAdmin):
         "average",
         "maximum",
         "minimum",
-        "date",
+        "timestamp",
     ]
     search_fields = ["city_slug", "value_type"]
     list_display = [
@@ -26,11 +26,11 @@ class SensorDataStatAdmin(admin.ModelAdmin):
         "average",
         "maximum",
         "minimum",
-        "date",
+        "timestamp",
         "created",
         "modified",
     ]
-    list_filter = ["date", "node", "sensor", "location"]
+    list_filter = ["timestamp", "node", "sensor", "location"]
 
     def get_actions(self, request):
         actions = super(SensorDataStatAdmin, self).get_actions(request)
