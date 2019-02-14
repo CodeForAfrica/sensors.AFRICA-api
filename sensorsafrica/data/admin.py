@@ -14,7 +14,7 @@ class SensorDataStatAdmin(admin.ModelAdmin):
         "average",
         "maximum",
         "minimum",
-        "date",
+        "datehour",
     ]
     search_fields = ["city_slug", "value_type"]
     list_display = [

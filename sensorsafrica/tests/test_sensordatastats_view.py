@@ -72,6 +72,27 @@ class TestGettingData:
             "/v2/air/data/dar-es-salaam/?to=2019-02-08", format="json"
         )
         assert response.status_code == 400
+        assert response.json() == {
+            "from": "Must be provide along with to query"
+        }
+
+    def test_getting_air_data_with_invalid_from_request(self, client, sensorsdatastats):
+        response = client.get(
+            "/v2/air/data/dar-es-salaam/?from=2019-23-08", format="json"
+        )
+        assert response.status_code == 400
+        assert response.json() == {
+            "from": "Must be a date in the format Y-m-d."
+        }
+
+    def test_getting_air_data_with_invalid_to_request(self, client, sensorsdatastats):
+        response = client.get(
+            "/v2/air/data/dar-es-salaam/?from=2019-02-08&to=08-02-2019", format="json"
+        )
+        assert response.status_code == 400
+        assert response.json() == {
+            "to": "Must be a date in the format Y-m-d."
+        }
 
     def test_getting_air_data_now_with_additional_values(
         self, client, additional_sensorsdatastats

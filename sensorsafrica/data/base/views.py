@@ -20,23 +20,28 @@ class StandardResultsSetPagination(pagination.PageNumberPagination):
     max_page_size = 1000
 
 
-def begining_of_day_today():
+def beginning_of_today():
     return timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
 
 
-def begining_of_day(from_date):
+def end_of_today():
+    return beginning_of_today() + datetime.timedelta(hours=24)
+
+
+def beginning_of_day(from_date):
     return datetime.datetime.strptime(from_date, "%Y-%m-%d").replace(tzinfo=pytz.UTC)
-
-
-def end_of_day_today():
-    return (timezone.now() + datetime.timedelta(hours=24)).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    )
 
 
 def end_of_day(to_date):
     date = datetime.datetime.strptime(to_date, "%Y-%m-%d")
     return (date + datetime.timedelta(hours=24)).replace(tzinfo=pytz.UTC)
+
+
+def validate_date(date_text, error):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+    except ValueError:
+        raise ValidationError(error)
 
 
 class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -52,7 +57,11 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         to_date = self.request.query_params.get("to", None)
 
         if to_date and not from_date:
-            raise ValidationError({"from": "Must be provide along with to"})
+            raise ValidationError({"from": "Must be provide along with to query"})
+        if from_date:
+            validate_date(from_date, {"from": "Must be a date in the format Y-m-d."})
+        if to_date:
+            validate_date(to_date, {"to": "Must be a date in the format Y-m-d."})
 
         value_type_to_filter = self.request.query_params.get("value_type", None)
 
@@ -63,40 +72,60 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             )
 
         if not from_date and not to_date:
-            """
-            Retrive the past 24 hours from now
-            """
-            now = timezone.now().replace(minute=0, second=0, microsecond=0)
-            to_date = now
-            from_date = (now - datetime.timedelta(hours=24)).replace(
-                minute=0, second=0, microsecond=0
-            )
+            return self._retrieve_past_24hrs(city_slug, filter_value_types)
 
-            return (
-                SensorDataStat.objects.filter(
-                    city_slug=city_slug,
-                    value_type__in=filter_value_types,
-                    datehour__gte=from_date,
-                    datehour__lte=to_date,
-                )
-                .values("value_type")
-                .order_by()
-                .annotate(
-                    average=ExpressionWrapper(
-                        Sum(F("average") * F("sample_size")) / Sum("sample_size"),
-                        output_field=FloatField(),
-                    ),
-                    minimum=Min("minimum"),
-                    maximum=Max("maximum"),
-                )
+        return self._retrieve_range(from_date, to_date, city_slug, filter_value_types)
+
+    @staticmethod
+    def _retrieve_past_24hrs(city_slug, filter_value_types):
+        to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
+        from_date = to_date - datetime.timedelta(hours=24)
+
+        return (
+            SensorDataStat.objects.filter(
+                city_slug=city_slug,
+                value_type__in=filter_value_types,
+                datehour__gte=from_date,
+                datehour__lte=to_date,
             )
-        elif not to_date:
-            from_date = begining_of_day(from_date)
-            to_date = end_of_day_today()
+            .values("value_type")
+            .order_by()
+            .annotate(
+                average=ExpressionWrapper(
+                    Sum(F("average") * F("sample_size")) / Sum("sample_size"),
+                    output_field=FloatField(),
+                ),
+                minimum=Min("minimum"),
+                maximum=Max("maximum"),
+            )
+        )
+
+    @staticmethod
+    def _retrieve_range(from_date, to_date, city_slug, filter_value_types):
+        if not to_date:
+            from_date = beginning_of_day(from_date)
+            to_date = end_of_today()
         else:
-            from_date = begining_of_day(from_date)
+            from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
 
+        print(SensorDataStat.objects.filter(
+                city_slug=city_slug,
+                value_type__in=filter_value_types,
+                datehour__gte=from_date,
+                datehour__lt=to_date,
+            )
+            .annotate(date=TruncDate("datehour"))
+            .values("date", "value_type")
+            .annotate(
+                average=ExpressionWrapper(
+                    Sum(F("average") * F("sample_size")) / Sum("sample_size"),
+                    output_field=FloatField(),
+                ),
+                minimum=Min("minimum"),
+                maximum=Max("maximum"),
+            )
+            .order_by("-date").query)
         return (
             SensorDataStat.objects.filter(
                 city_slug=city_slug,
