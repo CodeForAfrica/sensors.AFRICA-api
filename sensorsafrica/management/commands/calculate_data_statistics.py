@@ -3,7 +3,7 @@ from django.db.models import Avg, Count, FloatField, Max, Min, Q
 from django.db.models.functions import Cast, TruncHour
 from django.utils.text import slugify
 from feinstaub.sensors.models import Node, Sensor, SensorDataValue, SensorLocation
-from ...models import SensorDataStat
+from ...api.models import SensorDataStat
 
 
 def map_stat(stat, city):

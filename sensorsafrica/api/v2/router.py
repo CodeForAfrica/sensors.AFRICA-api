@@ -2,7 +2,7 @@ from rest_framework import routers
 from django.conf.urls import url, include
 
 from .views import SensorDataStatView
-from ...base.router import api_urls
+from ..v1.router import api_urls
 
 router = routers.DefaultRouter()
 

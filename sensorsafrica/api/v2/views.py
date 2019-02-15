@@ -8,7 +8,7 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum
 from django.db.models.functions import TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from ...models import SensorDataStat
+from ..models import SensorDataStat
 from .serializers import SensorDataStatSerializer
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
