@@ -109,7 +109,7 @@ class Command(BaseCommand):
                 # Incriment month
                 date = datetime.datetime(
                     day=1,
-                    month=(date.month - 1) % 12 + 1,
+                    month=date.month % 12 + 1,
                     year=date.year + date.month // 12,
                     tzinfo=pytz.UTC,
                 )
