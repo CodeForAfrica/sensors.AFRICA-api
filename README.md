@@ -76,6 +76,12 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 1 0 * * * dokku enter < dokku app name > web python3 manage.py export_as_csv --no_exclude --upload_s3 True --type dht11  >> /var/log/cron.log 2>&1
 ```
 
+- To calculate data statistics add the following:
+
+```bash
+0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
+```
+
 ## License
 
 GNU GPLv3

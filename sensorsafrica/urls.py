@@ -21,16 +21,14 @@ from feinstaub.sensors.views import AddSensordeviceView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.documentation import include_docs_urls
 
-from .accounts.base.router import api_urls as accounts_api_v1
-from .data.base.router import api_urls as data_api_v2
-from .sensors.base.router import api_urls as sensors_api_v1
+from .api.v1.router import api_urls as sensors_api_v1
+from .api.v2.router import api_urls as sensors_api_v2
 
 urlpatterns = [
     url(r"^$", RedirectView.as_view(url="/docs/", permanent=False)),
     url(r"^admin/", admin.site.urls),
     url(r"^v1/", include(sensors_api_v1)),
-    url(r"^v1/", include(accounts_api_v1)),
-    url(r"^v2/", include(data_api_v2)),
+    url(r"^v2/", include(sensors_api_v2)),
     url(r"^get-auth-token/", obtain_auth_token),
     url(r"^auth/", include("rest_framework.urls", namespace="rest_framework")),
     url(r"^docs/", include_docs_urls(title="sensors.Africa API")),
