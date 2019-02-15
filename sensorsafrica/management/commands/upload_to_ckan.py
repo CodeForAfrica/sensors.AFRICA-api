@@ -93,13 +93,18 @@ class Command(BaseCommand):
                         month=calendar.month_name[date.month], year=date.year
                     )
 
-                    self._write_file(filepath="./temp/file.csv", qs=qs)
+                    filepath = "./temp/%s.csv" % resource_name.lower().replace(" ", "_")
+
+                    self._write_file(filepath=filepath, qs=qs)
                     self._create_or_update_resource(
-                        resource_name, "./temp/file.csv", resources, ckan, package
+                        resource_name, filepath, resources, ckan, package
                     )
 
+                    # Cleanup
+                    os.remove(filepath)
+
                     # Don't DDOS openAFRICA
-                    time.sleep(20)
+                    time.sleep(5)
 
                 # Incriment month
                 date = datetime.datetime(
