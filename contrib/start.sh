@@ -18,3 +18,6 @@ exec gunicorn \
     --access-logfile=/src/logs/access.log \
     --name sensorsafrica --reload sensorsafrica.wsgi:application \
     --chdir sensorsafrica/
+
+# Install or reinstall cronjobs
+python manage.py cron --breadcrumb $DOKKU_APP_NAME
