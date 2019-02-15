@@ -1,5 +1,5 @@
-from django.core.management import BaseCommand, get_commands
 import crontab
+from django.core.management import BaseCommand
 
 BREADCRUMB = "sensorsafrica"
 
