@@ -20,4 +20,4 @@ exec gunicorn \
     --chdir sensorsafrica/
 
 # Install or reinstall cronjobs
-python manage.py cron --breadcrumb $DOKKU_APP_NAME
+python manage.py cron --breadcrumb $DOKKU_APP_NAME --dokku_appname $DOKKU_APP_NAME
