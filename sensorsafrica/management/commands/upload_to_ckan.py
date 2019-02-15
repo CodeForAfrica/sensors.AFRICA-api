@@ -74,6 +74,7 @@ class Command(BaseCommand):
                         location__city=city,
                         timestamp__month=date.month,
                         timestamp__year=date.year,
+                        sensordatavalues__value__isnull=False,
                     )
                     .values(
                         "sensor__id",
