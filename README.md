@@ -65,11 +65,11 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 ### Cronjob
 
-The commands are added to crontab by running; `python manage.py cron --breadcrumb sensorsafrica`.
+The commands are added to crontab by running; `python manage.py cron --breadcrumb sensorsafrica --dokku_appname`.
 The following commands are added:
 
 ```bash
-0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1 # sensorsafrica
+0 * * * * dokku enter {dokku_appname} web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1 # {breadcrumb}
 ```
 
 ## License
