@@ -1,35 +1,47 @@
-import crontab
+from crontab import CronTab
 from django.core.management import call_command
 
+import unittest
 
-class TestSensorDataPushFull:
-    def test_crontab_intalled(self):
-        call_command("cron", dokku_appname="sensorsafrica-test", breadcrumb="sensorsafrica-test")
+from unittest import mock
 
-        tab = crontab.CronTab(user=True)
+crontab = CronTab(user=True)
 
-        count = len(list(tab.find_comment("sensorsafrica-test")))
+
+def get_crontab(*args, **kwargs):
+    return crontab
+
+
+
+@mock.patch("crontab.CronTab", autospec=True, side_effect=get_crontab)
+class TestCronCommand(unittest.TestCase):
+    def test_crontab_intalled(self, _):
+        call_command("cron", dokku_appname="sensorsafrica-test")
+
+        count = len(list(crontab.find_comment("sensorsafrica-test")))
 
         assert count == 1
 
-    def test_crontab_reintalled(self):
-        call_command("cron", dokku_appname="sensorsafrica-test-reinstall", breadcrumb="sensorsafrica-test-reinstall")
+    def test_crontab_reintalled(self, _):
+        call_command("cron", dokku_appname="sensorsafrica-test")
 
-        tab = crontab.CronTab(user=True)
+        count = len(list(crontab.find_comment("sensorsafrica-test")))
 
-        prev_jobs = len(list(tab.find_comment("sensorsafrica-test")))
-        current_jobs = len(list(tab.find_comment("sensorsafrica-test-reinstall")))
+        assert count == 1
+
+        call_command("cron", dokku_appname="sensorsafrica-test-reinstall")
+
+        prev_jobs = len(list(crontab.find_comment("sensorsafrica-test")))
+        current_jobs = len(list(crontab.find_comment("sensorsafrica-test-reinstall")))
 
         assert prev_jobs == 0
         assert current_jobs == 1
 
-    def test_crontab_clear(self):
+    def test_crontab_clear(self, _):
         call_command("cron", clear=True)
 
-        tab = crontab.CronTab(user=True)
-
-        prev_jobs = len(list(tab.find_comment("sensorsafrica-test")))
-        current_jobs = len(list(tab.find_comment("sensorsafrica-test-reinstall")))
+        prev_jobs = len(list(crontab.find_comment("sensorsafrica-test")))
+        current_jobs = len(list(crontab.find_comment("sensorsafrica-test-reinstall")))
 
         assert prev_jobs == 0
         assert current_jobs == 0
