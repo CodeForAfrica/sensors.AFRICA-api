@@ -6,7 +6,7 @@ psycopg2==2.7.6.1
 coreapi==2.3.3
 dj-database-url==0.5.0
 
-python-crontab==2.3.6
+python-crontab==2.0
 gunicorn==19.9.0
 gevent==1.2.2
 greenlet==0.4.12
