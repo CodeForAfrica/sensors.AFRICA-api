@@ -36,6 +36,7 @@ class Command(BaseCommand):
                     owner_org=openAFRICA_CFA_ID,
                     name="sensorsafrica-airquality-archive-" + slugify(city),
                     title="sensors.AFRICA Air Quality Archive " + city,
+                    groups=[{"name": "sensorsafrica-airquality-archive"}]
                 )
             except ckanapi.ValidationError:
                 package = ckan.action.package_show(
