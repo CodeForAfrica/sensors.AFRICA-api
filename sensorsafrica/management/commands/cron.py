@@ -1,5 +1,4 @@
 import shelve
-import uuid
 import crontab
 from django.core.management import BaseCommand
 

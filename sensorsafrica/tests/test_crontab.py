@@ -1,16 +1,19 @@
+import os
+import unittest
+from unittest import mock
+
 from crontab import CronTab
 from django.core.management import call_command
 
-import unittest
+test_tabfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "crontab")
 
-from unittest import mock
+open(test_tabfile, "a").close()
 
-crontab = CronTab(user=True)
+crontab = CronTab(user=True, tabfile=test_tabfile)
 
 
 def get_crontab(*args, **kwargs):
     return crontab
-
 
 
 @mock.patch("crontab.CronTab", autospec=True, side_effect=get_crontab)
