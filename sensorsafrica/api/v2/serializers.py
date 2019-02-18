@@ -8,3 +8,4 @@ class SensorDataStatSerializer(serializers.Serializer):
     value_type = serializers.CharField(max_length=200)
     start_datetime = serializers.DateTimeField()
     end_datetime = serializers.DateTimeField()
+    city_slug = serializers.CharField(max_length=200)

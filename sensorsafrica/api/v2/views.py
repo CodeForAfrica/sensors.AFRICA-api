@@ -38,7 +38,7 @@ def end_of_day(to_date):
 
 def validate_date(date_text, error):
     try:
-        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        datetime.datetime.strptime(date_text, "%Y-%m-%d")
     except ValueError:
         raise ValidationError(error)
 
@@ -50,7 +50,10 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
-        city_slug = self.kwargs["city_slug"]
+
+        city_slug = None
+        if "city_slug" in self.kwargs:
+            city_slug = self.kwargs["city_slug"]
 
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
@@ -80,16 +83,20 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
         from_date = to_date - datetime.timedelta(hours=24)
 
+        queryset = SensorDataStat.objects.filter(
+            value_type__in=filter_value_types,
+            timestamp__gte=from_date,
+            timestamp__lte=to_date,
+        )
+
+        if city_slug:
+            queryset = queryset.filter(city_slug=city_slug)
+
         return (
-            SensorDataStat.objects.filter(
-                city_slug=city_slug,
-                value_type__in=filter_value_types,
-                timestamp__gte=from_date,
-                timestamp__lte=to_date,
-            )
+            queryset.order_by()
             .values("value_type")
-            .order_by()
             .annotate(
+                city_slug=F("city_slug"),
                 start_datetime=Min("timestamp"),
                 end_datetime=Max("timestamp"),
                 average=ExpressionWrapper(
@@ -120,6 +127,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
+                city_slug=F("city_slug"),
                 start_datetime=Min("timestamp"),
                 end_datetime=Max("timestamp"),
                 average=ExpressionWrapper(

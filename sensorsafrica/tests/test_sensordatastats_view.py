@@ -31,6 +31,23 @@ class TestGettingData:
         assert results[1]["maximum"] == 8.0
         assert results[1]["minimum"] == 0.0
 
+    def test_getting_air_data_now_all_cities(self, client, sensorsdatastats):
+        response = client.get("/v2/air/data/", format="json")
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 4
+
+        results = data["results"]
+
+        assert results[0]["city_slug"] == "dar-es-salaam"
+        assert results[0]["value_type"] == "P1"
+        assert results[1]["city_slug"] == "dar-es-salaam"
+        assert results[1]["value_type"] == "P2"
+        assert results[2]["city_slug"] == "nairobi"
+        assert results[3]["city_slug"] == "bagamoyo"
+
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
         response = client.get(
             "/v2/air/data/dar-es-salaam/?value_type=P2", format="json"
