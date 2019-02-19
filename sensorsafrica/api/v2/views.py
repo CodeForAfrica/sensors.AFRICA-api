@@ -57,14 +57,14 @@ class CustomPagination(pagination.PageNumberPagination):
             if city_slug not in results:
                 results[city_slug] = {
                     "city_slug": city_slug,
-                    value_type: {} if from_date else [],
+                    value_type: [] if from_date else {},
                 }
 
             if value_type not in results[city_slug]:
-                results[city_slug][value_type] = {} if from_date else []
+                results[city_slug][value_type] = [] if from_date else {}
 
             values = results[city_slug][value_type]
-            getattr(values, "update" if from_date else "append")(
+            getattr(values, "append" if from_date else "update")(
                 {
                     "average": result["average"],
                     "minimum": result["minimum"],
