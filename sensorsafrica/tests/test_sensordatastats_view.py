@@ -42,13 +42,12 @@ class TestGettingData:
 
         results = data["results"]
 
-        assert results[0]["city_slug"] == "dar-es-salaam"
-        print(results)
-        assert "P1" in results[0]
-        assert results[0]["city_slug"] == "dar-es-salaam"
+        assert results[0]["city_slug"] == "bagamoyo"
+        assert results[1]["city_slug"] == "dar-es-salaam"
+        assert "P1" in results[1]
+        assert results[1]["city_slug"] == "dar-es-salaam"
         assert "P2" in results[1]
-        assert results[1]["city_slug"] == "nairobi"
-        assert results[2]["city_slug"] == "bagamoyo"
+        assert results[2]["city_slug"] == "nairobi"
 
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
         response = client.get(

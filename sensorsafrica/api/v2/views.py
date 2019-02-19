@@ -137,6 +137,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
                 minimum=Min("minimum"),
                 maximum=Max("maximum"),
             )
+            .order_by("city_slug")
         )
 
     @staticmethod
