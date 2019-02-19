@@ -11,7 +11,6 @@ class City(TimeStampedModel):
     location = models.CharField(max_length=255, db_index=True, null=False, blank=False)
     latitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
     longitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
-    map_zoom = models.IntegerField(default=12)
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)

@@ -7,7 +7,7 @@ from django.utils import timezone
 @pytest.mark.django_db
 class TestGettingData:
     def test_getting_air_data_now(self, client, sensorsdatastats):
-        response = client.get("/v2/air/data/dar-es-salaam/", format="json")
+        response = client.get("/v2/data/air/?city=dar-es-salaam", format="json")
         assert response.status_code == 200
 
         data = response.json()
@@ -32,7 +32,7 @@ class TestGettingData:
         assert result["P2"]["minimum"] == 0.0
 
     def test_getting_air_data_now_all_cities(self, client, sensorsdatastats):
-        response = client.get("/v2/air/data/", format="json")
+        response = client.get("/v2/data/air/", format="json")
         assert response.status_code == 200
 
         data = response.json()
@@ -50,7 +50,7 @@ class TestGettingData:
 
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?value_type=P2", format="json"
+            "/v2/data/air/?city=dar-es-salaam&value_type=P2", format="json"
         )
         assert response.status_code == 200
 
@@ -61,7 +61,7 @@ class TestGettingData:
 
     def test_getting_air_data_from_date(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?from=%s"
+            "/v2/data/air/?city=dar-es-salaam&from=%s"
             % (timezone.now() - datetime.timedelta(days=2)).date(),
             format="json",
         )
@@ -75,7 +75,7 @@ class TestGettingData:
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?from=%s&to=%s" % (now.date(), now.date()),
+            "/v2/data/air/?city=dar-es-salaam&from=%s&to=%s" % (now.date(), now.date()),
             format="json",
         )
         assert response.status_code == 200
@@ -88,7 +88,7 @@ class TestGettingData:
 
     def test_getting_air_data_with_invalid_request(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?to=2019-02-08", format="json"
+            "/v2/data/air/?city=dar-es-salaam&to=2019-02-08", format="json"
         )
         assert response.status_code == 400
         assert response.json() == {
@@ -97,7 +97,7 @@ class TestGettingData:
 
     def test_getting_air_data_with_invalid_from_request(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?from=2019-23-08", format="json"
+            "/v2/data/air/?city=dar-es-salaam&from=2019-23-08", format="json"
         )
         assert response.status_code == 400
         assert response.json() == {
@@ -106,7 +106,7 @@ class TestGettingData:
 
     def test_getting_air_data_with_invalid_to_request(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/air/data/dar-es-salaam/?from=2019-02-08&to=08-02-2019", format="json"
+            "/v2/data/air/?city=dar-es-salaam&from=2019-02-08&to=08-02-2019", format="json"
         )
         assert response.status_code == 400
         assert response.json() == {
@@ -116,7 +116,7 @@ class TestGettingData:
     def test_getting_air_data_now_with_additional_values(
         self, client, additional_sensorsdatastats
     ):
-        response = client.get("/v2/air/data/dar-es-salaam/", format="json")
+        response = client.get("/v2/data/air/?city=dar-es-salaam", format="json")
         assert response.status_code == 200
 
         data = response.json()

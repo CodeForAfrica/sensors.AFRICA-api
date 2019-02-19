@@ -16,7 +16,6 @@ def forwards_func(apps, schema_editor):
                 slug="lagos",
                 name="Lagos",
                 country="Nigeria",
-                map_zoom=12,
             ),
             City(
                 latitude=-1.2921,
@@ -24,7 +23,6 @@ def forwards_func(apps, schema_editor):
                 slug="nairobi",
                 name="Nairobi",
                 country="Kenya",
-                map_zoom=12,
             ),
             City(
                 latitude=-6.7924,
@@ -32,7 +30,6 @@ def forwards_func(apps, schema_editor):
                 slug="dar-es-salaam",
                 name="Dar es Salaam",
                 country="Tanzania",
-                map_zoom=12,
             ),
         ]
     )
@@ -86,8 +83,7 @@ class Migration(migrations.Migration):
                     models.DecimalField(
                         blank=True, decimal_places=11, max_digits=14, null=True
                     ),
-                ),
-                ("map_zoom", models.IntegerField(default=12)),
+                )
             ],
             options={
                 "ordering": ("-modified", "-created"),

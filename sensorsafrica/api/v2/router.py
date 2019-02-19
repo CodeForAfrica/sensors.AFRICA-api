@@ -6,14 +6,13 @@ from ..v1.router import api_urls
 
 data_router = routers.DefaultRouter()
 
-data_router.register(r"(?P<city_slug>[\w-]+)", SensorDataStatView)
 data_router.register(r"", SensorDataStatView)
 
-router = routers.DefaultRouter()
+city_router = routers.DefaultRouter()
 
-router.register(r"cities", CityView)
+city_router.register(r"", CityView)
 
-api_urls += [
-    url(r"(?P<sensor_type>[air]+)/data/", include(data_router.urls)),
-    url(r"", include(router.urls)),
-]
+api_urls = [
+    url(r"data/(?P<sensor_type>[air]+)/", include(data_router.urls)),
+    url(r"cities/", include(city_router.urls)),
+] + api_urls

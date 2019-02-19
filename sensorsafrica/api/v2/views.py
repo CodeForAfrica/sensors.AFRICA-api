@@ -44,15 +44,15 @@ class CustomPagination(pagination.PageNumberPagination):
     max_page_size = 1000
     page_size = 100
 
-    def get_paginated_response(self, data):
+    def get_paginated_response(self, data_stats):
         # If filtering from a date
         # We will need to have a list of the value_types e.g. { 'P1': [{}, {}] }
         from_date = self.request.query_params.get("from", None)
 
         results = {}
-        for result in data:
-            city_slug = result["city_slug"]
-            value_type = result["value_type"]
+        for data_stat in data_stats:
+            city_slug = data_stat["city_slug"]
+            value_type = data_stat["value_type"]
 
             if city_slug not in results:
                 results[city_slug] = {
@@ -64,13 +64,14 @@ class CustomPagination(pagination.PageNumberPagination):
                 results[city_slug][value_type] = [] if from_date else {}
 
             values = results[city_slug][value_type]
-            getattr(values, "append" if from_date else "update")(
+            include_result = getattr(values, "append" if from_date else "update")
+            include_result(
                 {
-                    "average": result["average"],
-                    "minimum": result["minimum"],
-                    "maximum": result["maximum"],
-                    "start_datetime": result["start_datetime"],
-                    "end_datetime": result["end_datetime"],
+                    "average": data_stat["average"],
+                    "minimum": data_stat["minimum"],
+                    "maximum": data_stat["maximum"],
+                    "start_datetime": data_stat["start_datetime"],
+                    "end_datetime": data_stat["end_datetime"],
                 }
             )
 
@@ -94,10 +95,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
 
-        city_slug = None
-        if "city_slug" in self.kwargs:
-            city_slug = self.kwargs["city_slug"]
-
+        city_slug = self.request.query_params.get("city", None)
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
 
