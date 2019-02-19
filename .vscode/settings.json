@@ -4,5 +4,5 @@
   "python.linting.enabled": true,
   "python.formatting.provider": "black",
   "editor.detectIndentation": false,
-  "python.pythonPath": "venv/bin/python3.6"
+  "python.pythonPath": "/Users/Karim/anaconda3/bin/python"
 }
