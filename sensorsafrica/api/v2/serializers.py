@@ -23,7 +23,7 @@ class CitySerializer(serializers.Serializer):
     def get_label(self, obj):
         return "{}, {}".format(obj.name, obj.country)
 
-    def get_mapi_link(self, obj):
+    def get_map_link(self, obj):
         return "https://map.aq.sensors.africa/#{}/{}/{}".format(
             obj.map_zoom, obj.latitude, obj.longitude
         )
