@@ -18,10 +18,12 @@ class CitySerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     country = serializers.CharField(max_length=255)
     label = serializers.SerializerMethodField()
-    location = serializers.SerializerMethodField()
+    map_link = serializers.SerializerMethodField()
 
     def get_label(self, obj):
-        return '{}, {}'.format(obj.name, obj.country)
+        return "{}, {}".format(obj.name, obj.country)
 
-    def get_location(self, obj):
-        return '{}/{}/{}'.format(obj.map_zoom, obj.latitude, obj.longitude)
+    def get_mapi_link(self, obj):
+        return "https://map.aq.sensors.africa/#{}/{}/{}".format(
+            obj.map_zoom, obj.latitude, obj.longitude
+        )
