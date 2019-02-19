@@ -64,13 +64,14 @@ class CustomPagination(pagination.PageNumberPagination):
                     "end_datetime": result["end_datetime"],
                 }
             )
-
+        
+        count = len(results.keys())
         return Response(
             {
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
-                "count": len(results.keys()),
-                "results": results.values(),
+                "count": count,
+                "results": list(results.values())[0] if count == 1 else results.values(),
             }
         )
 

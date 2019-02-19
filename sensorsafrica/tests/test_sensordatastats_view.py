@@ -14,8 +14,7 @@ class TestGettingData:
 
         assert data["count"] == 1
 
-        results = data["results"]
-        result = results[0]
+        result = data["results"]
 
         assert "P1" in result
         assert result["P1"][0]["average"] == 0.0
@@ -58,7 +57,7 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 1
-        assert "P2" in data["results"][0]
+        assert "P2" in data["results"]
 
     def test_getting_air_data_from_date(self, client, sensorsdatastats):
         response = client.get(
@@ -70,8 +69,8 @@ class TestGettingData:
 
         data = response.json()
 
-        assert len(data["results"][0]["P1"]) == 1
-        assert len(data["results"][0]["P2"]) == 2
+        assert len(data["results"]["P1"]) == 1
+        assert len(data["results"]["P2"]) == 2
 
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
@@ -84,8 +83,8 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 1
-        assert len(data["results"][0]["P1"]) == 1
-        assert len(data["results"][0]["P2"]) == 1
+        assert len(data["results"]["P1"]) == 1
+        assert len(data["results"]["P2"]) == 1
 
     def test_getting_air_data_with_invalid_request(self, client, sensorsdatastats):
         response = client.get(
@@ -124,8 +123,7 @@ class TestGettingData:
 
         assert data["count"] == 1
 
-        results = data["results"]
-        result = results[0]
+        result = data["results"]
 
         assert "P1" in result
         assert result["P1"][0]["average"] == 0.0
