@@ -45,6 +45,9 @@ class CustomPagination(pagination.PageNumberPagination):
     page_size = 100
 
     def get_paginated_response(self, data):
+        # If filtering from a date
+        # We will need to have a list of the value_types e.g. { 'P1': [{}, {}] }
+        from_date = self.request.query_params.get("from", None)
 
         results = {}
         for result in data:
@@ -52,10 +55,16 @@ class CustomPagination(pagination.PageNumberPagination):
             value_type = result["value_type"]
 
             if city_slug not in results:
-                results[city_slug] = {"city_slug": city_slug, value_type: []}
+                results[city_slug] = {
+                    "city_slug": city_slug,
+                    value_type: {} if from_date else [],
+                }
+
             if value_type not in results[city_slug]:
-                results[city_slug][value_type] = []
-            results[city_slug][value_type].append(
+                results[city_slug][value_type] = {} if from_date else []
+
+            values = results[city_slug][value_type]
+            getattr(values, "update" if from_date else "append")(
                 {
                     "average": result["average"],
                     "minimum": result["minimum"],
@@ -64,14 +73,15 @@ class CustomPagination(pagination.PageNumberPagination):
                     "end_datetime": result["end_datetime"],
                 }
             )
-        
+
         count = len(results.keys())
+        values = list(results.values())
         return Response(
             {
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
                 "count": count,
-                "results": list(results.values())[0] if count == 1 else results.values(),
+                "results": values[0] if count == 1 else values,
             }
         )
 

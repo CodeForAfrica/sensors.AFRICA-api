@@ -69,8 +69,8 @@ class TestGettingData:
 
         data = response.json()
 
-        assert len(data["results"]["P1"]) == 1
-        assert len(data["results"]["P2"]) == 2
+        assert type(data["results"]["P1"]) == dict
+        assert type(data["results"]["P2"]) == dict
 
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
@@ -83,8 +83,8 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 1
-        assert len(data["results"]["P1"]) == 1
-        assert len(data["results"]["P2"]) == 1
+        assert type(data["results"]["P1"]) == dict
+        assert type(data["results"]["P2"]) == dict
 
     def test_getting_air_data_with_invalid_request(self, client, sensorsdatastats):
         response = client.get(
