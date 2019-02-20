@@ -91,7 +91,7 @@ Follow the [intergratation guide](https://cronitor.io/docs/integration-guide) to
 - To calculate data statistics add the following:
 
 ```bash
-0 * * * * cronitor exec <cronitor monitor code> dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
+0 * * * * cronitor exec <cronitor monitor code> dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
 ```
 
 ## License
