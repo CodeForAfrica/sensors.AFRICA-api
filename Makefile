@@ -6,6 +6,9 @@ build:
 up:
 	$(COMPOSE) up -d
 
+logs:
+    $(COMPOSE) logs -f
+
 compilescss:
 	$(COMPOSE) exec api python manage.py compilescss
 	$(COMPOSE) exec api python manage.py collectstatic --clear --noinput
