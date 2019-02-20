@@ -65,9 +65,9 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 ### Cronjob
 
-### Cronitor
+Setup cronitor
 
-[Setup cronitor:](https://cronitor.io/docs/using-cronitor-cli)
+- [Setup cronitor:](https://cronitor.io/docs/using-cronitor-cli)
 
 ```bash
 wget https://cronitor.io/dl/cronitor-cli-stable-linux-amd64.tgz
@@ -78,7 +78,7 @@ rm cronitor-cli-stable-linux-amd64.tgz
 
 Follow the [intergratation guide](https://cronitor.io/docs/integration-guide) to get the monitor working.
 
-### Crontab
+Setup crontab
 
 - Change users to dokku; `sudo su dokku`
 - Edit dokku's crontab; `crontab -e`
