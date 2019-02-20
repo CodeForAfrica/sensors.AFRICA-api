@@ -29,8 +29,19 @@ GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 
 Using docker compose:
 
-- Build the project; `docker-compose build`
-- Run the project; `docker-compose up -d`
+- Build the project; `docker-compose build` or `make build`
+- Run the project; `docker-compose up -d` or `make up`
+
+Docker compose make commands:
+
+- `make build`
+- `make up` - run docker and detach
+- `make test` - run test
+- `make migrate` - migrate database
+- `make createsuperuser` - create a super user for admin
+- `make compilescss`
+- `make enter` - enter docker shell
+- `make django` - enter docker django shell
 
 **NOTE:**
 `docker-compose` is strictly for development and testing purposes.
