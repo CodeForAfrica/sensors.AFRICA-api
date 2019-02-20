@@ -67,19 +67,16 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 - Change users to dokku; `sudo su dokku`
 - Edit dokku's crontab; `crontab -e`
-- To export csv to S3 as archives add the following:
+- To export csv to openAFRICA as archives add the following:
 
 ```bash
-1 0 * * * dokku enter < dokku app name > web python3 manage.py export_as_csv --no_exclude --upload_s3 True  >> /var/log/cron.log 2>&1
-1 0 * * * dokku enter < dokku app name > web python3 manage.py export_as_csv --no_exclude --upload_s3 True --type sds011  >> /var/log/cron.log 2>&1
-1 0 * * * dokku enter < dokku app name > web python3 manage.py export_as_csv --no_exclude --upload_s3 True --type dht22  >> /var/log/cron.log 2>&1
-1 0 * * * dokku enter < dokku app name > web python3 manage.py export_as_csv --no_exclude --upload_s3 True --type dht11  >> /var/log/cron.log 2>&1
+1 0 * * * dokku enter < dokku app name > web python3 manage.py upload_to_ckan >> /var/log/cron.log 2>&1
 ```
 
 - To calculate data statistics add the following:
 
 ```bash
-0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
+0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
 ```
 
 ## License
