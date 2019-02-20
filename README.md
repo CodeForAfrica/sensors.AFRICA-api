@@ -65,18 +65,33 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 ### Cronjob
 
+### Cronitor
+
+[Setup cronitor:](https://cronitor.io/docs/using-cronitor-cli)
+
+```bash
+wget https://cronitor.io/dl/cronitor-cli-stable-linux-amd64.tgz
+sudo tar xvf cronitor-cli-stable-linux-amd64.tgz -C /usr/bin/
+sudo /usr/bin/cronitor configure --api-key 1e5db066119f4b439352ef5e70eaaecc
+rm cronitor-cli-stable-linux-amd64.tgz
+```
+
+Follow the [intergratation guide](https://cronitor.io/docs/integration-guide) to get the monitor working.
+
+### Crontab
+
 - Change users to dokku; `sudo su dokku`
 - Edit dokku's crontab; `crontab -e`
 - To export csv to openAFRICA as archives add the following:
 
 ```bash
-1 0 * * * dokku enter < dokku app name > web python3 manage.py upload_to_ckan >> /var/log/cron.log 2>&1
+1 0 * * * cronitor exec <cronitor monitor code> dokku enter < dokku app name > web python3 manage.py upload_to_ckan >> /var/log/cron.log 2>&1
 ```
 
 - To calculate data statistics add the following:
 
 ```bash
-0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
+0 * * * * cronitor exec <cronitor monitor code> dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics  >> /var/log/cron.log 2>&1
 ```
 
 ## License
