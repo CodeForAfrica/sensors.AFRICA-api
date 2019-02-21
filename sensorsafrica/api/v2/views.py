@@ -11,6 +11,8 @@ from rest_framework import mixins, pagination, viewsets
 from ..models import SensorDataStat, City
 from .serializers import SensorDataStatSerializer, CitySerializer
 
+from feinstaub.sensors.views import StandardResultsSetPagination
+
 from rest_framework.response import Response
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
@@ -75,14 +77,12 @@ class CustomPagination(pagination.PageNumberPagination):
                 }
             )
 
-        count = len(results.keys())
-        values = list(results.values())
         return Response(
             {
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
-                "count": count,
-                "results": values[0] if count == 1 else values,
+                "count": len(results.keys()),
+                "results": list(results.values()),
             }
         )
 
@@ -95,7 +95,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
 
-        city_slug = self.request.query_params.get("city", None)
+        city_slugs = self.request.query_params.get("city", None)
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
 
@@ -110,17 +110,17 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         filter_value_types = value_types[sensor_type]
         if value_type_to_filter:
-            filter_value_types = set(value_type_to_filter.split(",")) & set(
-                value_types[sensor_type]
+            filter_value_types = set(value_type_to_filter.upper().split(",")) & set(
+                [x.upper() for x in value_types[sensor_type]]
             )
 
         if not from_date and not to_date:
-            return self._retrieve_past_24hrs(city_slug, filter_value_types)
+            return self._retrieve_past_24hrs(city_slugs, filter_value_types)
 
-        return self._retrieve_range(from_date, to_date, city_slug, filter_value_types)
+        return self._retrieve_range(from_date, to_date, city_slugs, filter_value_types)
 
     @staticmethod
-    def _retrieve_past_24hrs(city_slug, filter_value_types):
+    def _retrieve_past_24hrs(city_slugs, filter_value_types):
         to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
         from_date = to_date - datetime.timedelta(hours=24)
 
@@ -130,8 +130,8 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             timestamp__lte=to_date,
         )
 
-        if city_slug:
-            queryset = queryset.filter(city_slug=city_slug)
+        if city_slugs:
+            queryset = queryset.filter(city_slug__in=city_slugs.split(','))
 
         return (
             queryset.order_by()
@@ -150,7 +150,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
 
     @staticmethod
-    def _retrieve_range(from_date, to_date, city_slug, filter_value_types):
+    def _retrieve_range(from_date, to_date, city_slugs, filter_value_types):
         if not to_date:
             from_date = beginning_of_day(from_date)
             to_date = end_of_today()
@@ -160,7 +160,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         return (
             SensorDataStat.objects.filter(
-                city_slug=city_slug,
+                city_slug__in=city_slugs.split(','),
                 value_type__in=filter_value_types,
                 timestamp__gte=from_date,
                 timestamp__lt=to_date,
@@ -185,3 +185,4 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+    pagination_class = StandardResultsSetPagination

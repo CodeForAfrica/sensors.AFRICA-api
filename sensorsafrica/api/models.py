@@ -12,6 +12,9 @@ class City(TimeStampedModel):
     latitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
     longitude = models.DecimalField(max_digits=14, decimal_places=11, null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = "Cities"
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
         return super(City, self).save(*args, **kwargs)
