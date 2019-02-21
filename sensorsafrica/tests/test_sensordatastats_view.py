@@ -14,7 +14,7 @@ class TestGettingData:
 
         assert data["count"] == 1
 
-        result = data["results"]
+        result = data["results"][0]
 
         assert "P1" in result
         assert result["P1"]["average"] == 0.0
@@ -48,6 +48,22 @@ class TestGettingData:
         assert "P2" in results[1]
         assert results[2]["city_slug"] == "nairobi"
 
+    def test_getting_air_data_now_filter_cities(self, client, sensorsdatastats):
+        response = client.get("/v2/data/air/?city=dar-es-salaam,bagamoyo", format="json")
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 2
+
+        results = data["results"]
+
+        assert results[0]["city_slug"] == "bagamoyo"
+        assert results[1]["city_slug"] == "dar-es-salaam"
+        assert "P1" in results[1]
+        assert results[1]["city_slug"] == "dar-es-salaam"
+        assert "P2" in results[1]
+
     def test_getting_air_data_value_type(self, client, sensorsdatastats):
         response = client.get(
             "/v2/data/air/?city=dar-es-salaam&value_type=P2", format="json"
@@ -57,7 +73,10 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 1
-        assert "P2" in data["results"]
+        assert "P2" in data["results"][0]
+        assert "P1" not in data["results"][0]
+        assert "temperature" not in data["results"][0]
+        assert "humidity" not in data["results"][0]
 
     def test_getting_air_data_from_date(self, client, sensorsdatastats):
         response = client.get(
@@ -69,8 +88,8 @@ class TestGettingData:
 
         data = response.json()
 
-        assert type(data["results"]["P1"]) == list
-        assert type(data["results"]["P2"]) == list
+        assert type(data["results"][0]["P1"]) == list
+        assert type(data["results"][0]["P2"]) == list
 
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
@@ -83,8 +102,8 @@ class TestGettingData:
         data = response.json()
 
         assert data["count"] == 1
-        assert type(data["results"]["P1"]) == list
-        assert type(data["results"]["P2"]) == list
+        assert type(data["results"][0]["P1"]) == list
+        assert type(data["results"][0]["P2"]) == list
 
     def test_getting_air_data_with_invalid_request(self, client, sensorsdatastats):
         response = client.get(
@@ -123,7 +142,7 @@ class TestGettingData:
 
         assert data["count"] == 1
 
-        result = data["results"]
+        result = data["results"][0]
 
         assert "P1" in result
         assert result["P1"]["average"] == 0.0
