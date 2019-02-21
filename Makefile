@@ -6,8 +6,8 @@ build:
 up:
 	$(COMPOSE) up -d
 
-logs:
-    $(COMPOSE) logs -f
+logst:
+	$(COMPOSE) logs -f
 
 compilescss:
 	$(COMPOSE) exec api python manage.py compilescss
