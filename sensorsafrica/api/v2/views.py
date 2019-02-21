@@ -112,8 +112,8 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         filter_value_types = value_types[sensor_type]
         if value_type_to_filter:
-            filter_value_types = set(value_type_to_filter.split(",")) & set(
-                value_types[sensor_type]
+            filter_value_types = set(value_type_to_filter.upper().split(",")) & set(
+                [x.upper() for x in value_types[sensor_type]]
             )
 
         if not from_date and not to_date:
