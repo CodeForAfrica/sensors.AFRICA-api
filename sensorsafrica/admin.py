@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import SensorDataStat
+from .api.models import SensorDataStat, City
 
 
 @admin.register(SensorDataStat)
@@ -51,3 +51,10 @@ class SensorDataStatAdmin(admin.ModelAdmin):
 
     def save_related(self, request, form, formsets, change):
         pass
+
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    search_fields = ["slug", "name", "country"]
+    list_display = ["slug", "name", "country", "latitude", "longitude"]
+    list_filter = ["name", "country"]
