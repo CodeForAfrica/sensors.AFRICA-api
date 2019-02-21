@@ -11,6 +11,8 @@ from rest_framework import mixins, pagination, viewsets
 from ..models import SensorDataStat, City
 from .serializers import SensorDataStatSerializer, CitySerializer
 
+from feinstaub.sensors.views import StandardResultsSetPagination
+
 from rest_framework.response import Response
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
@@ -185,3 +187,4 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+    pagination_class = StandardResultsSetPagination

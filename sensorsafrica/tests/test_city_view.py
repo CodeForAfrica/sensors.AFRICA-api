@@ -9,7 +9,7 @@ class TestCityView:
 
         data = response.json()
 
-        assert len(data) == 3
+        assert data["count"] == 3
 
         assert {
             "latitude": "-6.79240000000",
@@ -18,4 +18,4 @@ class TestCityView:
             "name": "Dar es Salaam",
             "country": "Tanzania",
             "label": "Dar es Salaam, Tanzania",
-        } in data
+        } in data["results"]
