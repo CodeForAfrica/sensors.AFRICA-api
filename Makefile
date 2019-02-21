@@ -6,7 +6,7 @@ build:
 up:
 	$(COMPOSE) up -d
 
-logst:
+log:
 	$(COMPOSE) logs -f
 
 compilescss:

@@ -36,7 +36,7 @@ Docker compose make commands:
 
 - `make build`
 - `make up` - run docker and detach
-- `make logst` - tail logs
+- `make log` - tail logs
 - `make test` - run test
 - `make migrate` - migrate database
 - `make createsuperuser` - create a super user for admin
