@@ -51,6 +51,10 @@ class CustomPagination(pagination.PageNumberPagination):
         # We will need to have a list of the value_types e.g. { 'P1': [{}, {}] }
         from_date = self.request.query_params.get("from", None)
 
+        # If filtering for city
+        # We will return dict in results else its a list
+        city = self.request.query_params.get("city", None)
+
         results = {}
         for data_stat in data_stats:
             city_slug = data_stat["city_slug"]
@@ -84,7 +88,7 @@ class CustomPagination(pagination.PageNumberPagination):
                 "next": self.get_next_link(),
                 "previous": self.get_previous_link(),
                 "count": count,
-                "results": values[0] if count == 1 else values,
+                "results": values[0] if city else values,
             }
         )
 
