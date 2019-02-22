@@ -88,7 +88,6 @@ class TestGettingData:
 
         data = response.json()
 
-        assert type(data["results"][0]["P1"]) == list
         assert type(data["results"][0]["P2"]) == list
 
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
