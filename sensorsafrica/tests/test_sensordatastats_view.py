@@ -89,6 +89,13 @@ class TestGettingData:
         data = response.json()
 
         assert type(data["results"][0]["P2"]) == list
+        
+        # Data is in descending order by date
+        last_value = data["results"][0]["P2"][0]
+        last_date = datetime.datetime.strptime(last_value["end_datetime"], '%Y-%m-%dT%H:%M:%SZ')
+
+        # Check today is not included
+        assert last_date.date() < datetime.datetime.today().date()
 
     def test_getting_air_data_from_date_to_date(self, client, sensorsdatastats):
         now = timezone.now()
