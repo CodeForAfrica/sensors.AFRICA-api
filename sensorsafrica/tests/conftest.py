@@ -93,7 +93,7 @@ def sensors(sensor_type, nodes):
     ]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def sensordata(sensors, locations):
     now = timezone.now()
     below_active_threshold_time = now - datetime.timedelta(minutes=40)
@@ -129,7 +129,7 @@ def sensordata(sensors, locations):
     return data
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def datavalues(sensors, sensordata):
     data_values = [
         # Bagamoyo
