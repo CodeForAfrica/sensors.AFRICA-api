@@ -95,8 +95,6 @@ def sensors(sensor_type, nodes):
 
 @pytest.fixture(autouse=True)
 def sensordata(sensors, locations):
-    now = timezone.now()
-    below_active_threshold_time = now - datetime.timedelta(minutes=40)
 
     sensor_datas = [
         # Bagamoyo SensorData
@@ -121,10 +119,9 @@ def sensordata(sensors, locations):
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
-    # Bagamoyo Data is below active threshold
-    data[0].update_modified = False
-    data[0].modified = below_active_threshold_time
-    data[0].save()
+    data[1].update_modified = False
+    data[1].timestamp = timezone.now() - datetime.timedelta(minutes=40)
+    data[1].save()
 
     return data
 

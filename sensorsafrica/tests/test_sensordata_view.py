@@ -11,7 +11,7 @@ class TestGettingRawData:
 
         results = response.json()
 
-        assert results["count"] > 0
+        assert results["count"] == 8
 
     def test_getting_filtered_data_by_public_sensor(self, client, sensors):
         response = client.get("/v1/data/?sensor=%s" % sensors[0].id, format="json")
@@ -32,7 +32,9 @@ class TestGettingRawData:
         assert results["count"] == 0
 
     def test_getting_filtered_data_by_timestamp(self, client):
-        timestamp = timezone.now() - datetime.timedelta(hours=2)
+        # Filter out one Dar es Salaam SensorData
+        # It has timestamp 40 minutes ago
+        timestamp = timezone.now() - datetime.timedelta(minutes=40)
         # It won't accept the tz information unless the '+' sign is encoded %2B
         timestamp = timestamp.replace(tzinfo=None)
         response = client.get("/v1/data/?timestamp__gte=%s" % timestamp, format="json")
@@ -40,4 +42,4 @@ class TestGettingRawData:
 
         results = response.json()
 
-        assert results["count"] > 0
+        assert results["count"] == 7
