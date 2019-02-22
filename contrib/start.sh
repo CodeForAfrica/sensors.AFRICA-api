@@ -18,3 +18,5 @@ exec gunicorn \
     --access-logfile=/src/logs/access.log \
     --name sensorsafrica --reload sensorsafrica.wsgi:application \
     --chdir sensorsafrica/
+
+cron && tail -n 0 -f /var/logs/cron.log &

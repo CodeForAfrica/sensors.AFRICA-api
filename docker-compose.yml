@@ -14,6 +14,7 @@ services:
       context: .
     environment:
       SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
+      DOKKU_APP_NAME: sensorsafrica
     depends_on:
       - postgres
     links:

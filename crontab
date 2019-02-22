@@ -1,0 +1,27 @@
+# server cron jobs
+MAILTO="mail@dokku.me"
+PATH=/usr/local/bin:/usr/bin:/bin
+SHELL=/bin/bash
+
+# https://crontab.guru/
+# m   h   dom mon dow   username command
+# *   *   *   *   *     dokku    command to be executed
+# -   -   -   -   -
+# |   |   |   |   |
+# |   |   |   |   +----- day of week (0 - 6) (Sunday=0)
+# |   |   |   +------- month (1 - 12)
+# |   |   +--------- day of month (1 - 31)
+# |   +----------- hour (0 - 23)
+# +----------- min (0 - 59)
+
+### HIGH TRAFFIC TIME IS B/W 00:00 - 04:00 AND 14:00 - 23:59
+### RUN YOUR TASKS FROM 04:00 - 14:00
+### KEEP SORTED IN TIME ORDER
+
+### PLACE ALL CRON TASKS BELOW
+
+* * * * * echo "Hello World" >> /var/log/cron.log 2>&1 # hello world
+0 * * * * python manage.py calculate_data_statistics >> /var/log/cron.log 2>&1 # calculate_data_statistics
+0 0 * * * python manage.py upload_to_ckan >> /var/log/cron.log 2>&1 # upload_to_ckan
+
+# Don't remove the empty line at the end of this file. It is required to run the cron job
