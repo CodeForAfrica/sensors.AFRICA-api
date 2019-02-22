@@ -6,8 +6,9 @@ from feinstaub.sensors.views import (
     PostSensorDataView,
     SensorView,
     StatisticsView,
+    SensorDataView,
 )
-from .views import SensorDataView
+
 from rest_framework import routers
 
 router = routers.DefaultRouter()
