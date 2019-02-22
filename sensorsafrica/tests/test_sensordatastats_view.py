@@ -49,7 +49,9 @@ class TestGettingData:
         assert results[2]["city_slug"] == "nairobi"
 
     def test_getting_air_data_now_filter_cities(self, client, sensorsdatastats):
-        response = client.get("/v2/data/air/?city=dar-es-salaam,bagamoyo", format="json")
+        response = client.get(
+            "/v2/data/air/?city=dar-es-salaam,bagamoyo", format="json"
+        )
         assert response.status_code == 200
 
         data = response.json()
@@ -89,10 +91,12 @@ class TestGettingData:
         data = response.json()
 
         assert type(data["results"][0]["P2"]) == list
-        
+
         # Data is in descending order by date
         last_value = data["results"][0]["P2"][0]
-        last_date = datetime.datetime.strptime(last_value["end_datetime"], '%Y-%m-%dT%H:%M:%SZ')
+        last_date = datetime.datetime.strptime(
+            last_value["end_datetime"], "%Y-%m-%dT%H:%M:%SZ"
+        )
 
         # Check today is not included
         assert last_date.date() < datetime.datetime.today().date()
@@ -116,27 +120,22 @@ class TestGettingData:
             "/v2/data/air/?city=dar-es-salaam&to=2019-02-08", format="json"
         )
         assert response.status_code == 400
-        assert response.json() == {
-            "from": "Must be provide along with to query"
-        }
+        assert response.json() == {"from": "Must be provide along with to query"}
 
     def test_getting_air_data_with_invalid_from_request(self, client, sensorsdatastats):
         response = client.get(
             "/v2/data/air/?city=dar-es-salaam&from=2019-23-08", format="json"
         )
         assert response.status_code == 400
-        assert response.json() == {
-            "from": "Must be a date in the format Y-m-d."
-        }
+        assert response.json() == {"from": "Must be a date in the format Y-m-d."}
 
     def test_getting_air_data_with_invalid_to_request(self, client, sensorsdatastats):
         response = client.get(
-            "/v2/data/air/?city=dar-es-salaam&from=2019-02-08&to=08-02-2019", format="json"
+            "/v2/data/air/?city=dar-es-salaam&from=2019-02-08&to=08-02-2019",
+            format="json",
         )
         assert response.status_code == 400
-        assert response.json() == {
-            "to": "Must be a date in the format Y-m-d."
-        }
+        assert response.json() == {"to": "Must be a date in the format Y-m-d."}
 
     def test_getting_air_data_now_with_additional_values(
         self, client, additional_sensorsdatastats
