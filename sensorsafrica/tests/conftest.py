@@ -81,7 +81,7 @@ def nodes(logged_in_user, locations):
 def sensors(sensor_type, nodes):
     return [
         # Active Dar Sensor
-        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type, public=True)[0],
         # Inactive with last data push beyond active threshold
         Sensor.objects.get_or_create(node=nodes[1], sensor_type=sensor_type)[0],
         # Inactive without any data
