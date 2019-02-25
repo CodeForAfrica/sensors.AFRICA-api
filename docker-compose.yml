@@ -1,6 +1,16 @@
 version: '3.3'
 
 services:
+  rabbitmq:
+    image: bitnami/rabbitmq:latest
+    ports:
+      - 4369:4369
+      - 5672:5672
+      - 25672:25672
+      - 15672:15672
+    environment:
+      - RABBITMQ_USERNAME=sensorsafrica
+      - RABBITMQ_PASSWORD=sensorsafrica
   postgres:
     image: postgres:9.6
     ports:
@@ -17,6 +27,7 @@ services:
       DOKKU_APP_NAME: sensorsafrica
     depends_on:
       - postgres
+      - rabbitmq
     links:
       - postgres
     volumes:
