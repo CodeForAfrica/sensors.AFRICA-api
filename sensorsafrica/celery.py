@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 
 # Set sensorsafrica application settings module for sensorsafrica Celery instance
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sensorsafrica.settings")
