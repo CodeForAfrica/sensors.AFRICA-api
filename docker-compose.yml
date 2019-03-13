@@ -24,6 +24,9 @@ services:
       context: .
     environment:
       SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
+      CELERY_BROKER_URL: amqp://sensorsafrica:sensorsafrica@rabbitmq//
+      FLOWER_ADMIN_USERNAME: admin
+      FLOWER_ADMIN_PASSWORD: password
       DOKKU_APP_NAME: sensorsafrica
     depends_on:
       - postgres

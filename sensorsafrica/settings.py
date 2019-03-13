@@ -141,7 +141,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
-# Celery Broker URL
+# Celery Broker
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
 CELERY_IGNORE_RESULT = True
 
@@ -152,7 +152,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "archive-task": {
         "task": "sensorsafrica.tasks.archive_data",
-        "schedule": crontab(day_of_week="*", hour=0, minute=0)
+        "schedule": crontab(hour="*", minute=0)
     }
 }
 
