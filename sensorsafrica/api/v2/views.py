@@ -153,7 +153,9 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     def _retrieve_range(from_date, to_date, city_slugs, filter_value_types):
         if not to_date:
             from_date = beginning_of_day(from_date)
-            to_date = end_of_today()
+            # Get data from_date until the end
+            # of day yesterday which is the beginning of today
+            to_date = beginning_of_today()
         else:
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)

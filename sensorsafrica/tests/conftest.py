@@ -81,7 +81,7 @@ def nodes(logged_in_user, locations):
 def sensors(sensor_type, nodes):
     return [
         # Active Dar Sensor
-        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type, public=True)[0],
         # Inactive with last data push beyond active threshold
         Sensor.objects.get_or_create(node=nodes[1], sensor_type=sensor_type)[0],
         # Inactive without any data
@@ -93,10 +93,8 @@ def sensors(sensor_type, nodes):
     ]
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def sensordata(sensors, locations):
-    now = timezone.now()
-    below_active_threshold_time = now - datetime.timedelta(minutes=40)
 
     sensor_datas = [
         # Bagamoyo SensorData
@@ -121,15 +119,14 @@ def sensordata(sensors, locations):
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
-    # Bagamoyo Data is below active threshold
-    data[0].update_modified = False
-    data[0].modified = below_active_threshold_time
-    data[0].save()
+    data[1].update_modified = False
+    data[1].timestamp = timezone.now() - datetime.timedelta(minutes=40)
+    data[1].save()
 
     return data
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def datavalues(sensors, sensordata):
     data_values = [
         # Bagamoyo
