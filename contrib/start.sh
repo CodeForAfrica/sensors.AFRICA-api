@@ -1,4 +1,5 @@
 #!/bin/sh
+python manage.py makemigrations                   # Make sure feinstaub migrations are created
 python manage.py migrate --noinput                # Apply database migrations
 python manage.py collectstatic --clear --noinput  # Collect static files
 
