@@ -142,7 +142,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Celery Broker
-CELERY_BROKER_URL = os.environ.get("RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
+CELERY_BROKER_URL = os.environ.get("SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
 CELERY_IGNORE_RESULT = True
 
 CELERY_BEAT_SCHEDULE = {
