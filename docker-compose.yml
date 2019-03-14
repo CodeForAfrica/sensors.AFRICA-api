@@ -2,7 +2,7 @@ version: '3.3'
 
 services:
   rabbitmq:
-    image: bitnami/rabbitmq:latest
+    image: rabbitmq:3.5.1
     ports:
       - 4369:4369
       - 5672:5672

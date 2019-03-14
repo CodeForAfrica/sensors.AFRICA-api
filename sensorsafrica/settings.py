@@ -166,5 +166,5 @@ sentry_sdk.init(
 
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
-    'sensors' : 'sensorsafrica.feinstaub_migrations'
+    'sensors': 'sensorsafrica.feinstaub_migrations'
 }
