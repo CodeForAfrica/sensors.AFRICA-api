@@ -133,3 +133,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# Put fenstaub migrations into sensorsafrica
+MIGRATION_MODULES = {
+    'sensors': 'sensorsafrica.feinstaub_migrations'
+}
