@@ -162,9 +162,3 @@ sentry_sdk.init(
     os.environ.get("SENSORSAFRICA_SENTRY_DSN", ""),
     integrations=[CeleryIntegration(), DjangoIntegration()],
 )
-
-
-# Put fenstaub migrations into sensorsafrica
-MIGRATION_MODULES = {
-    'sensors': 'sensorsafrica.feinstaub_migrations'
-}
