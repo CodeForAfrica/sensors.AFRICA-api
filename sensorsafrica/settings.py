@@ -45,12 +45,12 @@ INSTALLED_APPS = [
     # Django Rest Framework
     "rest_framework",
     "rest_framework.authtoken",
-    # API
-    "sensorsafrica",
     # Feinstaub
     "feinstaub",
     "feinstaub.main",
     "feinstaub.sensors",
+    # API
+    "sensorsafrica",
 ]
 
 MIDDLEWARE = [
@@ -136,5 +136,5 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
-    'sensors': 'sensorsafrica.feinstaub.sensors.migrations'
+    'sensors': 'sensorsafrica.feinstaub_migrations'
 }
