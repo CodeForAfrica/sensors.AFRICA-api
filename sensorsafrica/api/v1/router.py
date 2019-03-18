@@ -1,8 +1,14 @@
 # The base version is entirely based on feinstaub
 from feinstaub.main.views import UsersView
-from feinstaub.sensors.views import (NodeView, NowView, PostSensorDataView,
-                                     SensorDataView, SensorView,
-                                     StatisticsView)
+from feinstaub.sensors.views import (
+    NodeView,
+    NowView,
+    PostSensorDataView,
+    SensorView,
+    StatisticsView,
+    SensorDataView,
+)
+
 from rest_framework import routers
 
 router = routers.DefaultRouter()

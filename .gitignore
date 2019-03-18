@@ -395,3 +395,4 @@ tags
 
 # End of https://www.gitignore.io/api/vim,venv,emacs,linux,macos,python,django,virtualenv,intellij+all,visualstudiocode
 
+/static

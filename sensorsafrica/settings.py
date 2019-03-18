@@ -45,12 +45,14 @@ INSTALLED_APPS = [
     # Django Rest Framework
     "rest_framework",
     "rest_framework.authtoken",
-    # API
-    "sensorsafrica",
     # Feinstaub
     "feinstaub",
     "feinstaub.main",
     "feinstaub.sensors",
+    # API
+    "sensorsafrica",
+    # Staging Helpers
+    'staging'
 ]
 
 MIDDLEWARE = [
@@ -133,3 +135,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+
+# Put fenstaub migrations into sensorsafrica
+MIGRATION_MODULES = {
+    'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
+}
+
+
+# Fixtures
+FIXTURE_DIRS = [
+    os.path.join(BASE_DIR, 'sensorsafrica/fixtures')
+]
