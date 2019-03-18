@@ -136,5 +136,5 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
-    'sensors': 'sensorsafrica.feinstaub_migrations'
+    'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
 }
