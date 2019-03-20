@@ -1,26 +1,34 @@
 import json
 import os
 import random
-from locust import HttpLocust, TaskSet, task
+from locust import HttpLocust, TaskSet, task, events
 
-# Don't run SensorBehaviour on production server
+
+sensor_count = 0
+
 class SensorBehavior(TaskSet):
-    @task(1)
+    def on_start(self):
+        # Fake Sensor Node UID
+        self.SENSOR = 'fake-%d' % sensor_count
+        sensor_count += 1
+            
+    @task
     def push_data(self):
         payload = {
             "sensordatavalues": [
-                {"value_type": "P1", "value": str(random.randrange(1,20))},
-                {"value_type": "P2", "value": str(random.randrange(1,20))},
+                { "value_type": "P1", "value": str(random.randrange(1,20)) },
+                { "value_type": "P2", "value": str(random.randrange(1,20)) },
             ]
         }
         headers = {
-            "content-type": "application/json",
-            "PIN": "1",
-            "SENSOR": "esp8266-1837609",
-            "token": os.environ.get("SENSORSAFRICA_API_TOKEN"),
+            "Content-Type": "application/json",
+            "PIN": "1", # always going to test using pin 1 for fake sensor
+            "SENSOR": self.SENSOR 
         }
         self.client.post(
-            "/v1/push-sensor-data"
+            "/v1/push-sensor-data/",
+            headers=headers,
+            data=json.dumps(payload)
         )
 
 

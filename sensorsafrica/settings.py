@@ -50,9 +50,7 @@ INSTALLED_APPS = [
     "feinstaub.main",
     "feinstaub.sensors",
     # API
-    "sensorsafrica",
-    # Staging Helpers
-    'staging'
+    "sensorsafrica"
 ]
 
 MIDDLEWARE = [

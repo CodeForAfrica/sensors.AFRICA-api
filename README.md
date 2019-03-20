@@ -101,6 +101,36 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
 ```
 
+## Staging
+
+Setup the staging server similar to how you would setup the production server.
+Now you can load staging server data using the `staging` app helper commands as follows:
+
+```bash
+python manage.py load_Staging
+```
+
+You can save data for staging server as follows:
+
+```bash
+python manage.py save_staging sensors.Sensor sensors.SensorType sensors.Node sensors.SensorLocation auth
+```
+
+NOTE: Only select models are saved for staging and data models are omitted because these files can be massive depending on how much dta is created.
+It is best to generate this data.
+
+### Load Test
+
+- Create a staging server that is similar to the production server setup.
+- Generate N fake sensors on staging (the sensors have pin as 1 and the uid fake-[1...N])
+
+```bash
+# N is a number of swarm you want to hit the server
+python manage.py generate_fake_sensors N
+```
+
+- Run locust on your computer and specify the host as the staging server and monitor the tests.
+
 ## License
 
 GNU GPLv3
