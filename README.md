@@ -13,8 +13,8 @@ To get the project up and running:
 
 - Use virtualenv to create your virtual environment; `virtualenv venv`
 - Activate the virtual environment; `source venv/bin/activate`
-- Install the requirements; `pip install .`
 - Install feinstaub; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`
+- Install the requirements; `pip install .`
 - Create a sensorsafrica database with the following sql script:
 
 ```sql
@@ -48,15 +48,6 @@ Docker compose make commands:
 **NOTE:**
 `docker-compose` is strictly for development and testing purposes.
 The Dockerfile is written for production since dokku is being used and it will look for Dockerfile.
-
-### Migrations
-
-Be sure to check in migrations with every model changes and be sure to review and test these changes.
-
-Open Stuttgart don't check in their migrations and so:
-
-- Install the latest pull from their repo; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`
-- Make sensorsafrica migrations and `feinstaub_migrations` with command; `python manage.py makemigrations`
 
 ### Tests
 
@@ -100,6 +91,13 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 ```bash
 0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
 ```
+
+## Contributing
+
+opendata-stuttgart/feinstaub-api prefer generating and applying migration to the database at the point of deployment (probably to reduce the number of changes to be applied).
+We, on the other hand, prefer the Django recommended approach of creating and reviewing migration files at the development time, and then applying the same migration files to different environments; dev, staging and eventually production.
+
+- Make sensorsafrica migrations and `feinstaub_migrations` with command; `python manage.py makemigrations`
 
 ## License
 
