@@ -51,12 +51,12 @@ INSTALLED_APPS = [
     # Django Rest Framework
     "rest_framework",
     "rest_framework.authtoken",
-    # API
-    "sensorsafrica",
     # Feinstaub
     "feinstaub",
     "feinstaub.main",
     "feinstaub.sensors",
+    # API
+    "sensorsafrica",
 ]
 
 MIDDLEWARE = [
@@ -162,3 +162,9 @@ sentry_sdk.init(
     os.environ.get("SENSORSAFRICA_SENTRY_DSN", ""),
     integrations=[CeleryIntegration(), DjangoIntegration()],
 )
+
+
+# Put fenstaub migrations into sensorsafrica
+MIGRATION_MODULES = {
+    'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
+}
