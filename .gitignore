@@ -94,9 +94,6 @@ ipython_config.py
 # pyenv
 .python-version
 
-# celery beat schedule file
-celerybeat-schedule
-
 # SageMath parsed files
 *.sage.py
 
@@ -394,5 +391,12 @@ tags
 .history
 
 # End of https://www.gitignore.io/api/vim,venv,emacs,linux,macos,python,django,virtualenv,intellij+all,visualstudiocode
+
+
+# celery beat schedule file
+celerybeat-schedule
+celerybeat.pid
+
+logs/
 
 /static
