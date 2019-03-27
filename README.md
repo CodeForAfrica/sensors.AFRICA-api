@@ -94,10 +94,10 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 ## Contributing
 
-opendata-stuttgart/feinstaub-api prefer generating and applying migration to the database at the point of deployment (probably to reduce the number of changes to be applied).
+[opendata-stuttgart/feinstaub-api](https://github.com/opendata-stuttgart/feinstaub-api) prefer generating and applying migration to the database at the point of deployment (probably to reduce the number of changes to be applied).
 We, on the other hand, prefer the Django recommended approach of creating and reviewing migration files at the development time, and then applying the same migration files to different environments; dev, staging and eventually production.
 
-- Make sensorsafrica migrations and `feinstaub_migrations` with command; `python manage.py makemigrations`
+Hence, with any contribution, include both `sensors.AFRICA-api` and `opendata-stuttgart/feinstaub-api` migration files by running `python manage.py makemigrations` command before creating a PR.
 
 ## License
 
