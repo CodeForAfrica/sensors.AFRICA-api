@@ -24,6 +24,7 @@ RUN pip install -q -U .
 
 # Expose port server
 EXPOSE 8000
+EXPOSE 5555
 
 COPY ./contrib/start.sh /start.sh
 COPY ./contrib/entrypoint.sh /entrypoint.sh

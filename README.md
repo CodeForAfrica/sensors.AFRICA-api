@@ -2,6 +2,10 @@
 
 API to save and access data from deployed sensors in cities all around Africa.
 
+## Documentation
+
+The API is documented [here.](https://github.com/CodeForAfricaLabs/sensors.AFRICA-api/wiki/API-Documentation) 
+
 ## Development
 
 Gitignore is standardized for this project using [gitignore.io](https://www.gitignore.io/) to support various development platforms.
@@ -13,6 +17,7 @@ To get the project up and running:
 
 - Use virtualenv to create your virtual environment; `virtualenv venv`
 - Activate the virtual environment; `source venv/bin/activate`
+- Install feinstaub; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`
 - Install the requirements; `pip install .`
 - Install feinstaub; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`
 - Create a sensorsafrica database with the following sql script:
@@ -87,19 +92,25 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 
 ### Cronjob
 
-- Change users to dokku; `sudo su dokku`
-- Edit dokku's crontab; `crontab -e`
-- To export csv to openAFRICA as archives add the following:
+This project uses celery to create cronjobs and flower to monitor the cron jobs as a web admin.
+To create your jobs, add the task to the `tasks.py` and `CELERY_BEAT_SCHEDULE` in `settings.py`.
 
-```bash
-1 0 * * * dokku enter < dokku app name > web python3 manage.py upload_to_ckan >> /var/log/cron.log 2>&1
+Everything starts automatically as setup in the `contrib/start.sh`:
+
+```
+celery -A sensorsafrica beat -l info &> /src/logs/celery.log  &
+celery -A sensorsafrica worker -l info &> /src/logs/celery.log  &
+celery -A sensorsafrica flower --basic_auth=$SENSORSAFRICA_FLOWER_ADMIN_USERNAME:$SENSORSAFRICA_FLOWER_ADMIN_PASSWORD &> /src/logs/celery.log  &
 ```
 
-- To calculate data statistics add the following:
+Note: If you run the project in the virtualenv you will have to start rabbitmq and pass that link to settings by the env variable `SENSORSAFRICA_RABBITMQ_URL`
 
-```bash
-0 * * * * dokku enter sensorsafrica-staging web python3 manage.py calculate_data_statistics >> /var/log/cron.log 2>&1
-```
+## Contributing
+
+[opendata-stuttgart/feinstaub-api](https://github.com/opendata-stuttgart/feinstaub-api) prefer generating and applying migration to the database at the point of deployment (probably to reduce the number of changes to be applied).
+We, on the other hand, prefer the Django recommended approach of creating and reviewing migration files at the development time, and then applying the same migration files to different environments; dev, staging and eventually production.
+
+Hence, with any contribution, include both `sensors.AFRICA-api` and `opendata-stuttgart/feinstaub-api` migration files by running `python manage.py makemigrations` command before creating a PR.
 
 ## Staging
 

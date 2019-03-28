@@ -11,7 +11,13 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+
 import dj_database_url
+import sentry_sdk
+from sentry_sdk.integrations.celery import CeleryIntegration
+from sentry_sdk.integrations.django import DjangoIntegration
+
+from celery.schedules import crontab
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -50,7 +56,7 @@ INSTALLED_APPS = [
     "feinstaub.main",
     "feinstaub.sensors",
     # API
-    "sensorsafrica"
+    "sensorsafrica",
 ]
 
 MIDDLEWARE = [
@@ -135,13 +141,30 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
+# Celery Broker
+CELERY_BROKER_URL = os.environ.get("SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
+CELERY_IGNORE_RESULT = True
+
+CELERY_BEAT_SCHEDULE = {
+    "statistics-task": {
+        "task": "sensorsafrica.tasks.calculate_data_statistics",
+        "schedule": crontab(hour="*", minute=0)
+    },
+    "archive-task": {
+        "task": "sensorsafrica.tasks.archive_data",
+        "schedule": crontab(hour="*", minute=0)
+    }
+}
+
+
+# Sentry
+sentry_sdk.init(
+    os.environ.get("SENSORSAFRICA_SENTRY_DSN", ""),
+    integrations=[CeleryIntegration(), DjangoIntegration()],
+)
+
+
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
     'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
 }
-
-
-# Fixtures
-FIXTURE_DIRS = [
-    os.path.join(BASE_DIR, 'sensorsafrica/fixtures')
-]

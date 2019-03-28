@@ -1,6 +1,16 @@
 version: '3.3'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3.5.1
+    ports:
+      - 4369:4369
+      - 5672:5672
+      - 25672:25672
+      - 15672:15672
+    environment:
+      - RABBITMQ_USERNAME=sensorsafrica
+      - RABBITMQ_PASSWORD=sensorsafrica
   postgres:
     image: postgres:9.6
     ports:
@@ -14,11 +24,17 @@ services:
       context: .
     environment:
       SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
+      SENSORSAFRICA_RABBITMQ_URL: amqp://sensorsafrica:sensorsafrica@rabbitmq//
+      SENSORSAFRICA_FLOWER_ADMIN_USERNAME: admin
+      SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: password
+      DOKKU_APP_NAME: sensorsafrica
     depends_on:
       - postgres
+      - rabbitmq
     links:
       - postgres
     volumes:
       - .:/src
     ports:
       - "8000:8000"
+      - "5555:5555"
