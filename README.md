@@ -2,6 +2,10 @@
 
 API to save and access data from deployed sensors in cities all around Africa.
 
+## Documentation
+
+The API is documented [here.](https://github.com/CodeForAfricaLabs/sensors.AFRICA-api/wiki/API-Documentation) 
+
 ## Development
 
 Gitignore is standardized for this project using [gitignore.io](https://www.gitignore.io/) to support various development platforms.
