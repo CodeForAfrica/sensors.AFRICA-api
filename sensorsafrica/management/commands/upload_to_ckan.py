@@ -95,7 +95,7 @@ class Command(BaseCommand):
                         month=calendar.month_name[date.month], year=date.year
                     )
 
-                    filepath = "./temp/%s.csv" % resource_name.lower().replace(" ", "_")
+                    filepath = "/tmp/%s.csv" % resource_name.lower().replace(" ", "_")
 
                     self._write_file(filepath=filepath, qs=qs)
                     self._create_or_update_resource(
