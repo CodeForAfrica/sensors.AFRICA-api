@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 Max("timestamp"), Min("timestamp")
             )
 
-            if not start_date and timestamp["timestamp__min"] is not None:
+            if not start_date and "timestamp__min" in timestamp and timestamp["timestamp__min"] is not None:
                 start_date = timestamp["timestamp__min"].replace(
                     day=1, hour=0, minute=0, second=0, microsecond=0
                 )
