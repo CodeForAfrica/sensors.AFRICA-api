@@ -19,6 +19,9 @@ from django.utils.text import slugify
 
 from rest_framework.response import Response
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
 
@@ -96,6 +99,10 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataStatSerializer
     pagination_class = CustomPagination
 
+    @method_decorator(cache_page(3600))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
 
@@ -163,14 +170,19 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
+    
 
-        return (
-            SensorDataStat.objects.filter(
-                city_slug__in=city_slugs.split(","),
+        queryset = SensorDataStat.objects.filter(
                 value_type__in=filter_value_types,
                 timestamp__gte=from_date,
                 timestamp__lt=to_date,
             )
+
+        if city_slugs:
+            queryset = queryset.filter(city_slug__in=city_slugs.split(","))
+
+        return (
+            queryset
             .annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
@@ -195,6 +207,9 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
+
+    # Cache requested url for each user for 1 hour
+    @method_decorator(cache_page(3600))
     def list(self, request):
         nodes = []
         for location in SensorLocation.objects.iterator():
