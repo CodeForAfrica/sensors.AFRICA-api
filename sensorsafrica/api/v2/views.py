@@ -170,20 +170,18 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         else:
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
-    
 
         queryset = SensorDataStat.objects.filter(
-                value_type__in=filter_value_types,
-                timestamp__gte=from_date,
-                timestamp__lt=to_date,
-            )
+            value_type__in=filter_value_types,
+            timestamp__gte=from_date,
+            timestamp__lt=to_date,
+        )
 
         if city_slugs:
             queryset = queryset.filter(city_slug__in=city_slugs.split(","))
 
         return (
-            queryset
-            .annotate(date=TruncDate("timestamp"))
+            queryset.annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
                 city_slug=F("city_slug"),
