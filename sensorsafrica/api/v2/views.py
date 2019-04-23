@@ -8,7 +8,7 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, City
+from ..models import SensorDataStat, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
@@ -135,7 +135,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
 
         if city_slugs:
-            queryset = queryset.filter(city_slug__in=city_slugs.split(','))
+            queryset = queryset.filter(city_slug__in=city_slugs.split(","))
 
         return (
             queryset.order_by()
@@ -166,7 +166,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
         return (
             SensorDataStat.objects.filter(
-                city_slug__in=city_slugs.split(','),
+                city_slug__in=city_slugs.split(","),
                 value_type__in=filter_value_types,
                 timestamp__gte=from_date,
                 timestamp__lt=to_date,
@@ -195,13 +195,27 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
-
     def list(self, request):
         nodes = []
         for location in SensorLocation.objects.iterator():
-            last_pushed = SensorData.objects.filter(location=location).values_list('timestamp', flat=True).last()
+            Node.objects.filter(location=location)
+            result = (
+                SensorData.objects.filter(location=location)
+                .values(
+                    "sensor__node__location",
+                    "sensor__node__location__location",
+                    "sensor__node__location__city",
+                    "sensor__node__location__longitude",
+                    "sensor__node__location__latitude",
+                    "timestamp",
+                )
+                .last()
+            )
+
             stats = []
-            if last_pushed:
+            prev_location = None
+            if result:
+                last_pushed = result["timestamp"]
                 last_24_hours = last_pushed - datetime.timedelta(hours=24)
                 stats = (
                     SensorDataValue.objects.filter(
@@ -212,7 +226,8 @@ class NodesView(viewsets.ViewSet):
                         ~Q(value_type="timestamp"),
                         # Match only valid float text
                         Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
-                    ).order_by()
+                    )
+                    .order_by()
                     .values("value_type")
                     .annotate(
                         start_datetime=Min("sensordata__timestamp"),
@@ -222,17 +237,25 @@ class NodesView(viewsets.ViewSet):
                         maximum=Max(Cast("value", FloatField())),
                     )
                 )
-            nodes.append({
-                "location": {
-                    "longitude": location.longitude,
-                    "latitude": location.latitude,
-                    "name": location.location,
-                    "city": {
-                        "name": location.city,
-                        "slug": slugify(location.city)
-                    }
-                },
-                "last_data_pushed": last_pushed,
-                "stats": stats
-            })
+
+                if result["sensor__node__location"] != location.id:
+                    prev_location = {"name": result["sensor__node__location__location"], "longitude": result["sensor__node__location__longitude"],"latitude": result["sensor__node__location__latitude"], "city": {
+                        "name": result["sensor__node__location__city"],
+                        "slug": slugify(result["sensor__node__location__city"])
+                    }}
+
+            nodes.append(
+                {
+                    "senor_moved": prev_location is not None,
+                    "prev_location": prev_location,
+                    "location": {
+                        "longitude": location.longitude,
+                        "latitude": location.latitude,
+                        "name": location.location,
+                        "city": {"name": location.city, "slug": slugify(location.city)},
+                    },
+                    "last_data_pushed": last_pushed,
+                    "stats": stats,
+                }
+            )
         return Response(nodes)
