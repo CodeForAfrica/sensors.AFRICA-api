@@ -4,14 +4,18 @@ import pytz
 from rest_framework.exceptions import ValidationError
 
 from django.utils import timezone
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum
-from django.db.models.functions import TruncDate
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
+from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat, City
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
+
+from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue
+
+from django.utils.text import slugify
 
 from rest_framework.response import Response
 
@@ -188,3 +192,47 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
+
+
+class NodesView(viewsets.ViewSet):
+
+    def list(self, request):
+        nodes = []
+        for location in SensorLocation.objects.iterator():
+            last_pushed = SensorData.objects.filter(location=location).values_list('timestamp', flat=True).last()
+            stats = []
+            if last_pushed:
+                last_24_hours = last_pushed - datetime.timedelta(hours=24)
+                stats = (
+                    SensorDataValue.objects.filter(
+                        Q(sensordata__location=location),
+                        Q(sensordata__timestamp__gte=last_24_hours),
+                        Q(sensordata__timestamp__lte=last_pushed),
+                        # Ignore timestamp values
+                        ~Q(value_type="timestamp"),
+                        # Match only valid float text
+                        Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
+                    ).order_by()
+                    .values("value_type")
+                    .annotate(
+                        start_datetime=Min("sensordata__timestamp"),
+                        end_datetime=Max("sensordata__timestamp"),
+                        average=Avg(Cast("value", FloatField())),
+                        minimum=Min(Cast("value", FloatField())),
+                        maximum=Max(Cast("value", FloatField())),
+                    )
+                )
+            nodes.append({
+                "location": {
+                    "longitude": location.longitude,
+                    "latitude": location.latitude,
+                    "name": location.location,
+                    "city": {
+                        "name": location.city,
+                        "slug": slugify(location.city)
+                    }
+                },
+                "last_data_pushed": last_pushed,
+                "stats": stats
+            })
+        return Response(nodes)
