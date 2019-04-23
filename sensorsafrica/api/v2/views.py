@@ -239,14 +239,19 @@ class NodesView(viewsets.ViewSet):
                 )
 
                 if result["sensor__node__location"] != location.id:
-                    prev_location = {"name": result["sensor__node__location__location"], "longitude": result["sensor__node__location__longitude"],"latitude": result["sensor__node__location__latitude"], "city": {
-                        "name": result["sensor__node__location__city"],
-                        "slug": slugify(result["sensor__node__location__city"])
-                    }}
+                    prev_location = {
+                        "name": result["sensor__node__location__location"],
+                        "longitude": result["sensor__node__location__longitude"],
+                        "latitude": result["sensor__node__location__latitude"],
+                        "city": {
+                            "name": result["sensor__node__location__city"],
+                            "slug": slugify(result["sensor__node__location__city"]),
+                        },
+                    }
 
             nodes.append(
                 {
-                    "senor_moved": prev_location is not None,
+                    "sensor_moved": prev_location is not None,
                     "prev_location": prev_location,
                     "location": {
                         "longitude": location.longitude,
