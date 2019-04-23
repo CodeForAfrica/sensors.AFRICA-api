@@ -2,6 +2,26 @@ from django.contrib import admin
 
 from .api.models import SensorDataStat, City
 
+from feinstaub.sensors.admin import SensorLocationAdmin, SensorLocation, SensorData
+
+import timeago, datetime, django.utils.timezone
+
+def last_pushed(self, obj):
+    then = SensorData.objects.filter(location=obj).values_list("timestamp", flat=True).last()
+    now = datetime.datetime.now(django.utils.timezone.utc)
+
+    if not then:
+        return "Unknown"
+
+    return "%s ( %s )" % (SensorData.objects.filter(location=obj).values_list("timestamp", flat=True).last(), timeago.format(then, now))
+
+def geo(self, obj):
+    return "%s,%s" % (obj.latitude, obj.longitude)
+
+SensorLocation._meta.verbose_name_plural = "Sensor Node Locations"
+SensorLocationAdmin.list_display = ["location", "city", "last_pushed", "geo"]
+SensorLocationAdmin.last_pushed = last_pushed
+SensorLocationAdmin.geo = geo
 
 @admin.register(SensorDataStat)
 class SensorDataStatAdmin(admin.ModelAdmin):
