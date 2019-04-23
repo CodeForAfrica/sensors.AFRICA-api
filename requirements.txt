@@ -1,4 +1,4 @@
-django==1.11.18 #LTS
+django==1.11.20 #LTS
 django-extensions==2.1.4
 django-filter==2.0.0
 djangorestframework==3.9.0
