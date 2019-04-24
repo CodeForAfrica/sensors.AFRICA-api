@@ -9,7 +9,7 @@ touch /src/logs/access.log
 tail -n 0 -f /src/logs/*.log &
 
 celery -A sensorsafrica beat -l info &> /src/logs/celery.log  &
-celery -A sensorsafrica worker -l info &> /src/logs/celery.log  &
+celery -A sensorsafrica worker --hostname=$DOKKU_APP_NAME -l info &> /src/logs/celery.log  &
 celery -A sensorsafrica flower --basic_auth=$SENSORSAFRICA_FLOWER_ADMIN_USERNAME:$SENSORSAFRICA_FLOWER_ADMIN_PASSWORD &> /src/logs/celery.log  &
 
 # Start Gunicorn processes
