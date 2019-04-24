@@ -4,16 +4,23 @@ import pytz
 from rest_framework.exceptions import ValidationError
 
 from django.utils import timezone
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum
-from django.db.models.functions import TruncDate
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
+from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, City
+from ..models import SensorDataStat, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
 
+from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue
+
+from django.utils.text import slugify
+
 from rest_framework.response import Response
+
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
@@ -92,6 +99,10 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataStatSerializer
     pagination_class = CustomPagination
 
+    @method_decorator(cache_page(3600))
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
 
@@ -131,7 +142,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
 
         if city_slugs:
-            queryset = queryset.filter(city_slug__in=city_slugs.split(','))
+            queryset = queryset.filter(city_slug__in=city_slugs.split(","))
 
         return (
             queryset.order_by()
@@ -160,14 +171,17 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
 
+        queryset = SensorDataStat.objects.filter(
+            value_type__in=filter_value_types,
+            timestamp__gte=from_date,
+            timestamp__lt=to_date,
+        )
+
+        if city_slugs:
+            queryset = queryset.filter(city_slug__in=city_slugs.split(","))
+
         return (
-            SensorDataStat.objects.filter(
-                city_slug__in=city_slugs.split(','),
-                value_type__in=filter_value_types,
-                timestamp__gte=from_date,
-                timestamp__lt=to_date,
-            )
-            .annotate(date=TruncDate("timestamp"))
+            queryset.annotate(date=TruncDate("timestamp"))
             .values("date", "value_type")
             .annotate(
                 city_slug=F("city_slug"),
@@ -188,3 +202,78 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
+
+
+class NodesView(viewsets.ViewSet):
+
+    # Cache requested url for each user for 1 hour
+    @method_decorator(cache_page(3600))
+    def list(self, request):
+        nodes = []
+        for location in SensorLocation.objects.iterator():
+            Node.objects.filter(location=location)
+            result = (
+                SensorData.objects.filter(location=location)
+                .values(
+                    "sensor__node__location",
+                    "sensor__node__location__location",
+                    "sensor__node__location__city",
+                    "sensor__node__location__longitude",
+                    "sensor__node__location__latitude",
+                    "timestamp",
+                )
+                .last()
+            )
+
+            stats = []
+            prev_location = None
+            if result:
+                last_data_datetime = result["timestamp"]
+                last_24_hours = last_data_datetime - datetime.timedelta(hours=24)
+                stats = (
+                    SensorDataValue.objects.filter(
+                        Q(sensordata__location=location),
+                        Q(sensordata__timestamp__gte=last_24_hours),
+                        Q(sensordata__timestamp__lte=last_data_datetime),
+                        # Ignore timestamp values
+                        ~Q(value_type="timestamp"),
+                        # Match only valid float text
+                        Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
+                    )
+                    .order_by()
+                    .values("value_type")
+                    .annotate(
+                        start_datetime=Min("sensordata__timestamp"),
+                        end_datetime=Max("sensordata__timestamp"),
+                        average=Avg(Cast("value", FloatField())),
+                        minimum=Min(Cast("value", FloatField())),
+                        maximum=Max(Cast("value", FloatField())),
+                    )
+                )
+
+                if result["sensor__node__location"] != location.id:
+                    prev_location = {
+                        "name": result["sensor__node__location__location"],
+                        "longitude": result["sensor__node__location__longitude"],
+                        "latitude": result["sensor__node__location__latitude"],
+                        "city": {
+                            "name": result["sensor__node__location__city"],
+                            "slug": slugify(result["sensor__node__location__city"]),
+                        },
+                    }
+
+            nodes.append(
+                {
+                    "node_moved": prev_location is not None,
+                    "prev_location": prev_location,
+                    "location": {
+                        "longitude": location.longitude,
+                        "latitude": location.latitude,
+                        "name": location.location,
+                        "city": {"name": location.city, "slug": slugify(location.city)},
+                    },
+                    "last_data_received_at": last_data_datetime,
+                    "stats": stats,
+                }
+            )
+        return Response(nodes)
