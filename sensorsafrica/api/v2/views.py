@@ -264,7 +264,7 @@ class NodesView(viewsets.ViewSet):
 
             nodes.append(
                 {
-                    "sensor_moved": prev_location is not None,
+                    "node_moved": prev_location is not None,
                     "prev_location": prev_location,
                     "location": {
                         "longitude": location.longitude,
