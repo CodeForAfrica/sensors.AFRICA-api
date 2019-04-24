@@ -228,13 +228,13 @@ class NodesView(viewsets.ViewSet):
             stats = []
             prev_location = None
             if result:
-                last_pushed = result["timestamp"]
-                last_24_hours = last_pushed - datetime.timedelta(hours=24)
+                last_data_datetime = result["timestamp"]
+                last_24_hours = last_data_datetime - datetime.timedelta(hours=24)
                 stats = (
                     SensorDataValue.objects.filter(
                         Q(sensordata__location=location),
                         Q(sensordata__timestamp__gte=last_24_hours),
-                        Q(sensordata__timestamp__lte=last_pushed),
+                        Q(sensordata__timestamp__lte=last_data_datetime),
                         # Ignore timestamp values
                         ~Q(value_type="timestamp"),
                         # Match only valid float text
@@ -272,7 +272,7 @@ class NodesView(viewsets.ViewSet):
                         "name": location.location,
                         "city": {"name": location.city, "slug": slugify(location.city)},
                     },
-                    "last_data_pushed": last_pushed,
+                    "last_data_received_at": last_data_datetime,
                     "stats": stats,
                 }
             )
