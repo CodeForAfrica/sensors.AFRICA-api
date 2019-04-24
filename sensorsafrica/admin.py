@@ -2,14 +2,19 @@ from django.contrib import admin
 
 from .api.models import SensorDataStat, City
 
-from feinstaub.sensors.admin import SensorLocationAdmin, SensorLocation, SensorData
+from feinstaub.sensors.admin import (
+    SensorLocationAdmin,
+    SensorLocation,
+    SensorData,
+    Node,
+)
 
 import timeago
 import datetime
 import django.utils.timezone
 
 
-def last_pushed(self, obj):
+def last_data_received_at(self, obj):
     then = (
         SensorData.objects.filter(location=obj)
         .values_list("timestamp", flat=True)
@@ -20,22 +25,33 @@ def last_pushed(self, obj):
     if not then:
         return "Unknown"
 
-    return "%s ( %s )" % (
+    return "( %s ) %s" % (
+        timeago.format(then, now),
         SensorData.objects.filter(location=obj)
         .values_list("timestamp", flat=True)
         .last(),
-        timeago.format(then, now),
     )
 
 
-def geo(self, obj):
+def latitude_and_longitude(self, obj):
     return "%s,%s" % (obj.latitude, obj.longitude)
 
 
+def node_UID(self, obj):
+    return Node.objects.filter(location=obj).values_list("uid", flat=True).first()
+
+
 SensorLocation._meta.verbose_name_plural = "Sensor Node Locations"
-SensorLocationAdmin.list_display = ["location", "city", "last_pushed", "geo"]
-SensorLocationAdmin.last_pushed = last_pushed
-SensorLocationAdmin.geo = geo
+SensorLocationAdmin.list_display = [
+    "node_UID",
+    "location",
+    "city",
+    "latitude_and_longitude",
+    "last_data_received_at",
+]
+SensorLocationAdmin.last_data_received_at = last_data_received_at
+SensorLocationAdmin.latitude_and_longitude = latitude_and_longitude
+SensorLocationAdmin.node_UID = node_UID
 
 
 @admin.register(SensorDataStat)
