@@ -150,10 +150,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "sensorsafrica.tasks.calculate_data_statistics",
         "schedule": crontab(hour="*", minute=0)
     },
-    "archive-task": {
-        "task": "sensorsafrica.tasks.archive_data",
-        "schedule": crontab(hour="*", minute=0)
-    }
+    # "archive-task": {
+    #     "task": "sensorsafrica.tasks.archive_data",
+    #     "schedule": crontab(hour="*", minute=0)
+    # }
 }
 
 
