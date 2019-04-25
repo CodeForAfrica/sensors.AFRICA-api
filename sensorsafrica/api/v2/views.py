@@ -243,6 +243,7 @@ class NodesView(viewsets.ViewSet):
                     .order_by()
                     .values("value_type")
                     .annotate(
+                        sensor_id=F("sensordata__sensor__id"),
                         start_datetime=Min("sensordata__timestamp"),
                         end_datetime=Max("sensordata__timestamp"),
                         average=Avg(Cast("value", FloatField())),
