@@ -211,7 +211,6 @@ class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
         for location in SensorLocation.objects.iterator():
-            Node.objects.filter(location=location)
             result = (
                 SensorData.objects.filter(location=location)
                 .values(
