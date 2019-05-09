@@ -5,6 +5,7 @@ from django.conf import settings
 
 from django.db.models import Max
 
+from sensorsafrica.api.models import Node, SensorLocation, LastActiveNodes
 from feinstaub.sensors.models import SensorData
 
 import json
@@ -25,21 +26,13 @@ class Command(BaseCommand):
     help = ""
 
     def handle(self, *args, **options):
-
-        print(settings.STATIC_ROOT + "/partial_nodes_data.json")
-
-        with open(settings.STATIC_ROOT + "/lastactive_nodes_data.json", "w") as f:
-            nodes_data = list(
-                SensorData.objects.values(
-                    "sensor__node",
-                    "location__id",
-                    "location__location",
-                    "location__city",
-                    "location__longitude",
-                    "location__latitude",
-                )
-                .order_by("sensor__node__id", "location__id")
-                .annotate(timestamp=Max("timestamp"))
+        for data in (
+            SensorData.objects.values("sensor__node", "location")
+            .order_by("sensor__node__id", "location__id")
+            .annotate(timestamp=Max("timestamp"))
+        ):
+            LastActiveNodes.objects.update_or_create(
+                node=Node(pk=data["sensor__node"]),
+                location=SensorLocation(pk=data["location"]),
+                last_data_received_at=data["timestamp"],
             )
-
-            json.dump(nodes_data, f, cls=Encoder)

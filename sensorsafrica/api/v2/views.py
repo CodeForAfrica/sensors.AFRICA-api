@@ -10,7 +10,7 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, City, Node
+from ..models import SensorDataStat, LastActiveNodes, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
@@ -212,13 +212,11 @@ class NodesView(viewsets.ViewSet):
     # @method_decorator(cache_page(3600))
     def list(self, request):
         nodes = []
-        nodes_data = []
-        with open(settings.STATIC_ROOT + "/lastactive_nodes_data.json") as f:
-            nodes_data = json.loads(f.read())
-
-        for s in nodes_data:
-            node = Node.objects.filter(Q(id=s["sensor__node"]), ~Q(sensors=None)).get()
-            last_data_received_at = datetime.datetime.fromtimestamp(s["timestamp"])
+        for last_active_node in LastActiveNodes.objects.iterator():
+            node = Node.objects.filter(
+                Q(id=last_active_node.node.id), ~Q(sensors=None)
+            ).get()
+            last_data_received_at = last_active_node.last_data_received_at
 
             # last_data_received_at
             stats = []
@@ -227,7 +225,7 @@ class NodesView(viewsets.ViewSet):
                 last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
                     SensorDataValue.objects.filter(
-                        Q(sensordata__location=s["location__id"]),
+                        Q(sensordata__location=last_active_node.location.id),
                         Q(sensordata__timestamp__gte=last_5_mins),
                         Q(sensordata__timestamp__lte=last_data_received_at),
                         # Ignore timestamp values
@@ -247,7 +245,7 @@ class NodesView(viewsets.ViewSet):
                     )
                 )
 
-            if s["location__id"] != node.location.id:
+            if last_active_node.location.id != node.location.id:
                 prev_location = {
                     "name": node.location.location,
                     "longitude": node.location.longitude,
@@ -263,12 +261,12 @@ class NodesView(viewsets.ViewSet):
                     "node_moved": prev_location is not None,
                     "prev_location": prev_location,
                     "location": {
-                        "name": s["location__location"],
-                        "longitude": s["location__longitude"],
-                        "latitude": s["location__latitude"],
+                        "name": last_active_node.location.location,
+                        "longitude": last_active_node.location.longitude,
+                        "latitude": last_active_node.location.latitude,
                         "city": {
-                            "name": s["location__city"],
-                            "slug": slugify(s["location__city"]),
+                            "name": last_active_node.location.city,
+                            "slug": slugify(last_active_node.location.city),
                         },
                     },
                     "last_data_received_at": last_data_received_at,
