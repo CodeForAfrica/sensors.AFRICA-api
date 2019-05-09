@@ -207,9 +207,6 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
-
-    # Cache requested url for each user for 1 hour
-    # @method_decorator(cache_page(3600))
     def list(self, request):
         nodes = []
         for last_active_node in LastActiveNodes.objects.iterator():
