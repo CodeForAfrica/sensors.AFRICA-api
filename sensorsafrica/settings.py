@@ -153,7 +153,11 @@ CELERY_BEAT_SCHEDULE = {
     # "archive-task": {
     #     "task": "sensorsafrica.tasks.archive_data",
     #     "schedule": crontab(hour="*", minute=0)
-    # }
+    # },
+    "statistics-task": {
+        "task": "sensorsafrica.tasks.cache_partial_node_data",
+        "schedule": crontab(minute="*/5")
+    },
 }
 
 

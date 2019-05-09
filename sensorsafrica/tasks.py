@@ -10,3 +10,7 @@ def calculate_data_statistics():
 @shared_task
 def archive_data():
     call_command("upload_to_ckan")
+
+@shared_task
+def cache_partial_node_data():
+    call_command("cache_nodes_data")
