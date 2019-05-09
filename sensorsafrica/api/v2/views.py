@@ -213,7 +213,7 @@ class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
         nodes_data = []
-        with open(settings.STATIC_ROOT + "/partial_nodes_data.json") as f:
+        with open(settings.STATIC_ROOT + "/lastactive_nodes_data.json") as f:
             nodes_data = json.loads(f.read())
 
         for s in nodes_data:

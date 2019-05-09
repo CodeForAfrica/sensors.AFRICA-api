@@ -28,7 +28,7 @@ class Command(BaseCommand):
 
         print(settings.STATIC_ROOT + "/partial_nodes_data.json")
 
-        with open(settings.STATIC_ROOT + "/partial_nodes_data.json", "w") as f:
+        with open(settings.STATIC_ROOT + "/lastactive_nodes_data.json", "w") as f:
             nodes_data = list(
                 SensorData.objects.values(
                     "sensor__node",
