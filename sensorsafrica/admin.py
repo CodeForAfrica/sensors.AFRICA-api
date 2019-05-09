@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .api.models import SensorDataStat, City
+from .api.models import LastActiveNodes, SensorDataStat, City
 
 from feinstaub.sensors.admin import (
     SensorLocationAdmin,
@@ -14,44 +14,43 @@ import datetime
 import django.utils.timezone
 
 
-def last_data_received_at(self, obj):
-    then = (
-        SensorData.objects.filter(location=obj)
-        .values_list("timestamp", flat=True)
-        .last()
-    )
-    now = datetime.datetime.now(django.utils.timezone.utc)
+@admin.register(LastActiveNodes)
+class LastActiveNodesAdmin(admin.ModelAdmin):
+    readonly_fields = ["node", "location", "last_data_received_at"]
+    list_display = ["node", "location", "received"]
+    search_fields = ["node", "location", "last_data_received_at"]
+    list_filter = ["node", "location", "last_data_received_at"]
 
-    if not then:
-        return "Unknown"
+    def received(self, obj):
+        now = datetime.datetime.now(django.utils.timezone.utc)
 
-    return "( %s ) %s" % (
-        timeago.format(then, now),
-        SensorData.objects.filter(location=obj)
-        .values_list("timestamp", flat=True)
-        .last(),
-    )
+        if not obj.last_data_received_at:
+            return "Unknown"
 
+        return "( %s ) %s" % (
+            timeago.format(obj.last_data_received_at, now),
+            obj.last_data_received_at,
+        )
 
-def latitude_and_longitude(self, obj):
-    return "%s,%s" % (obj.latitude, obj.longitude)
+    def get_actions(self, request):
+        actions = super(LastActiveNodesAdmin, self).get_actions(request)
+        del actions["delete_selected"]
+        return actions
 
+    def has_add_permission(self, request):
+        return False
 
-def node_UID(self, obj):
-    return Node.objects.filter(location=obj).values_list("uid", flat=True).first()
+    def has_delete_permission(self, request, obj=None):
+        return False
 
+    def save_model(self, request, obj, form, change):
+        pass
 
-SensorLocation._meta.verbose_name_plural = "Sensor Node Locations"
-SensorLocationAdmin.list_display = [
-    "node_UID",
-    "location",
-    "city",
-    "latitude_and_longitude",
-    "last_data_received_at",
-]
-SensorLocationAdmin.last_data_received_at = last_data_received_at
-SensorLocationAdmin.latitude_and_longitude = latitude_and_longitude
-SensorLocationAdmin.node_UID = node_UID
+    def delete_model(self, request, obj):
+        pass
+
+    def save_related(self, request, form, formsets, change):
+        pass
 
 
 @admin.register(SensorDataStat)

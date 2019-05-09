@@ -48,3 +48,12 @@ class SensorDataStat(TimeStampedModel):
             self.minimum,
             self.maximum,
         )
+
+
+class LastActiveNodes(TimeStampedModel):
+    node = models.ForeignKey(Node)
+    location = models.ForeignKey(SensorLocation)
+    last_data_received_at = models.DateTimeField()
+
+    class Meta:
+        unique_together = ['node', 'location']

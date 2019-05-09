@@ -1,14 +1,16 @@
 import datetime
 import pytz
+import json
 
 from rest_framework.exceptions import ValidationError
 
+from django.conf import settings
 from django.utils import timezone
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, City, Node
+from ..models import SensorDataStat, LastActiveNodes, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
@@ -205,36 +207,24 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
-
-    # Cache requested url for each user for 1 hour
-    @method_decorator(cache_page(3600))
     def list(self, request):
         nodes = []
-        for location in SensorLocation.objects.iterator():
-            Node.objects.filter(location=location)
-            result = (
-                SensorData.objects.filter(location=location)
-                .values(
-                    "sensor__node__location",
-                    "sensor__node__location__location",
-                    "sensor__node__location__city",
-                    "sensor__node__location__longitude",
-                    "sensor__node__location__latitude",
-                    "timestamp",
-                )
-                .last()
-            )
+        for last_active_node in LastActiveNodes.objects.iterator():
+            node = Node.objects.filter(
+                Q(id=last_active_node.node.id), ~Q(sensors=None)
+            ).get()
+            last_data_received_at = last_active_node.last_data_received_at
 
+            # last_data_received_at
             stats = []
             prev_location = None
-            if result:
-                last_data_datetime = result["timestamp"]
-                last_24_hours = last_data_datetime - datetime.timedelta(hours=24)
+            if last_data_received_at:
+                last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
                     SensorDataValue.objects.filter(
-                        Q(sensordata__location=location),
-                        Q(sensordata__timestamp__gte=last_24_hours),
-                        Q(sensordata__timestamp__lte=last_data_datetime),
+                        Q(sensordata__location=last_active_node.location.id),
+                        Q(sensordata__timestamp__gte=last_5_mins),
+                        Q(sensordata__timestamp__lte=last_data_received_at),
                         # Ignore timestamp values
                         ~Q(value_type="timestamp"),
                         # Match only valid float text
@@ -252,28 +242,31 @@ class NodesView(viewsets.ViewSet):
                     )
                 )
 
-                if result["sensor__node__location"] != location.id:
-                    prev_location = {
-                        "name": result["sensor__node__location__location"],
-                        "longitude": result["sensor__node__location__longitude"],
-                        "latitude": result["sensor__node__location__latitude"],
-                        "city": {
-                            "name": result["sensor__node__location__city"],
-                            "slug": slugify(result["sensor__node__location__city"]),
-                        },
-                    }
+            if last_active_node.location.id != node.location.id:
+                prev_location = {
+                    "name": node.location.location,
+                    "longitude": node.location.longitude,
+                    "latitude": node.location.latitude,
+                    "city": {
+                        "name": node.location.city,
+                        "slug": slugify(node.location.city),
+                    },
+                }
 
             nodes.append(
                 {
                     "node_moved": prev_location is not None,
                     "prev_location": prev_location,
                     "location": {
-                        "longitude": location.longitude,
-                        "latitude": location.latitude,
-                        "name": location.location,
-                        "city": {"name": location.city, "slug": slugify(location.city)},
+                        "name": last_active_node.location.location,
+                        "longitude": last_active_node.location.longitude,
+                        "latitude": last_active_node.location.latitude,
+                        "city": {
+                            "name": last_active_node.location.city,
+                            "slug": slugify(last_active_node.location.city),
+                        },
                     },
-                    "last_data_received_at": last_data_datetime,
+                    "last_data_received_at": last_data_received_at,
                     "stats": stats,
                 }
             )
