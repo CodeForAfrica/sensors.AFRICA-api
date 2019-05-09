@@ -11,6 +11,7 @@ def calculate_data_statistics():
 def archive_data():
     call_command("upload_to_ckan")
 
+
 @shared_task
 def cache_lastactive_nodes_data():
     call_command("cache_lastactive_nodes_data")
