@@ -8,19 +8,6 @@ from django.db.models import Max
 from sensorsafrica.api.models import Node, SensorLocation, LastActiveNodes
 from feinstaub.sensors.models import SensorData
 
-import json
-import datetime
-from decimal import Decimal
-
-
-class Encoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Decimal):
-            return float(o)
-        if isinstance(o, (datetime.date, datetime.datetime)):
-            return o.timestamp()
-        return super(Encoder, self).default(o)
-
 
 class Command(BaseCommand):
     help = ""
