@@ -1,8 +1,10 @@
 import datetime
 import pytz
+import json
 
 from rest_framework.exceptions import ValidationError
 
+from django.conf import settings
 from django.utils import timezone
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncDate
@@ -210,23 +212,13 @@ class NodesView(viewsets.ViewSet):
     # @method_decorator(cache_page(3600))
     def list(self, request):
         nodes = []
-        something = (
-            SensorData.objects.values(
-                "sensor__node",
-                "location__id",
-                "location__location",
-                "location__city",
-                "location__longitude",
-                "location__latitude",
-                "timestamp"
-            )
-            .order_by("sensor__node__id", "location__id")
-            .distinct("sensor__node__id", "location__id")
-        )
+        nodes_data = []
+        with open(settings.STATIC_ROOT + "/partial_nodes_data.json") as f:
+            nodes_data = json.loads(f.read())
 
-        for s in something.iterator():
+        for s in nodes_data:
             node = Node.objects.filter(Q(id=s["sensor__node"]), ~Q(sensors=None)).get()
-            last_data_received_at = s["timestamp"]
+            last_data_received_at = datetime.datetime.fromtimestamp(s["timestamp"])
 
             # last_data_received_at
             stats = []
@@ -280,7 +272,7 @@ class NodesView(viewsets.ViewSet):
                         },
                     },
                     "last_data_received_at": last_data_received_at,
-                    "stats": stats
+                    "stats": stats,
                 }
             )
         return Response(nodes)
