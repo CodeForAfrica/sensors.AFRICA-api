@@ -1,6 +1,9 @@
 from django.contrib import admin
-
+from django.utils.html import format_html
+from django.conf.urls import include, url
+from django.template.response import TemplateResponse
 from .api.models import LastActiveNodes, SensorDataStat, City
+from django.db.models import Q
 
 from feinstaub.sensors.admin import (
     SensorLocationAdmin,
@@ -17,9 +20,12 @@ import django.utils.timezone
 @admin.register(LastActiveNodes)
 class LastActiveNodesAdmin(admin.ModelAdmin):
     readonly_fields = ["node", "location", "last_data_received_at"]
-    list_display = ["node", "location", "received"]
+    list_display = ["node", "location", "received", "previous_locations"]
     search_fields = ["node", "location", "last_data_received_at"]
     list_filter = ["node", "location", "last_data_received_at"]
+
+    def get_queryset(self, request):
+        return LastActiveNodes.objects.order_by("node_id").distinct("node_id")
 
     def received(self, obj):
         now = datetime.datetime.now(django.utils.timezone.utc)
@@ -30,6 +36,27 @@ class LastActiveNodesAdmin(admin.ModelAdmin):
         return "( %s ) %s" % (
             timeago.format(obj.last_data_received_at, now),
             obj.last_data_received_at,
+        )
+
+    def previous_locations(self, obj):
+        prev = list(
+            LastActiveNodes.objects.filter(
+                Q(node_id=obj.node), ~Q(location_id=obj.location)
+            )
+        )
+        return format_html(
+            """
+                <div class="popover__wrapper">
+                    <a href="#">
+                        <h2 class="popover__title">{}</h2>
+                    </a>
+                    <div class="popover__content">
+                        {}
+                    </div>
+                </div>
+            """,
+            len(prev),
+            ",".join(map(lambda n: n.location.location, prev))
         )
 
     def get_actions(self, request):
