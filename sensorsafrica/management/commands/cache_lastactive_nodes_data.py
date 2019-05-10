@@ -21,5 +21,5 @@ class Command(BaseCommand):
             LastActiveNodes.objects.update_or_create(
                 node=Node(pk=data["sensor__node"]),
                 location=SensorLocation(pk=data["location"]),
-                last_data_received_at=data["timestamp"],
+                defaults={"last_data_received_at": data["timestamp"]},
             )
