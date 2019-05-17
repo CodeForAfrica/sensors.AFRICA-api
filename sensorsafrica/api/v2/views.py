@@ -222,6 +222,7 @@ class NodesView(viewsets.ViewSet):
                 last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
                     SensorDataValue.objects.filter(
+                        Q(sensordata__sensor__node=last_active_node.node.id),
                         Q(sensordata__location=last_active_node.location.id),
                         Q(sensordata__timestamp__gte=last_5_mins),
                         Q(sensordata__timestamp__lte=last_data_received_at),
