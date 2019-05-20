@@ -217,7 +217,7 @@ class NodesView(viewsets.ViewSet):
 
             # last_data_received_at
             stats = []
-            prev_location = None
+            new_location = None
             if last_data_received_at:
                 last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
@@ -244,7 +244,7 @@ class NodesView(viewsets.ViewSet):
                 )
 
             if last_active_node.location.id != node.location.id:
-                prev_location = {
+                new_location = {
                     "name": node.location.location,
                     "longitude": node.location.longitude,
                     "latitude": node.location.latitude,
@@ -256,8 +256,8 @@ class NodesView(viewsets.ViewSet):
 
             nodes.append(
                 {
-                    "node_moved": prev_location is not None,
-                    "prev_location": prev_location,
+                    "node_moved": new_location is not None,
+                    "new_location": new_location,
                     "location": {
                         "name": last_active_node.location.location,
                         "longitude": last_active_node.location.longitude,
