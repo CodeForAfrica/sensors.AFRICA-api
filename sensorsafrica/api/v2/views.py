@@ -264,6 +264,9 @@ class NodesView(viewsets.ViewSet):
                 {
                     "node_moved": moved_to is not None,
                     "moved_to": moved_to,
+                    "node": {
+                        "uid": last_active.node.uid
+                    },
                     "location": {
                         "name": last_active.location.location,
                         "longitude": last_active.location.longitude,
