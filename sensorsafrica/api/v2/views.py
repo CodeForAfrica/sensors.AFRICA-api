@@ -209,7 +209,7 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
-        # Loop througth the last active nodes
+        # Loop through the last active nodes
         for last_active in LastActiveNodes.objects.iterator():
             # Get the current node
             node = Node.objects.filter(
@@ -247,7 +247,7 @@ class NodesView(viewsets.ViewSet):
                     )
                 )
 
-            # If the last_ctive node location is not same as current node location
+            # If the last_active node location is not same as current node location
             # then the node has moved locations since it was last active
             if last_active.location.id != node.location.id:
                 moved_to = {
