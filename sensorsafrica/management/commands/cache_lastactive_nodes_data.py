@@ -14,9 +14,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for data in (
-            SensorData.objects.values("sensor__node", "location")
-            .order_by("sensor__node__id", "location__id")
-            .annotate(timestamp=Max("timestamp"))
+            SensorData.objects
+                .filter(sensordatavalues__value_type__in=["P1", "P2"])
+                .values("sensor__node", "location")
+                .order_by("sensor__node__id", "location__id")
+                .annotate(timestamp=Max("timestamp"))
         ):
             LastActiveNodes.objects.update_or_create(
                 node=Node(pk=data["sensor__node"]),
