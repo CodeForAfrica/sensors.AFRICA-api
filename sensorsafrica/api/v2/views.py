@@ -206,6 +206,7 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
 
+
 class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
