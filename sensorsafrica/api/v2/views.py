@@ -209,20 +209,26 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
-        for last_active_node in LastActiveNodes.objects.iterator():
+        # Loop through the last active nodes
+        for last_active in LastActiveNodes.objects.iterator():
+            # Get the current node
             node = Node.objects.filter(
-                Q(id=last_active_node.node.id), ~Q(sensors=None)
+                Q(id=last_active.node.id), ~Q(sensors=None)
             ).get()
-            last_data_received_at = last_active_node.last_data_received_at
+
+            # The last acive date
+            last_data_received_at = last_active.last_data_received_at
 
             # last_data_received_at
             stats = []
-            prev_location = None
+            moved_to = None
+            # Get data stats from 5mins before last_data_received_at
             if last_data_received_at:
                 last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
                     SensorDataValue.objects.filter(
-                        Q(sensordata__location=last_active_node.location.id),
+                        Q(sensordata__sensor__node=last_active.node.id),
+                        Q(sensordata__location=last_active.location.id),
                         Q(sensordata__timestamp__gte=last_5_mins),
                         Q(sensordata__timestamp__lte=last_data_received_at),
                         # Ignore timestamp values
@@ -242,8 +248,10 @@ class NodesView(viewsets.ViewSet):
                     )
                 )
 
-            if last_active_node.location.id != node.location.id:
-                prev_location = {
+            # If the last_active node location is not same as current node location
+            # then the node has moved locations since it was last active
+            if last_active.location.id != node.location.id:
+                moved_to = {
                     "name": node.location.location,
                     "longitude": node.location.longitude,
                     "latitude": node.location.latitude,
@@ -255,15 +263,19 @@ class NodesView(viewsets.ViewSet):
 
             nodes.append(
                 {
-                    "node_moved": prev_location is not None,
-                    "prev_location": prev_location,
+                    "node_moved": moved_to is not None,
+                    "moved_to": moved_to,
+                    "node": {
+                        "uid": last_active.node.uid,
+                        "id": last_active.node.id
+                    },
                     "location": {
-                        "name": last_active_node.location.location,
-                        "longitude": last_active_node.location.longitude,
-                        "latitude": last_active_node.location.latitude,
+                        "name": last_active.location.location,
+                        "longitude": last_active.location.longitude,
+                        "latitude": last_active.location.latitude,
                         "city": {
-                            "name": last_active_node.location.city,
-                            "slug": slugify(last_active_node.location.city),
+                            "name": last_active.location.city,
+                            "slug": slugify(last_active.location.city),
                         },
                     },
                     "last_data_received_at": last_data_received_at,
