@@ -6,6 +6,7 @@ from rest_framework.exceptions import ValidationError
 
 from django.conf import settings
 from django.utils import timezone
+from dateutil.relativedelta import relativedelta
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
@@ -205,12 +206,18 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
 
-
 class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
+
+        public_threshold = timezone.now() - relativedelta(months=3)
+        lastactive_queryset = LastActiveNodes.objects.filter(last_data_received_at__gte=public_threshold)
+        if self.request.user.is_authenticated():
+            if self.request.user.groups.filter(name="show_me_everything").exists():
+                lastactive_queryset = LastActiveNodes.objects.all()
+
         # Loop through the last active nodes
-        for last_active in LastActiveNodes.objects.iterator():
+        for last_active in lastactive_queryset.iterator():
             # Get the current node
             node = Node.objects.filter(
                 Q(id=last_active.node.id), ~Q(sensors=None)
