@@ -46,17 +46,15 @@ class LastActiveNodesAdmin(admin.ModelAdmin):
         )
         return format_html(
             """
-                <div class="popover__wrapper">
-                    <a href="#">
-                        <h2 class="popover__title">{}</h2>
-                    </a>
-                    <div class="popover__content">
-                        {}
-                    </div>
+                <div>
+                    <p>
+                        <strong>{}</strong>
+                    </p>
+                    <p>{}</p>
                 </div>
             """,
             len(prev),
-            ",".join(map(lambda n: n.location.location, prev))
+            ", ".join(map(lambda n: n.location.location, prev))
         )
 
     def get_actions(self, request):
