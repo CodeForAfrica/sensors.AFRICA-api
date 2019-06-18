@@ -21,3 +21,5 @@ pytest==4.1.1
 pytest-django==3.4.5
 
 ckanapi==4.1
+
+celery-slack==0.3.0

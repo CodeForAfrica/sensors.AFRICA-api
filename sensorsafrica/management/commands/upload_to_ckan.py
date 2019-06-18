@@ -122,7 +122,7 @@ class Command(BaseCommand):
             fp.write(
                 "sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
             )
-            for sd in qs:
+            for sd in qs.iterator():
                 s = ";".join(
                     [
                         str(sd["sensor__id"]),
