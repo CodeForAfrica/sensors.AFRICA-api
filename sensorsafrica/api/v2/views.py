@@ -219,6 +219,7 @@ class NodesView(viewsets.ViewSet):
             # The last acive date
             last_data_received_at = last_active.last_data_received_at
 
+            # last_data_received_at
             stats = []
             moved_to = None
             # Get data stats from 5mins before last_data_received_at
