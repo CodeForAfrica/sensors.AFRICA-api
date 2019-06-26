@@ -210,15 +210,8 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class NodesView(viewsets.ViewSet):
     def list(self, request):
         nodes = []
-
-        public_threshold = timezone.now() - relativedelta(months=3)
-        lastactive_queryset = LastActiveNodes.objects.filter(last_data_received_at__gte=public_threshold)
-        if self.request.user.is_authenticated():
-            if self.request.user.groups.filter(name="show_me_everything").exists():
-                lastactive_queryset = LastActiveNodes.objects.all()
-
         # Loop through the last active nodes
-        for last_active in lastactive_queryset.iterator():
+        for last_active in LastActiveNodes.objects.iterator():
             # Get the current node
             node = Node.objects.filter(
                 Q(id=last_active.node.id), ~Q(sensors=None)
