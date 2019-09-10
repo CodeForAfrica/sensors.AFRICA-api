@@ -16,4 +16,10 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 # Autodiscover tasks in tasks.py
 app.autodiscover_tasks()
 
-slack_app = Slackify(app, os.environ.get("SENSORSAFRICA_CELERY_SLACK_WEBHOOK", ""))
+SLACK_WEBHOOK = os.environ.get("SENSORSAFRICA_CELERY_SLACK_WEBHOOK", "")
+SLACK_WEBHOOK_FAILURES_ONLY = os.environ.get(
+    "SENSORSAFRICA_CELERY_SLACK_WEBHOOK_FAILURES_ONLY", "").strip().lower() in ('true', 't', '1')
+
+options = {'failures_only': SLACK_WEBHOOK_FAILURES_ONLY}
+
+slack_app = Slackify(app, SLACK_WEBHOOK, **options)
