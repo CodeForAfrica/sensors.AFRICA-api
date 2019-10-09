@@ -5,7 +5,7 @@ from django.conf import settings
 
 from django.forms.models import model_to_dict
 
-from feinstaub.sensors.models import SensorLocation, Sensor
+from feinstaub.sensors.models import SensorLocation, Sensor, SensorType
 
 import os
 import json
@@ -17,10 +17,19 @@ from django.db import connection
 from rest_framework import serializers
 
 
+class SensorTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorType
+        fields = "__all__"
+
+
 class SensorSerializer(serializers.ModelSerializer):
+    sensor_type = SensorTypeSerializer()
+
     class Meta:
         model = Sensor
         fields = "__all__"
+
 
 class SensorLocationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -36,8 +45,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         intervals = {'5m': '5 minutes', '1h': '1 hour', '24h': '24 hours'}
-        paths = {'5m': '../../static/v2/data.json',
-                 '1h': '../../static/v2/data.1h.json', '24h': '../../static/v2/data.24h.json'}
+        paths = {
+            '5m': [
+                '../../../static/v2/data.json',
+                '../../../static/v2/data.dust.min.json',
+                '../../../static/v2/data.temp.min.json'
+            ],
+            '1h': ['../../../static/v2/data.1h.json'],
+            '24h': ['../../../static/v2/data.24h.json']
+        }
         cursor = connection.cursor()
         cursor.execute('''
             SELECT sd.sensor_id, sdv.value_type, AVG(CAST(sdv."value" AS FLOAT)) as "value", COUNT("value"), sd.location_id
@@ -70,9 +86,15 @@ class Command(BaseCommand):
                     }]
                 })
 
-        with open(os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            paths[options['interval']]),
-            'w'
-        ) as f:
-            json.dump(list(data.values()), f)
+        for path in paths[options['interval']]:
+            with open(
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), path), 'w'
+            ) as f:
+                if 'dust' in path:
+                    json.dump(list(filter(
+                        lambda d: d['sensor']['sensor_type']['uid'] == 'sds011', data.values())), f)
+                elif 'temp' in path:
+                    json.dump(list(filter(
+                        lambda d: d['sensor']['sensor_type']['uid'] == 'dht22', data.values())), f)
+                else:
+                    json.dump(list(data.values()), f)
