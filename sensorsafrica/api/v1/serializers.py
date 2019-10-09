@@ -4,6 +4,7 @@ from feinstaub.sensors.models import (
     SensorDataValue
 )
 
+
 class SensorDataValueSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorDataValue
