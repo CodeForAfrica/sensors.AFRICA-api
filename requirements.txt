@@ -17,7 +17,7 @@ greenlet==0.4.12
 whitenoise==4.1.2
 
 pylama==7.6.6
-pytest==4.1.1
+pytest==5.2.1
 pytest-django==3.4.5
 
 ckanapi==4.1
