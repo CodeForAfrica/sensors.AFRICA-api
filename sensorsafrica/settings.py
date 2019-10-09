@@ -94,10 +94,16 @@ WSGI_APPLICATION = "sensorsafrica.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
-DATABASE_URL = os.getenv(
-    "SENSORSAFRICA_DATABASE_URL",
-    "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
-)
+# DATABASE_URL = "postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica"
+
+DATABASE_URL = "postgres://htools:EFiNop6PMKBbeE6@cfa-general.cfgmtx8ishfx.eu-west-1.rds.amazonaws.com:54321/htools-airquality-api"
+
+# "postgres://sensorsafrica:sensorsafrica@sensorsafrica-staging.cfgmtx8ishfx.eu-west-1.rds.amazonaws.com:5432/sensorsafrica"
+
+# os.getenv(
+#     "SENSORSAFRICA_DATABASE_URL",
+#     "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
+# )
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
 
 
@@ -157,6 +163,14 @@ CELERY_BEAT_SCHEDULE = {
     "cache-lastactive-nodes-task": {
         "task": "sensorsafrica.tasks.cache_lastactive_nodes_data",
         "schedule": crontab(minute="*/5")
+    },
+    "cache-static-json-data": {
+        "task": "sensorsafrica.tasks.cache_static_json_data",
+        "schedule": crontab(minute="*/5")
+    },
+    "cache-static-json-data-1h-24h": {
+        "task": "sensorsafrica.tasks.cache_static_json_data_1h_24h",
+        "schedule": crontab(hour="*", minute=0)
     },
 }
 
