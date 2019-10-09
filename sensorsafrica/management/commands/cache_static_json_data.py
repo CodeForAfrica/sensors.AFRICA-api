@@ -66,7 +66,7 @@ class Command(BaseCommand):
         data = {}
         while True:
             row = cursor.fetchone()
-            if row == None:
+            if row is None:
                 break
 
             if row[0] in data:
@@ -88,7 +88,8 @@ class Command(BaseCommand):
 
         for path in paths[options['interval']]:
             with open(
-                os.path.join(os.path.dirname(os.path.abspath(__file__)), path), 'w'
+                os.path.join(os.path.dirname(
+                    os.path.abspath(__file__)), path), 'w'
             ) as f:
                 if 'dust' in path:
                     json.dump(list(filter(
