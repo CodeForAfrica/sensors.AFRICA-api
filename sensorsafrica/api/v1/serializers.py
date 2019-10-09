@@ -9,8 +9,10 @@ class SensorDataValueSerializer(serializers.ModelSerializer):
         model = SensorDataValue
         fields = ['value_type', 'value']
 
+
 class SensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = SensorDataValueSerializer(many=True)
+
     class Meta:
         model = SensorData
-        fields = ['sensor', 'timestamp', 'sensordatavalues']
+        fields = ['timestamp', 'sensordatavalues']

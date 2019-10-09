@@ -28,3 +28,23 @@ class SensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .only('sensor', 'timestamp')
             .prefetch_related('sensordatavalues')
         )
+
+
+class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = SensorDataSerializer
+
+    def get_queryset(self):
+        sensor_type = self.request.GET.get('type', r'\w+')
+        country = self.request.GET.get('country', r'\w+')
+        city = self.request.GET.get('city', r'\w+')
+        return (
+            SensorData.objects
+            .filter(
+                timestamp__gte=timezone.now() - datetime.timedelta(minutes=5),
+                sensor__sensor_type__uid__iregex=sensor_type,
+                location__country__iregex=country,
+                location__city__iregex=city
+            )
+            .only('sensor', 'timestamp')
+            .prefetch_related('sensordatavalues')
+        )
