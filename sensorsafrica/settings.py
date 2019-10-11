@@ -142,7 +142,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # Celery Broker
-CELERY_BROKER_URL = os.environ.get("SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
+CELERY_BROKER_URL = os.environ.get(
+    "SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
 CELERY_IGNORE_RESULT = True
 
 CELERY_BEAT_SCHEDULE = {
@@ -157,6 +158,14 @@ CELERY_BEAT_SCHEDULE = {
     "cache-lastactive-nodes-task": {
         "task": "sensorsafrica.tasks.cache_lastactive_nodes_data",
         "schedule": crontab(minute="*/5")
+    },
+    "cache-static-json-data": {
+        "task": "sensorsafrica.tasks.cache_static_json_data",
+        "schedule": crontab(minute="*/5")
+    },
+    "cache-static-json-data-1h-24h": {
+        "task": "sensorsafrica.tasks.cache_static_json_data_1h_24h",
+        "schedule": crontab(hour="*", minute=0)
     },
 }
 

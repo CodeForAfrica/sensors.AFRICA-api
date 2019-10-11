@@ -15,3 +15,14 @@ def archive_data():
 @shared_task
 def cache_lastactive_nodes_data():
     call_command("cache_lastactive_nodes_data")
+
+
+@shared_task
+def cache_static_json_data():
+    call_command("cache_static_json_data", interval='5m')
+
+
+@shared_task
+def cache_static_json_data_1h_24h():
+    call_command("cache_static_json_data", interval='1h')
+    call_command("cache_static_json_data", interval='24h')

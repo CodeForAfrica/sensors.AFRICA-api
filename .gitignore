@@ -400,3 +400,4 @@ celerybeat.pid
 logs/
 
 /static
+/sensorsafrica/static/**/*.json

@@ -37,7 +37,8 @@ def location():
 
 @pytest.fixture
 def sensor_type():
-    st, x = SensorType.objects.get_or_create(uid="a", name="b", manufacturer="c")
+    st, x = SensorType.objects.get_or_create(
+        uid="a", name="b", manufacturer="c")
     return st
 
 
@@ -58,22 +59,32 @@ def sensor(logged_in_user, sensor_type, node):
 @pytest.fixture
 def locations():
     return [
-        SensorLocation.objects.get_or_create(city="Dar es Salaam", description="active")[0],
-        SensorLocation.objects.get_or_create(city="Bagamoyo", description="inactive")[0],
-        SensorLocation.objects.get_or_create(city="Mombasa", description="inactive")[0],
-        SensorLocation.objects.get_or_create(city="Nairobi", description="inactive")[0],
-        SensorLocation.objects.get_or_create(city="Dar es Salaam", description="active | some other node location")[0],
+        SensorLocation.objects.get_or_create(
+            city="Dar es Salaam", country="Tanzania", description="active")[0],
+        SensorLocation.objects.get_or_create(
+            city="Bagamoyo", country="Tanzania", description="inactive")[0],
+        SensorLocation.objects.get_or_create(
+            city="Mombasa", country="Kenya", description="inactive")[0],
+        SensorLocation.objects.get_or_create(
+            city="Nairobi", country="Kenya", description="inactive")[0],
+        SensorLocation.objects.get_or_create(
+            city="Dar es Salaam", country="Tanzania", description="active | some other node location")[0],
     ]
 
 
 @pytest.fixture
 def nodes(logged_in_user, locations):
     return [
-        Node.objects.get_or_create(uid="0", owner=logged_in_user, location=locations[0])[0],
-        Node.objects.get_or_create(uid="1", owner=logged_in_user, location=locations[1])[0],
-        Node.objects.get_or_create(uid="2", owner=logged_in_user, location=locations[2])[0],
-        Node.objects.get_or_create(uid="3", owner=logged_in_user, location=locations[3])[0],
-        Node.objects.get_or_create(uid="4", owner=logged_in_user, location=locations[4])[0],
+        Node.objects.get_or_create(
+            uid="0", owner=logged_in_user, location=locations[0])[0],
+        Node.objects.get_or_create(
+            uid="1", owner=logged_in_user, location=locations[1])[0],
+        Node.objects.get_or_create(
+            uid="2", owner=logged_in_user, location=locations[2])[0],
+        Node.objects.get_or_create(
+            uid="3", owner=logged_in_user, location=locations[3])[0],
+        Node.objects.get_or_create(
+            uid="4", owner=logged_in_user, location=locations[4])[0],
     ]
 
 
@@ -81,15 +92,20 @@ def nodes(logged_in_user, locations):
 def sensors(sensor_type, nodes):
     return [
         # Active Dar Sensor
-        Sensor.objects.get_or_create(node=nodes[0], sensor_type=sensor_type, public=True)[0],
+        Sensor.objects.get_or_create(
+            node=nodes[0], sensor_type=sensor_type, public=True)[0],
         # Inactive with last data push beyond active threshold
-        Sensor.objects.get_or_create(node=nodes[1], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(
+            node=nodes[1], sensor_type=sensor_type)[0],
         # Inactive without any data
-        Sensor.objects.get_or_create(node=nodes[2], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(
+            node=nodes[2], sensor_type=sensor_type)[0],
         # Active Nairobi Sensor
-        Sensor.objects.get_or_create(node=nodes[3], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(
+            node=nodes[3], sensor_type=sensor_type)[0],
         # Active Dar Sensor another location
-        Sensor.objects.get_or_create(node=nodes[4], sensor_type=sensor_type)[0],
+        Sensor.objects.get_or_create(
+            node=nodes[4], sensor_type=sensor_type)[0],
     ]
 
 
@@ -111,11 +127,13 @@ def sensordata(sensors, locations):
     ]
     # Nairobi SensorData
     for i in range(100):
-        sensor_datas.append(SensorData(sensor=sensors[3], location=locations[3]))
+        sensor_datas.append(SensorData(
+            sensor=sensors[3], location=locations[3]))
 
     # Dar es Salaam another node location SensorData
     for i in range(6):
-        sensor_datas.append(SensorData(sensor=sensors[4], location=locations[4]))
+        sensor_datas.append(SensorData(
+            sensor=sensors[4], location=locations[4]))
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
@@ -130,7 +148,8 @@ def sensordata(sensors, locations):
 def datavalues(sensors, sensordata):
     data_values = [
         # Bagamoyo
-        SensorDataValue(sensordata=sensordata[0], value="2", value_type="humidity"),
+        SensorDataValue(
+            sensordata=sensordata[0], value="2", value_type="humidity"),
         # Dar es salaam a day ago's data
         SensorDataValue(sensordata=sensordata[1], value="1", value_type="P2"),
         SensorDataValue(sensordata=sensordata[2], value="2", value_type="P2"),
@@ -150,12 +169,14 @@ def datavalues(sensors, sensordata):
     # Nairobi SensorDataValues
     for i in range(100):
         data_values.append(
-            SensorDataValue(sensordata=sensordata[9 + i], value="0", value_type="P2")
+            SensorDataValue(
+                sensordata=sensordata[9 + i], value="0", value_type="P2")
         )
 
     # Dar es Salaam another node location SensorDataValues
     for i in range(6):
-        data_values.append(SensorDataValue(sensordata=sensordata[109 + i], value="0.0", value_type="P2"))
+        data_values.append(SensorDataValue(
+            sensordata=sensordata[109 + i], value="0.0", value_type="P2"))
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
