@@ -60,8 +60,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -140,6 +140,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+# Recheck the filesystem to see if any files have changed before responding. 
+WHITENOISE_AUTOREFRESH = True
+# Find and serve files in their original directories using Django’s “finders” API
+# WHITENOISE_USE_FINDERS = True
 
 # Celery Broker
 CELERY_BROKER_URL = os.environ.get(
