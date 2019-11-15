@@ -59,7 +59,9 @@ class Command(BaseCommand):
             SELECT sd.sensor_id, sdv.value_type, AVG(CAST(sdv."value" AS FLOAT)) as "value", COUNT("value"), sd.location_id
                 FROM sensors_sensordata sd
                     INNER JOIN sensors_sensordatavalue sdv
-                        ON  sd.id = sdv.sensordata_id WHERE "timestamp" >= (NOW() - interval %s)
+                        ON  sdv.sensordata_id = sd.id
+                            AND sdv.value_type <> 'timestamp'
+                WHERE "timestamp" >= (NOW() - interval %s)
                 GROUP BY sd.sensor_id, sdv.value_type, sd.location_id
         ''', [intervals[options['interval']]])
 
