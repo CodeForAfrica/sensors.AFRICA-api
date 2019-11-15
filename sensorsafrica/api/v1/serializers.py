@@ -1,8 +1,15 @@
 from rest_framework import serializers
 from feinstaub.sensors.models import (
     SensorData,
-    SensorDataValue
+    SensorDataValue,
+    SensorLocation
 )
+
+
+class SensorLocationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorLocation
+        fields = '__all__'
 
 
 class SensorDataValueSerializer(serializers.ModelSerializer):
@@ -13,7 +20,8 @@ class SensorDataValueSerializer(serializers.ModelSerializer):
 
 class SensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = SensorDataValueSerializer(many=True)
+    location = SensorLocationSerializer()
 
     class Meta:
         model = SensorData
-        fields = ['timestamp', 'sensordatavalues']
+        fields = ['location', 'timestamp', 'sensordatavalues']
