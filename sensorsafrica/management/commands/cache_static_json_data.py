@@ -61,7 +61,7 @@ class Command(BaseCommand):
                     INNER JOIN sensors_sensordatavalue sdv
                         ON  sdv.sensordata_id = sd.id
                             AND sdv.value_type <> 'timestamp'
-                            AND sdv.value ~ '^\-?\d+(\.?\d+)?$'
+                            AND sdv.value ~ '^\\-?\\d+(\\.?\\d+)?$'
                 WHERE "timestamp" >= (NOW() - interval %s)
                 GROUP BY sd.sensor_id, sdv.value_type, sd.location_id
         ''', [intervals[options['interval']]])
