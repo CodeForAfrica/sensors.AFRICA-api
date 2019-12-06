@@ -23,7 +23,7 @@ migrate:
 	$(COMPOSE) exec api python manage.py migrate
 
 test:
-	$(COMPOSE) exec api python manage.py pytest --pylama
+	$(COMPOSE) exec api pytest --pylama
 
 createsuperuser:
 	$(COMPOSE) exec api python manage.py createsuperuser
