@@ -15,11 +15,11 @@ class Command(BaseCommand):
     help = ""
 
     def handle(self, *args, **options):
-        openAFRICA_API_KEY = os.environ.get("openAFRICA_API_KEY")
-        openAFRICA_CFA_ID = os.environ.get("openAFRICA_CFA_ID")
-        openAFRICA_URL = "https://africaopendata.org"
+        CKAN_ARCHIVE_API_KEY = os.environ.get("CKAN_ARCHIVE_API_KEY")
+        CKAN_ARCHIVE_OWNER_ID = os.environ.get("CKAN_ARCHIVE_OWNER_ID")
+        CKAN_ARCHIVE_URL = os.environ.get("CKAN_ARCHIVE_URL")
 
-        ckan = ckanapi.RemoteCKAN(openAFRICA_URL, apikey=openAFRICA_API_KEY)
+        ckan = ckanapi.RemoteCKAN(CKAN_ARCHIVE_URL, apikey=CKAN_ARCHIVE_API_KEY)
 
         city_queryset = (
             SensorLocation.objects.all()
@@ -33,7 +33,7 @@ class Command(BaseCommand):
 
             try:
                 package = ckan.action.package_create(
-                    owner_org=openAFRICA_CFA_ID,
+                    owner_org=CKAN_ARCHIVE_OWNER_ID,
                     name="sensorsafrica-airquality-archive-" + slugify(city),
                     title="sensors.AFRICA Air Quality Archive " + city,
                     groups=[{"name": "sensorsafrica-airquality-archive"}]
