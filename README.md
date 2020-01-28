@@ -153,9 +153,11 @@ Set the enivronment variable `SENSORSAFRICA_SENTRY_DSN`.
 
 Archives are sent to CKAN and require environment configuration:
 
+```
 - CKAN_ARCHIVE_API_KEY=..
 - CKAN_ARCHIVE_OWNER_ID=...
-- CKAN_ARCHIVE_URL=`<url that supports bulk uploads>`
+- CKAN_ARCHIVE_URL=<url that supports bulk uploads>
+```
 
 ## Contributing
 
