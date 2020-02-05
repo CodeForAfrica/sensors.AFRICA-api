@@ -227,3 +227,36 @@ def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
     from django.core.management import call_command
 
     call_command("calculate_data_statistics")
+
+
+@pytest.fixture
+def last_active(sensors, locations, sensorsdatastats):
+    timestamps = [
+        timezone.now(),
+        timezone.now() + datetime.timedelta(minutes=2),
+        timezone.now() + datetime.timedelta(minutes=4)
+    ]
+    sensordata = SensorData.objects.bulk_create([
+        SensorData(
+            sensor=sensors[0], location=locations[0], timestamp=timestamps[0]),
+        SensorData(
+            sensor=sensors[3], location=locations[3], timestamp=timestamps[1]),
+        SensorData(
+            sensor=sensors[4], location=locations[4], timestamp=timestamps[2]),
+    ])
+
+    SensorDataValue.objects.bulk_create([
+        SensorDataValue(
+            sensordata=sensordata[0], value="4", value_type="P2"),
+        SensorDataValue(
+            sensordata=sensordata[1], value="4", value_type="P1"),
+        # Won't be tracked as last active
+        SensorDataValue(
+            sensordata=sensordata[2], value="4", value_type="Temp"),
+    ])
+
+    from django.core.management import call_command
+
+    call_command("cache_lastactive_nodes")
+
+    return timestamps

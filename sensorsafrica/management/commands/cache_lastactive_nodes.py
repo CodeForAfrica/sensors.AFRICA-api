@@ -18,12 +18,13 @@ class Command(BaseCommand):
                     FROM
                         sensors_sensordata sd
                         INNER JOIN sensors_sensor s ON s.id = sd.sensor_id
-                            AND s.sensor_type_id IN(1, 9)
                             INNER JOIN sensors_node sn ON sn.id = s.node_id
+                            INNER JOIN sensors_sensordatavalue sv ON sv.sensordata_id = sd.id
+                            AND sv.value_type in ('P1', 'P2')
                         WHERE
                             "timestamp" >= now() - INTERVAL '5 min'
                         GROUP BY
-                            sn.id;
+                            sn.id
                 """)
             latest = cursor.fetchall()
             for data in latest:

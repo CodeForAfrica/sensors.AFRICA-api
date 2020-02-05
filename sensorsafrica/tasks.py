@@ -13,8 +13,8 @@ def archive_data():
 
 
 @shared_task
-def cache_lastactive_nodes_data():
-    call_command("cache_lastactive_nodes_data")
+def cache_lastactive_nodes():
+    call_command("cache_lastactive_nodes")
 
 
 @shared_task
