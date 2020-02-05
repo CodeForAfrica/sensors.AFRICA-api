@@ -2,6 +2,11 @@
 python manage.py migrate --noinput                # Apply database migrations
 python manage.py collectstatic --clear --noinput  # Collect static files
 
+# recreate the cached static json files
+python manage.py cache_static_json_data --interval 5m
+python manage.py cache_static_json_data --interval 1h
+python manage.py cache_static_json_data --interval 24h
+
 # Prepare log files and start outputting logs to stdout
 touch /src/logs/celery.log
 touch /src/logs/gunicorn.log
