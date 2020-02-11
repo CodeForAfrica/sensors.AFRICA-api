@@ -152,10 +152,6 @@ CELERY_BROKER_URL = os.environ.get(
 CELERY_IGNORE_RESULT = True
 
 CELERY_BEAT_SCHEDULE = {
-    "statistics-task": {
-        "task": "sensorsafrica.tasks.calculate_data_statistics",
-        "schedule": crontab(hour="*", minute=0)
-    },
     "archive-task": {
         "task": "sensorsafrica.tasks.archive_data",
         "schedule": crontab(hour="*", minute=0)

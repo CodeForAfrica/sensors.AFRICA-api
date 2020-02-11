@@ -3,7 +3,7 @@ import pytest
 
 @pytest.mark.django_db
 class TestCityView:
-    def test_getting_cities(self, client, sensorsdatastats):
+    def test_getting_cities(self, client):
         response = client.get("/v2/cities/", format="json")
         assert response.status_code == 200
 

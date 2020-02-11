@@ -203,14 +203,7 @@ def datavalues(sensors, sensordata):
 
 
 @pytest.fixture
-def sensorsdatastats(datavalues):
-    from django.core.management import call_command
-
-    call_command("calculate_data_statistics")
-
-
-@pytest.fixture
-def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
+def additional_sensorsdatastats(sensors, locations):
     sensordata = SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),
@@ -224,13 +217,9 @@ def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
         SensorDataValue(sensordata=sensordata[2], value="4", value_type="P2"),
     ])
 
-    from django.core.management import call_command
-
-    call_command("calculate_data_statistics")
-
 
 @pytest.fixture
-def last_active(sensors, locations, sensorsdatastats):
+def last_active(sensors, locations):
     timestamps = [
         timezone.now(),
         timezone.now() + datetime.timedelta(minutes=2),
