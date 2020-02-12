@@ -4,6 +4,7 @@ import pytest
 from django.utils import timezone
 import dateutil.parser
 
+
 @pytest.mark.django_db
 class TestGettingData:
     def test_getting_air_data_now(self, client, modified_datavalues):
