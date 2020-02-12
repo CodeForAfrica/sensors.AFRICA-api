@@ -8,7 +8,7 @@ from django.conf import settings
 from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
-from django.db.models.functions import Cast, TruncDate
+from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat, LastActiveNodes, City, Node
@@ -79,9 +79,9 @@ class CustomPagination(pagination.PageNumberPagination):
             include_result = getattr(values, "append" if from_date else "update")
             include_result(
                 {
-                    "average": data_stat["average"],
-                    "minimum": data_stat["minimum"],
-                    "maximum": data_stat["maximum"],
+                    "average": data_stat["calculated_average"],
+                    "minimum": data_stat["calculated_minimum"],
+                    "maximum": data_stat["calculated_maximum"],
                     "start_datetime": data_stat["start_datetime"],
                     "end_datetime": data_stat["end_datetime"],
                 }
@@ -112,6 +112,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         city_slugs = self.request.query_params.get("city", None)
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
+        interval = self.request.query_params.get("interval", None)
 
         if to_date and not from_date:
             raise ValidationError({"from": "Must be provide along with to query"})
@@ -129,43 +130,10 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             )
 
         if not from_date and not to_date:
-            return self._retrieve_past_24hrs(city_slugs, filter_value_types)
-
-        return self._retrieve_range(from_date, to_date, city_slugs, filter_value_types)
-
-    @staticmethod
-    def _retrieve_past_24hrs(city_slugs, filter_value_types):
-        to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
-        from_date = to_date - datetime.timedelta(hours=24)
-
-        queryset = SensorDataStat.objects.filter(
-            value_type__in=filter_value_types,
-            timestamp__gte=from_date,
-            timestamp__lte=to_date,
-        )
-
-        if city_slugs:
-            queryset = queryset.filter(city_slug__in=city_slugs.split(","))
-
-        return (
-            queryset.order_by()
-            .values("value_type", "city_slug")
-            .annotate(
-                start_datetime=Min("timestamp"),
-                end_datetime=Max("timestamp"),
-                average=ExpressionWrapper(
-                    Sum(F("average") * F("sample_size")) / Sum("sample_size"),
-                    output_field=FloatField(),
-                ),
-                minimum=Min("minimum"),
-                maximum=Max("maximum"),
-            )
-            .order_by("city_slug")
-        )
-
-    @staticmethod
-    def _retrieve_range(from_date, to_date, city_slugs, filter_value_types):
-        if not to_date:
+            to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
+            from_date = to_date - datetime.timedelta(hours=24)
+            interval = 'day' if not interval else interval
+        elif not to_date:
             from_date = beginning_of_day(from_date)
             # Get data from_date until the end
             # of day yesterday which is the beginning of today
@@ -177,27 +145,47 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         queryset = SensorDataStat.objects.filter(
             value_type__in=filter_value_types,
             timestamp__gte=from_date,
-            timestamp__lt=to_date,
+            timestamp__lte=to_date,
         )
+
+        if interval == 'month':
+            truncate = TruncMonth("timestamp")
+        elif interval == 'day':
+            truncate = TruncDay("timestamp")
+        else:
+            truncate = TruncHour("timestamp")
 
         if city_slugs:
             queryset = queryset.filter(city_slug__in=city_slugs.split(","))
 
         return (
-            queryset.annotate(date=TruncDate("timestamp"))
-            .values("date", "value_type")
+            queryset
+            .values(
+                "value_type",
+                "city_slug"
+            )
             .annotate(
-                city_slug=F("city_slug"),
+                truncated_timestamp=truncate,
                 start_datetime=Min("timestamp"),
                 end_datetime=Max("timestamp"),
-                average=ExpressionWrapper(
+                calculated_average=ExpressionWrapper(
                     Sum(F("average") * F("sample_size")) / Sum("sample_size"),
                     output_field=FloatField(),
                 ),
-                minimum=Min("minimum"),
-                maximum=Max("maximum"),
+                calculated_minimum=Min("minimum"),
+                calculated_maximum=Max("maximum"),
             )
-            .order_by("-date")
+            .values(
+                "value_type",
+                "city_slug",
+                "truncated_timestamp",
+                "start_datetime",
+                "end_datetime",
+                "calculated_average",
+                "calculated_minimum",
+                "calculated_maximum"
+            )
+            .order_by("city_slug", "-truncated_timestamp")
         )
 
 
