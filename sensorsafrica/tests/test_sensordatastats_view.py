@@ -166,3 +166,57 @@ class TestGettingData:
 
         assert result["P2"]["maximum"] == 8.0
         assert result["P2"]["minimum"] == 0.0
+
+    def test_geting_air_data_by_the_hour(self, client, modified_datavalues):
+        now = timezone.now()
+        response = client.get(
+            "/v2/data/air/?city=Dar es Salaam&avg=hour&from=%s&to=%s" % (
+                now.date(), now.date()),
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 1
+        assert type(data["results"][0]["P1"]) == list
+        assert type(data["results"][0]["P2"]) == list
+
+        assert len(data["results"][0]["P1"]) == 1
+        assert len(data["results"][0]["P2"]) == 4
+
+    def test_geting_air_data_by_the_month(self, client, modified_datavalues):
+        now = timezone.now()
+        response = client.get(
+            "/v2/data/air/?city=Dar es Salaam&avg=month&from=%s&to=%s" % (
+                now.date(), now.date()),
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 1
+        assert type(data["results"][0]["P1"]) == list
+        assert type(data["results"][0]["P2"]) == list
+
+        assert len(data["results"][0]["P1"]) == 1
+        assert len(data["results"][0]["P2"]) == 1
+
+    def test_geting_air_data_by_the_minute(self, client, modified_datavalues):
+        now = timezone.now()
+        response = client.get(
+            "/v2/data/air/?city=Dar es Salaam&avg=minute&from=%s&to=%s" % (
+                now.date(), now.date()),
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 1
+        assert type(data["results"][0]["P1"]) == list
+        assert type(data["results"][0]["P2"]) == list
+
+        assert len(data["results"][0]["P1"]) == 1
+        assert len(data["results"][0]["P2"]) == 4
