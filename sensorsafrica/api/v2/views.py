@@ -65,19 +65,19 @@ class CustomPagination(pagination.PageNumberPagination):
 
         results = {}
         for data_stat in data_stats:
-            city_slug = data_stat["city_slug"]
+            city_name = data_stat["city_name"]
             value_type = data_stat["value_type"]
 
-            if city_slug not in results:
-                results[city_slug] = {
-                    "city_slug": city_slug,
+            if city_name not in results:
+                results[city_name] = {
+                    "city_name": city_name,
                     value_type: [] if from_date else {},
                 }
 
-            if value_type not in results[city_slug]:
-                results[city_slug][value_type] = [] if from_date else {}
+            if value_type not in results[city_name]:
+                results[city_name][value_type] = [] if from_date else {}
 
-            values = results[city_slug][value_type]
+            values = results[city_name][value_type]
             include_result = getattr(
                 values, "append" if from_date else "update")
             include_result(
@@ -111,7 +111,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
     def get_queryset(self):
         sensor_type = self.kwargs["sensor_type"]
 
-        city_slugs = self.request.query_params.get("city", None)
+        city_names = self.request.query_params.get("city", None)
         from_date = self.request.query_params.get("from", None)
         to_date = self.request.query_params.get("to", None)
         avg = self.request.query_params.get("avg", 'day')
@@ -129,7 +129,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         value_type_to_filter = self.request.query_params.get(
             "value_type", None)
 
-        filter_value_types = value_types[sensor_type]
+        filter_value_types = ",".join(value_types[sensor_type])
         if value_type_to_filter:
             filter_value_types = ",".join(set(value_type_to_filter.upper().split(",")) & set(
                 [x.upper() for x in value_types[sensor_type]]
@@ -147,11 +147,18 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
 
+        if city_names:
+            city_names = ",".join(map(lambda city: "'%s'" %
+                                      city, city_names.split(',')))
+
+        if filter_value_types:
+            filter_value_types = ",".join(map(
+                lambda filter_value_type: "'%s'" % filter_value_type, filter_value_types.split(',')))
+
         with connection.cursor() as cursor:
-            cursor.execute(
-                """
+            cursor.execute("""
                     SELECT
-                        sl.city as city_slug,
+                        sl.city as city_name,
                         min(sd."timestamp") as start_datetime,
                         max(sd."timestamp") as end_datetime,
                         sum(CAST("value" as float)) / COUNT(*) AS average,
@@ -163,19 +170,26 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
                         INNER JOIN sensors_sensordata sd ON sd.id = sensordata_id
                         INNER JOIN sensors_sensorlocation sl ON sl.id = location_id
                     WHERE
-                        v.value_type IN (%s)
+                        v.value_type IN (%(filter_value_types)s)
+                        AND v.value ~ '^\\-?\\d+(\\.?\\d+)?$'
                         """
-                +
-                ("AND sl.city IN (%s)" if city_slugs else "")
-                +
-                """
-                                        AND sd."timestamp" >= TIMESTAMP %s
-                                        AND sd."timestamp" <= TIMESTAMP %s
+                           +
+                           ("AND sl.city IN (%(city_names)s)" if city_names else "")
+                           +
+                           """
+                                        AND sd."timestamp" >= TIMESTAMP %(from_date)s
+                                        AND sd."timestamp" <= TIMESTAMP %(to_date)s
                     GROUP BY
-                        DATE_TRUNC(%s, sd."timestamp"),
+                        DATE_TRUNC(%(trunc)s, sd."timestamp"),
                         v.value_type,
                         sl.city
-                """, [filter_value_types, city_slugs, from_date, to_date, avg] if city_slugs else [filter_value_types, from_date, to_date, avg])
+                """, {
+                               'filter_value_types': filter_value_types,
+                               'city_names': city_names,
+                               'from_date': from_date,
+                               'to_date': to_date,
+                               'trunc': avg
+                           })
             return cursor.fetchall()
 
 

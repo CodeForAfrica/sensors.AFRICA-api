@@ -203,7 +203,7 @@ def datavalues(sensors, sensordata):
 
 
 @pytest.fixture
-def additional_sensorsdatastats(sensors, locations):
+def additional_sensorsdatastats(sensors, locations, datavalues):
     sensordata = SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),

@@ -77,6 +77,7 @@ class LastActiveNodesAdmin(admin.ModelAdmin):
     def save_related(self, request, form, formsets, change):
         pass
 
+
 @admin.register(City)
 class CityAdmin(admin.ModelAdmin):
     search_fields = ["slug", "name", "country"]
