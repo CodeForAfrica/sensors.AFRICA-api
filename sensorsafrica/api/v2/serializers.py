@@ -8,9 +8,9 @@ class RawSensorDataStatSerializer(serializers.Serializer):
     value_type = serializers.SerializerMethodField()
     start_datetime = serializers.SerializerMethodField()
     end_datetime = serializers.SerializerMethodField()
-    city_slug = serializers.SerializerMethodField()
+    city_name = serializers.SerializerMethodField()
 
-    def get_city_slug(self, obj):
+    def get_city_name(self, obj):
         return obj[0]
 
     def get_start_datetime(self, obj):

@@ -178,32 +178,34 @@ def datavalues(sensors, sensordata):
         data_values.append(SensorDataValue(
             sensordata=sensordata[109 + i], value="0.0", value_type="P2"))
 
-    values = SensorDataValue.objects.bulk_create(data_values)
-
-    now = timezone.now()
-
-    # Set Dar es salaam a day ago's data
-    values[1].update_modified = False
-    values[1].created = now - datetime.timedelta(days=2)
-    values[1].save()
-    values[2].update_modified = False
-    values[2].created = now - datetime.timedelta(days=2)
-    values[2].save()
-
-    # Set data received at different hours
-    values[3].update_modified = False
-    values[3].created = now - datetime.timedelta(hours=1)
-    values[3].save()
-    values[4].update_modified = False
-    values[4].created = now - datetime.timedelta(hours=2)
-    values[4].save()
-    values[5].update_modified = False
-    values[5].created = now - datetime.timedelta(hours=3)
-    values[5].save()
+    return SensorDataValue.objects.bulk_create(data_values)
 
 
 @pytest.fixture
-def additional_sensorsdatastats(sensors, locations, datavalues):
+def modified_datavalues(datavalues):
+    now = timezone.now()
+    # Set Dar es salaam a day ago's data
+    datavalues[1].sensordata.update_modified = False
+    datavalues[1].sensordata.timestamp = now - datetime.timedelta(days=2)
+    datavalues[1].sensordata.save()
+    datavalues[2].sensordata.update_modified = False
+    datavalues[2].sensordata.timestamp = now - datetime.timedelta(days=2)
+    datavalues[2].sensordata.save()
+
+    # Set data received at different hours
+    datavalues[3].sensordata.update_modified = False
+    datavalues[3].sensordata.timestamp = now - datetime.timedelta(hours=1)
+    datavalues[3].sensordata.save()
+    datavalues[4].sensordata.update_modified = False
+    datavalues[4].sensordata.timestamp = now - datetime.timedelta(hours=2)
+    datavalues[4].sensordata.save()
+    datavalues[5].sensordata.update_modified = False
+    datavalues[5].sensordata.timestamp = now - datetime.timedelta(hours=3)
+    datavalues[5].sensordata.save()
+
+
+@pytest.fixture
+def additional_sensorsdatastats(sensors, locations, modified_datavalues):
     sensordata = SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),

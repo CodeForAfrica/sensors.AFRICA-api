@@ -2,10 +2,11 @@ import datetime
 
 import pytest
 from django.utils import timezone
+import dateutil.parser
 
 @pytest.mark.django_db
 class TestGettingData:
-    def test_getting_air_data_now(self, client, datavalues):
+    def test_getting_air_data_now(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam", format="json")
         assert response.status_code == 200
@@ -31,7 +32,7 @@ class TestGettingData:
         assert result["P2"]["maximum"] == 8.0
         assert result["P2"]["minimum"] == 0.0
 
-    def test_getting_air_data_now_all_cities(self, client, datavalues):
+    def test_getting_air_data_now_all_cities(self, client, modified_datavalues):
         response = client.get("/v2/data/air/", format="json")
         assert response.status_code == 200
 
@@ -41,14 +42,14 @@ class TestGettingData:
 
         results = data["results"]
 
-        assert results[0]["city_slug"] == "Bagamoyo"
-        assert results[1]["city_slug"] == "Dar es Salaam"
+        assert results[0]["city_name"] == "Bagamoyo"
+        assert results[1]["city_name"] == "Dar es Salaam"
         assert "P1" in results[1]
-        assert results[1]["city_slug"] == "Dar es Salaam"
+        assert results[1]["city_name"] == "Dar es Salaam"
         assert "P2" in results[1]
-        assert results[2]["city_slug"] == "Nairobi"
+        assert results[2]["city_name"] == "Nairobi"
 
-    def test_getting_air_data_now_filter_cities(self, client, datavalues):
+    def test_getting_air_data_now_filter_cities(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam,Bagamoyo", format="json"
         )
@@ -60,13 +61,13 @@ class TestGettingData:
 
         results = data["results"]
 
-        assert results[0]["city_slug"] == "Bagamoyo"
-        assert results[1]["city_slug"] == "Dar es Salaam"
+        assert results[0]["city_name"] == "Bagamoyo"
+        assert results[1]["city_name"] == "Dar es Salaam"
         assert "P1" in results[1]
-        assert results[1]["city_slug"] == "Dar es Salaam"
+        assert results[1]["city_name"] == "Dar es Salaam"
         assert "P2" in results[1]
 
-    def test_getting_air_data_value_type(self, client, datavalues):
+    def test_getting_air_data_value_type(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&value_type=P2", format="json"
         )
@@ -80,7 +81,7 @@ class TestGettingData:
         assert "temperature" not in data["results"][0]
         assert "humidity" not in data["results"][0]
 
-    def test_getting_air_data_from_date(self, client, datavalues):
+    def test_getting_air_data_from_date(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&from=%s"
             % (timezone.now() - datetime.timedelta(days=2)).date(),
@@ -94,14 +95,12 @@ class TestGettingData:
 
         # Data is in descending order by date
         most_recent_value = data["results"][0]["P2"][0]
-        most_recent_date = datetime.datetime.strptime(
-            most_recent_value["end_datetime"], "%Y-%m-%dT%H:%M:%SZ"
-        )
+        most_recent_date = dateutil.parser.parse(most_recent_value["end_datetime"])
 
         # Check today is not included
         assert most_recent_date.date() < datetime.datetime.today().date()
 
-    def test_getting_air_data_from_date_to_date(self, client, datavalues):
+    def test_getting_air_data_from_date_to_date(self, client, modified_datavalues):
         now = timezone.now()
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&from=%s&to=%s" % (
@@ -116,7 +115,7 @@ class TestGettingData:
         assert type(data["results"][0]["P1"]) == list
         assert type(data["results"][0]["P2"]) == list
 
-    def test_getting_air_data_with_invalid_request(self, client, datavalues):
+    def test_getting_air_data_with_invalid_request(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&to=2019-02-08", format="json"
         )
@@ -124,7 +123,7 @@ class TestGettingData:
         assert response.json() == {
             "from": "Must be provide along with to query"}
 
-    def test_getting_air_data_with_invalid_from_request(self, client, datavalues):
+    def test_getting_air_data_with_invalid_from_request(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&from=2019-23-08", format="json"
         )
@@ -132,7 +131,7 @@ class TestGettingData:
         assert response.json() == {
             "from": "Must be a date in the format Y-m-d."}
 
-    def test_getting_air_data_with_invalid_to_request(self, client, datavalues):
+    def test_getting_air_data_with_invalid_to_request(self, client, modified_datavalues):
         response = client.get(
             "/v2/data/air/?city=Dar es Salaam&from=2019-02-08&to=08-02-2019",
             format="json",

@@ -129,14 +129,14 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         value_type_to_filter = self.request.query_params.get(
             "value_type", None)
 
-        filter_value_types = ",".join(value_types[sensor_type])
+        filter_value_types = value_types[sensor_type]
         if value_type_to_filter:
-            filter_value_types = ",".join(set(value_type_to_filter.upper().split(",")) & set(
+            filter_value_types = set(value_type_to_filter.upper().split(",")) & set(
                 [x.upper() for x in value_types[sensor_type]]
-            ))
+            )
 
         if not from_date and not to_date:
-            to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
+            to_date = timezone.now()
             from_date = to_date - datetime.timedelta(hours=24)
         elif not to_date:
             from_date = beginning_of_day(from_date)
@@ -147,13 +147,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             from_date = beginning_of_day(from_date)
             to_date = end_of_day(to_date)
 
-        if city_names:
-            city_names = ",".join(map(lambda city: "'%s'" %
-                                      city, city_names.split(',')))
-
-        if filter_value_types:
-            filter_value_types = ",".join(map(
-                lambda filter_value_type: "'%s'" % filter_value_type, filter_value_types.split(',')))
+        city_names = city_names.split(',') if city_names else []
 
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -164,33 +158,38 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
                         sum(CAST("value" as float)) / COUNT(*) AS average,
                         min(CAST("value" as float)) as minimum,
                         max(CAST("value" as float)) as maximum,
-                        v.value_type
+                        v.value_type,
+                        STRING_AGG("value" || ' ' || sd."timestamp", ',') as debug
                     FROM
                         sensors_sensordatavalue v
                         INNER JOIN sensors_sensordata sd ON sd.id = sensordata_id
                         INNER JOIN sensors_sensorlocation sl ON sl.id = location_id
                     WHERE
-                        v.value_type IN (%(filter_value_types)s)
+                        v.value_type IN %(filter_value_types)s
                         AND v.value ~ '^\\-?\\d+(\\.?\\d+)?$'
                         """
                            +
-                           ("AND sl.city IN (%(city_names)s)" if city_names else "")
+                           ("AND sl.city IN %(city_names)s" if len(city_names) > 0 else "")
                            +
                            """
-                                        AND sd."timestamp" >= TIMESTAMP %(from_date)s
-                                        AND sd."timestamp" <= TIMESTAMP %(to_date)s
+                        AND sd."timestamp" >= %(from_date)s
+                        AND sd."timestamp" <= %(to_date)s
                     GROUP BY
                         DATE_TRUNC(%(trunc)s, sd."timestamp"),
                         v.value_type,
                         sl.city
                 """, {
-                               'filter_value_types': filter_value_types,
-                               'city_names': city_names,
-                               'from_date': from_date,
-                               'to_date': to_date,
-                               'trunc': avg
-                           })
-            return cursor.fetchall()
+                                'filter_value_types': tuple(filter_value_types),
+                                'city_names': tuple(city_names),
+                                'from_date': from_date,
+                                'to_date': to_date,
+                                'trunc': avg
+                            })
+            res = cursor.fetchall()
+
+            print(res)
+
+            return res
 
 
 class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
