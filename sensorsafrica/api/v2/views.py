@@ -60,6 +60,7 @@ class CustomPagination(pagination.PageNumberPagination):
         # If filtering from a date
         # We will need to have a list of the value_types e.g. { 'P1': [{}, {}] }
         from_date = self.request.query_params.get("from", None)
+        interval = self.request.query_params.get("interval", None)
 
         results = {}
         for data_stat in data_stats:
@@ -69,14 +70,14 @@ class CustomPagination(pagination.PageNumberPagination):
             if city_slug not in results:
                 results[city_slug] = {
                     "city_slug": city_slug,
-                    value_type: [] if from_date else {},
+                    value_type: [] if from_date or interval else {},
                 }
 
             if value_type not in results[city_slug]:
-                results[city_slug][value_type] = [] if from_date else {}
+                results[city_slug][value_type] = [] if from_date or interval else {}
 
             values = results[city_slug][value_type]
-            include_result = getattr(values, "append" if from_date else "update")
+            include_result = getattr(values, "append" if from_date or interval else "update")
             include_result(
                 {
                     "average": data_stat["calculated_average"],
