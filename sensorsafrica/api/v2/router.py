@@ -5,7 +5,7 @@ from .views import SensorDataStatView, CityView, NodesView
 
 data_router = routers.DefaultRouter()
 
-data_router.register(r"", SensorDataStatView)
+data_router.register(r"", SensorDataStatView, basename="sensor_data_stat_view")
 
 city_router = routers.DefaultRouter()
 
