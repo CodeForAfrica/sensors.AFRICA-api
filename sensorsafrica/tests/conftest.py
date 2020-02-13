@@ -1,4 +1,6 @@
 import datetime
+import math
+from dateutil.relativedelta import relativedelta
 
 import pytest
 from django.core.management import call_command
@@ -227,6 +229,33 @@ def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
     from django.core.management import call_command
 
     call_command("calculate_data_statistics")
+
+
+@pytest.fixture
+def large_sensorsdatastats(sensors, locations):
+
+    now = timezone.now()
+    months = 6
+    points = math.floor((now - (now - relativedelta(months=months-1))).days * 24 * 60 / 5)
+    minutes = points * 5 * months
+    for point in range(1, points):
+        created_sd = SensorData.objects.create(sensor=sensors[0], location=locations[0])
+        created_sv = SensorDataValue.objects.create(sensordata=created_sd, value="4", value_type="P2")
+        created_sv.update_modified = False
+        created_sv.created = now - datetime.timedelta(minutes=point * 5)
+        created_sv.save()
+
+        last_date = created_sv.created
+
+    from django.core.management import call_command
+
+    call_command("calculate_data_statistics")
+
+    return {
+        'months': months,
+        'minutes': minutes,
+        'last_date': last_date
+    }
 
 
 @pytest.fixture
