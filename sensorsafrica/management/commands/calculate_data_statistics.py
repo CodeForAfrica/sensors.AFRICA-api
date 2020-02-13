@@ -94,7 +94,7 @@ class Command(BaseCommand):
                         ~Q(minimum=float("NaN")),
                         ~Q(maximum=float("NaN")),
                     )
-                    .order_by("-timestamp")):
+                    .order_by("timestamp")):
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )
