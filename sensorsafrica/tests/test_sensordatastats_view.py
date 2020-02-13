@@ -163,3 +163,35 @@ class TestGettingData:
 
         assert result["P2"]["maximum"] == 8.0
         assert result["P2"]["minimum"] == 0.0
+
+    def test_getting_air_data_by_hour(self, client, sensorsdatastats):
+        response = client.get(
+            "/v2/data/air/?city=dar-es-salaam&interval=hour",
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 1
+
+        assert type(data["results"][0]["P1"]) == list
+        assert len(data["results"][0]["P1"]) == 1
+        assert type(data["results"][0]["P2"]) == list
+        assert len(data["results"][0]["P2"]) == 4
+
+    def test_getting_air_data_by_month(self, client, sensorsdatastats):
+        response = client.get(
+            "/v2/data/air/?city=dar-es-salaam&interval=month",
+            format="json",
+        )
+        assert response.status_code == 200
+
+        data = response.json()
+
+        assert data["count"] == 1
+
+        assert type(data["results"][0]["P1"]) == list
+        assert len(data["results"][0]["P1"]) == 1
+        assert type(data["results"][0]["P2"]) == list
+        assert len(data["results"][0]["P2"]) == 1

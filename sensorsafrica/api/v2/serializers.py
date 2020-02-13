@@ -2,9 +2,9 @@ from rest_framework import serializers
 
 
 class SensorDataStatSerializer(serializers.Serializer):
-    average = serializers.FloatField()
-    minimum = serializers.FloatField()
-    maximum = serializers.FloatField()
+    calculated_average = serializers.FloatField()
+    calculated_minimum = serializers.FloatField()
+    calculated_maximum = serializers.FloatField()
     value_type = serializers.CharField(max_length=200)
     start_datetime = serializers.DateTimeField()
     end_datetime = serializers.DateTimeField()
