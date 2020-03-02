@@ -103,7 +103,8 @@ class Command(BaseCommand):
                     )
 
                     # Cleanup
-                    os.remove(filepath)
+                    if os.path.exists(filepath):
+                        os.remove(filepath)
 
                     # Don't DDOS openAFRICA
                     time.sleep(5)
