@@ -34,7 +34,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("SENSORSAFRICA_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [".sensors.africa"]
 
 CORS_ORIGIN_ALLOW_ALL = True
 
