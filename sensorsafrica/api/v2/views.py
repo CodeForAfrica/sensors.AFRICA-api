@@ -11,7 +11,7 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, LastActiveNodes, City, Node
+from ..models import SensorDataStat, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination

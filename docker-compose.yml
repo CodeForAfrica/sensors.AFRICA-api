@@ -1,40 +1,96 @@
 version: '3.3'
 
 services:
-  rabbitmq:
-    image: rabbitmq:3.5.1
+  # localstack:
+  #     image: localstack/localstack
+  #     ports:
+  #       - "4567-4599:4567-4599"
+  #       - "8080:8080"
+  #     environment:
+  #       - DEBUG=1
+  telegraf:
+    image: telegraf
+    volumes:
+      - ./etc/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    links:
+      - influxdb
     ports:
-      - 4369:4369
-      - 5672:5672
-      - 25672:25672
-      - 15672:15672
-    environment:
-      - RABBITMQ_USERNAME=sensorsafrica
-      - RABBITMQ_PASSWORD=sensorsafrica
+      - "8092:8092/udp"
+      - "8094:8094"
+      - "8125:8125/udp"
+  # Define an InfluxDB service
   postgres:
     image: postgres:9.6
+    environment:
+      POSTGRES_USER: sensorsafrica
+      POSTGRES_PASSWORD: sensorsafrica
+      POSTGRES_DB: sensorsafrica
     ports:
-      - "54321:5432"
-    environment:
-      - POSTGRES_USER=sensorsafrica
-      - POSTGRES_PASSWORD=sensorsafrica
-      - POSTGRES_DB=sensorsafrica
-  api:
-    build:
-      context: .
-    environment:
-      SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
-      SENSORSAFRICA_RABBITMQ_URL: amqp://sensorsafrica:sensorsafrica@rabbitmq//
-      SENSORSAFRICA_FLOWER_ADMIN_USERNAME: admin
-      SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: password
-      DOKKU_APP_NAME: sensorsafrica
-    depends_on:
-      - postgres
-      - rabbitmq
-    links:
-      - postgres
+      - "5432:5432"
+  influxdb:
+    image: influxdb
     volumes:
-      - .:/src
+      - ./data/influxdb:/var/lib/influxdb
+    environment:
+      INFLUXDB_DB: sensorsafrica
+      INFLUXDB_ADMIN_USER: sensorsafrica
+      INFLUXDB_ADMIN_PASSWORD: sensorsafrica
     ports:
-      - "8000:8000"
-      - "5555:5555"
+      - "8083:8083"
+      - "8086:8086"
+      - "8090:8090"
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "4000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_PATHS_CONFIG: /etc/grafana/grafana.ini
+      GF_INSTALL_PLUGINS: grafana-clock-panel,briangann-gauge-panel,natel-plotly-panel,grafana-simple-json-datasource
+    # User ID changes
+    user: "0"
+    links:
+      - influxdb
+  # Define a Chronograf service
+  chronograf:
+    image: chronograf
+    environment:
+      INFLUXDB_URL: http://influxdb:8086
+      INFLUXDB_ADMIN_USER: sensorsafrica
+      INFLUXDB_ADMIN_PASSWORD: sensorsafrica
+      KAPACITOR_URL: http://kapacitor:9092
+    ports:
+      - "8888:8888"
+    links:
+      - influxdb
+      - kapacitor
+  # Define a Kapacitor service
+  kapacitor:
+    image: kapacitor
+    environment:
+      KAPACITOR_HOSTNAME: kapacitor
+      KAPACITOR_INFLUXDB_0_URLS_0: http://influxdb:8086
+    links:
+      - influxdb
+    ports:
+      - "9092:9092"
+  # Define a service for using the influx CLI tool.
+  # docker-compose run influxdb-cli
+  influxdb-cli:
+    image: influxdb
+    entrypoint:
+      - influx
+      - -host
+      - influxdb
+    links:
+      - influxdb
+  # Define a service for using the kapacitor CLI tool.
+  # docker-compose run kapacitor-cli
+  kapacitor-cli:
+    image: kapacitor
+    entrypoint: bash
+    environment:
+      KAPACITOR_URL: http://kapacitor:9092
+    links:
+      - kapacitor

@@ -1,6 +1,8 @@
 import datetime
 import pytz
 import json
+from geohash import encode
+from random import random
 
 from rest_framework.exceptions import ValidationError
 
@@ -11,40 +13,31 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncDate
 from rest_framework import mixins, pagination, viewsets
 
-from .serializers import SensorDataSerializer
-from feinstaub.sensors.models import SensorData
+from sensorsafrica.influxclient import client
+
+from rest_framework.response import Response
 
 
-class SensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = SensorDataSerializer
+class PushSensorDataViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
+    def create(self, request):
+        client.write_points([{
+            "tags": {
+                "node_uid": "0",
+                "node_owner": "cfa",
+                "sensor_uid": "a",
+                "sensor_name": "b",
+                "sensor_manufacturer": "c",
+                "lat": -6.7924,
+                "lng": 39.2083,
+                "country": "TZ",
+                "city": "dar-es-salaam",
+                "geohash": encode(-6.7924, 39.2083)
+            },
+            "fields": {
+                "P2": random() * 50,
+                "P1": random() * 50
+            },
+            "measurement": "pm"
+        }])
 
-    def get_queryset(self):
-        return (
-            SensorData.objects
-            .filter(
-                timestamp__gte=timezone.now() - datetime.timedelta(minutes=5),
-                sensor=self.kwargs["sensor_id"]
-            )
-            .only('sensor', 'timestamp')
-            .prefetch_related('sensordatavalues')
-        )
-
-
-class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
-    serializer_class = SensorDataSerializer
-
-    def get_queryset(self):
-        sensor_type = self.request.GET.get('type', r'\w+')
-        country = self.request.GET.get('country', r'\w+')
-        city = self.request.GET.get('city', r'\w+')
-        return (
-            SensorData.objects
-            .filter(
-                timestamp__gte=timezone.now() - datetime.timedelta(minutes=5),
-                sensor__sensor_type__uid__iregex=sensor_type,
-                location__country__iregex=country,
-                location__city__iregex=city
-            )
-            .only('sensor', 'timestamp')
-            .prefetch_related('sensordatavalues')
-        )
+        return Response({"ok": 1})

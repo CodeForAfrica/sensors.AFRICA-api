@@ -400,3 +400,6 @@ celerybeat.pid
 logs/
 
 /static
+node_modules
+etc/
+data/

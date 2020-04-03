@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-
 import dj_database_url
+
 import sentry_sdk
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -50,24 +50,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_extensions",
-    "django_filters",
     # Django Rest Framework
     "rest_framework",
     "rest_framework.authtoken",
-    # Feinstaub
-    "feinstaub",
-    "feinstaub.main",
-    "feinstaub.sensors",
     # API
-    "sensorsafrica",
-    'corsheaders',
+    "sensorsafrica"
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -103,7 +96,8 @@ DATABASE_URL = os.getenv(
     "SENSORSAFRICA_DATABASE_URL",
     "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
 )
-DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+
+DATABASES = { "default": dj_database_url.parse(DATABASE_URL) }
 
 
 # Password validation
@@ -184,7 +178,14 @@ sentry_sdk.init(
 )
 
 
-# Put fenstaub migrations into sensorsafrica
-MIGRATION_MODULES = {
-    'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
-}
+# Put feinstaub migrations into sensorsafrica
+# MIGRATION_MODULES = {
+#     'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
+# }
+
+INFLUXDB_HOST = 'localhost'
+INFLUXDB_PORT = 8086
+INFLUXDB_USERNAME = 'sensorsafrica'
+INFLUXDB_PASSWORD = 'sensorsafrica'
+INFLUXDB_DATABASE = 'sensorsafrica'
+INFLUXDB_TIMEOUT = 10
