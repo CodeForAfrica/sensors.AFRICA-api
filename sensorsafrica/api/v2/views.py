@@ -9,7 +9,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
-from rest_framework import mixins, pagination, viewsets
+from rest_framework import mixins, pagination, viewsets, permissions
 
 from ..models import SensorDataStat, LastActiveNodes, City, Node
 from .serializers import SensorDataStatSerializer, CitySerializer
@@ -190,10 +190,14 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         )
 
 
-class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
+class CityView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
 
 class NodesView(viewsets.ViewSet):
