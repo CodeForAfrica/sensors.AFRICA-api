@@ -4,7 +4,7 @@ dj-database-url==0.5.0
 timeago==1.0.10
 
 flower==0.9.2
-tornado<6
+tornado<7
 sentry-sdk==0.7.3
 celery==4.2.1
 gevent==1.2.2
