@@ -7,6 +7,7 @@ from ...api.models import SensorDataStat
 
 from django.core.paginator import Paginator
 
+date = 'sonos'
 
 def map_stat(stat, city):
     return SensorDataStat(
@@ -47,30 +48,54 @@ class Command(BaseCommand):
             if not city:
                 continue
 
-            last_date_time = (
-                SensorDataStat.objects.filter(city_slug=slugify(city))
-                .values_list("last_datetime", flat=True)
-                .order_by("-last_datetime")[:1]
-            )
+            # last_date_time = (
+            #     SensorDataStat.objects.filter(city_slug=slugify(city))
+            #     .values_list("last_datetime", flat=True)
+            #     .order_by("-last_datetime")[:1]
+            # )
 
-            if last_date_time:
-                queryset = SensorDataValue.objects.filter(
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> STARTING BATCH')
+
+            last_date_time = '2020-11-01 00:00:00'
+            end_date_time = '2020-11-17 23:59:59'
+
+            print('start time>>>>>>>>>>>>>>>>>>> ', last_date_time)
+            print('end time>>>>>>>>>>>>>>>>>>> ', end_date_time)
+
+            queryset = SensorDataValue.objects.filter(
                     Q(sensordata__location__city__iexact=city),
                     # Get dates greater than last stat calculation
                     Q(created__gt=last_date_time),
+                    # TODO: Remove this code after data migration is completed
+                    Q(created__lt=end_date_time),
                     # Ignore timestamp values
                     ~Q(value_type="timestamp"),
                     # Match only valid float text
                     Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
                 )
-            else:
-                queryset = SensorDataValue.objects.filter(
-                    Q(sensordata__location__city__iexact=city),
-                    # Ignore timestamp values
-                    ~Q(value_type="timestamp"),
-                    # Match only valid float text
-                    Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
-                )
+
+            # if last_date_time:
+            #     queryset = SensorDataValue.objects.filter(
+            #         Q(sensordata__location__city__iexact=city),
+            #         # Get dates greater than last stat calculation
+            #         Q(created__gt=last_date_time),
+            #         # TODO: Remove this code after data migration is completed
+            #         Q(created__lt=end_date_time),
+            #         # Ignore timestamp values
+            #         ~Q(value_type="timestamp"),
+            #         # Match only valid float text
+            #         Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
+            #     )
+            # else:
+            #     queryset = SensorDataValue.objects.filter(
+            #         Q(sensordata__location__city__iexact=city),
+            #         # Ignore timestamp values
+            #         # TODO: Remove this code after data migration is completed
+            #         Q(created__lt=end_date_time),
+            #         ~Q(value_type="timestamp"),
+            #         # Match only valid float text
+            #         Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
+            #     )
 
             for stats in chunked_iterator(
                 queryset.annotate(timestamp=TruncHour("created"))
@@ -95,6 +120,8 @@ class Command(BaseCommand):
                         ~Q(maximum=float("NaN")),
                     )
                     .order_by("timestamp")):
+                print('STATS>>>>>>>>>>>>', stats)
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )
+            print('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> FINISHING BATCH')
