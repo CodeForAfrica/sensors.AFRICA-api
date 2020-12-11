@@ -12,7 +12,7 @@ from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat, LastActiveNodes, City, Node, SensorLocation
-from .serializers import SensorDataStatSerializer, CitySerializer, SensorLocationSerializer
+from .serializers import SensorDataStatSerializer, CitySerializer, SensorLocationSerializer, NodeSerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
 
@@ -22,7 +22,7 @@ from django.utils.text import slugify
 
 from rest_framework.response import Response
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -199,6 +199,14 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
+
     def list(self, request):
         nodes = []
         # Loop through the last active nodes
@@ -276,6 +284,14 @@ class NodesView(viewsets.ViewSet):
             )
         return Response(nodes)
 
+    def create(self, request):
+        serializer = NodeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=204)
+
+        return Response(serializer.errors, status=400)
+
 
 class SensorsLocationView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
@@ -293,5 +309,4 @@ class SensorsLocationView(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=204)
-        
         return Response(serializer.errors, status=400)
