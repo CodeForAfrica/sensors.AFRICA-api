@@ -24,7 +24,7 @@ class CitySerializer(serializers.Serializer):
         return "{}, {}".format(obj.name, obj.country)
 
 
-class LocationSerializer(NestedSensorLocationSerializer):
+class SensorLocationSerializer(NestedSensorLocationSerializer):
     class Meta(NestedSensorLocationSerializer.Meta):
         fields = NestedSensorLocationSerializer.Meta.fields + \
             (
