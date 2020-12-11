@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from feinstaub.sensors.serializers import NestedSensorLocationSerializer
 
 
 class SensorDataStatSerializer(serializers.Serializer):
@@ -21,3 +22,22 @@ class CitySerializer(serializers.Serializer):
 
     def get_label(self, obj):
         return "{}, {}".format(obj.name, obj.country)
+
+
+class LocationSerializer(NestedSensorLocationSerializer):
+    class Meta(NestedSensorLocationSerializer.Meta):
+        fields = NestedSensorLocationSerializer.Meta.fields + \
+            (
+                'longitude',
+                'latitude',
+                'altitude',
+                'street_name',
+                'street_number',
+                'city',
+                'country',
+                'postalcode',
+                'traffic_in_area',
+                'oven_in_area',
+                'industry_in_area',
+                'owner',
+            )
