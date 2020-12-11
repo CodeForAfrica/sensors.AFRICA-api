@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from feinstaub.sensors.serializers import NestedSensorLocationSerializer, NestedSensorTypeSerializer
-from feinstaub.sensors.models import Sensor
+from feinstaub.sensors.models import Node, Sensor
 
 
 class SensorDataStatSerializer(serializers.Serializer):
@@ -45,4 +45,21 @@ class SensorLocationSerializer(NestedSensorLocationSerializer):
                 'oven_in_area',
                 'industry_in_area',
                 'owner',
+            )
+class NodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Node
+        fields = (
+                'uid',
+                'owner',
+                'location',
+                'name',
+                'description',
+                'height',
+                'sensor_position',
+                'email',
+                'last_notify',
+                'indoor',
+                'inactive',
+                'exact_location',
             )
