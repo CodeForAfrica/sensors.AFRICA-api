@@ -16,7 +16,7 @@ nodes_router = routers.DefaultRouter()
 nodes_router.register(r"", NodesView, basename="map")
 
 sensors_location_router = routers.DefaultRouter()
-sensors_location_router.register(r"", SensorsLocationView)
+sensors_location_router.register(r"", SensorsLocationView, basename="location")
 
 api_urls = [
     url(r"data/(?P<sensor_type>[air]+)/", include(data_router.urls)),
