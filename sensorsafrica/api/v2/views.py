@@ -280,6 +280,7 @@ class NodesView(viewsets.ViewSet):
 class SensorsLocationView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
 
     def list(self, request):
         queryset = SensorLocation.objects.all()
