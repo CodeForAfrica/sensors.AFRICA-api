@@ -57,3 +57,16 @@ class LastActiveNodes(TimeStampedModel):
 
     class Meta:
         unique_together = ['node', 'location']
+
+
+class SensorNetwork():
+    uid = models.SlugField(unique=True, db_index=True)
+    name = models.CharField(max_length=255, null=False, blank=False)
+    description = models.CharField(max_length=10000, null=True, blank=True)
+
+    class Meta:
+        ordering = ['name', ]
+
+    def __str__(self):
+        return self.uid
+
