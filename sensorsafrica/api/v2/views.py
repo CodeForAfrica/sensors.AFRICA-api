@@ -12,11 +12,11 @@ from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
 from ..models import SensorDataStat, LastActiveNodes, City, Node, Sensor, SensorLocation
-from .serializers import SensorDataStatSerializer, CitySerializer, SensorSerializer, SensorLocationSerializer
+from .serializers import SensorDataStatSerializer, CitySerializer, NestedSensorTypeSerializer, SensorSerializer, SensorLocationSerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
 
-from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue
+from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue, SensorType
 
 from django.utils.text import slugify
 
@@ -316,6 +316,25 @@ class SensorsView(viewsets.ViewSet):
     
     def create(self, request):
         serializer = SensorSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=204)
+        
+        return Response(serializer.errors, status=400)
+
+class SensorsTypeView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        queryset = SensorType.objects.all()
+        serializer = NestedSensorTypeSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = NestedSensorTypeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=204)
