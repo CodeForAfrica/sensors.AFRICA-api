@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from feinstaub.sensors.serializers import NestedSensorLocationSerializer
+from feinstaub.sensors.serializers import NestedSensorLocationSerializer, SensorSerializer
 
 
 class SensorDataStatSerializer(serializers.Serializer):

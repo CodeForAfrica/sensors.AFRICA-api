@@ -11,8 +11,8 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, LastActiveNodes, City, Node, SensorLocation
-from .serializers import SensorDataStatSerializer, CitySerializer, SensorLocationSerializer
+from ..models import SensorDataStat, LastActiveNodes, City, Node, Sensor, SensorLocation
+from .serializers import SensorDataStatSerializer, CitySerializer, SensorSerializer, SensorLocationSerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
 
@@ -290,6 +290,25 @@ class SensorsLocationView(viewsets.ViewSet):
     
     def create(self, request):
         serializer = SensorLocationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=204)
+        
+        return Response(serializer.errors, status=400)
+
+class SensorsView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        queryset = Sensor.objects.all()
+        serializer = SensorSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = SensorSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=204)
