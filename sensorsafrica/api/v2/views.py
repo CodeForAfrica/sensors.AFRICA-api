@@ -322,7 +322,7 @@ class SensorsView(viewsets.ViewSet):
         
         return Response(serializer.errors, status=400)
 
-class SensorsTypeView(viewsets.ViewSet):
+class SensorTypeView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
