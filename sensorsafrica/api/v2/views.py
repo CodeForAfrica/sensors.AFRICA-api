@@ -11,12 +11,12 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, LastActiveNodes, City, Node, SensorLocation
-from .serializers import SensorDataStatSerializer, CitySerializer, SensorLocationSerializer, NodeSerializer
+from ..models import SensorDataStat, LastActiveNodes, City, Node, Sensor, SensorLocation
+from .serializers import SensorDataStatSerializer, CitySerializer, NestedSensorTypeSerializer, NodeSerializer, SensorSerializer, SensorLocationSerializer
 
 from feinstaub.sensors.views import StandardResultsSetPagination
 
-from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue
+from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue, SensorType
 
 from django.utils.text import slugify
 
@@ -309,4 +309,49 @@ class SensorsLocationView(viewsets.ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=204)
+        return Response(serializer.errors, status=400)
+
+class SensorsView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_permissions(self):
+        if self.action == 'create':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [AllowAny]
+        return [permission() for permission in permission_classes]
+
+    def list(self, request):
+        queryset = Sensor.objects.all()
+        serializer = SensorSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = SensorSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=204)
+        
+        return Response(serializer.errors, status=400)
+
+class SensorTypeView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        queryset = SensorType.objects.all()
+        serializer = NestedSensorTypeSerializer(queryset, many=True)
+
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = NestedSensorTypeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=204)
+        
         return Response(serializer.errors, status=400)

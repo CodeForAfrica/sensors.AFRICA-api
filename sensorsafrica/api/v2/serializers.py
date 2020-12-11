@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from feinstaub.sensors.serializers import NestedSensorLocationSerializer
-from feinstaub.sensors.models import Node
+from feinstaub.sensors.serializers import NestedSensorLocationSerializer, NestedSensorTypeSerializer
+from feinstaub.sensors.models import Node, Sensor
 
 
 class SensorDataStatSerializer(serializers.Serializer):
@@ -24,6 +24,10 @@ class CitySerializer(serializers.Serializer):
     def get_label(self, obj):
         return "{}, {}".format(obj.name, obj.country)
 
+class SensorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sensor
+        fields = ('id', 'node', 'description', 'pin', 'sensor_type', 'public')
 
 class SensorLocationSerializer(NestedSensorLocationSerializer):
     class Meta(NestedSensorLocationSerializer.Meta):
