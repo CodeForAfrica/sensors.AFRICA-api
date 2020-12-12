@@ -1,4 +1,5 @@
 import datetime
+import django_filters
 import pytz
 import json
 
@@ -14,8 +15,9 @@ from rest_framework import mixins, pagination, viewsets
 from ..models import SensorDataStat, LastActiveNodes, City, Node, Sensor, SensorLocation
 from .serializers import SensorDataStatSerializer, CitySerializer, NestedSensorTypeSerializer, NodeSerializer, SensorSerializer, SensorLocationSerializer
 
-from feinstaub.sensors.views import StandardResultsSetPagination
-
+from feinstaub.sensors.authentication import OwnerPermission
+from feinstaub.sensors.views import StandardResultsSetPagination, SensorFilter
+from feinstaub.sensors.serializers import VerboseSensorDataSerializer
 from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue, SensorType
 
 from django.utils.text import slugify
@@ -355,3 +357,21 @@ class SensorTypeView(viewsets.ViewSet):
             return Response(serializer.data, status=204)
         
         return Response(serializer.errors, status=400)
+
+
+class SensorDataView(viewsets.ViewSet):
+    permission_classes = (OwnerPermission,)
+    serializer_class = VerboseSensorDataSerializer
+    queryset = SensorData.objects.all()
+    pagination_class = StandardResultsSetPagination
+    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, )
+    filter_class = SensorFilter
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated():
+            if self.request.user.groups.filter(name="show_me_everything").exists():
+                return SensorData.objects.all()
+            return SensorData.objects.filter(Q(sensor__node__owner=self.request.user)
+
+        #public sensor can be queried without authentication                                     
+        return SensorData.objects.filter(sensor__public=True)

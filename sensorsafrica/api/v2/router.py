@@ -26,6 +26,7 @@ sensor_type_router.register(r"", SensorTypeView, basename="sensor_type")
 
 api_urls = [
     url(r"data/(?P<sensor_type>[air]+)/", include(data_router.urls)),
+    url(r"data/(?P<user>\d+)", include(sensors_router.urls)),
     url(r"cities/", include(city_router.urls)),
     url(r"nodes/", include(nodes_router.urls)),
     url(r"locations/", include(sensors_location_router.urls)),
