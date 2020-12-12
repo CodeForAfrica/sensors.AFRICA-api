@@ -410,7 +410,7 @@ class SensorDataView(viewsets.ViewSet):
         if self.request.user.is_authenticated():
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return SensorData.objects.all()
-            return SensorData.objects.filter(Q(sensor__node__owner=self.request.user)
+            return SensorData.objects.filter(Q(sensor__node__owner=self.request.user))
 
         #else filter public sensors                                     
         return SensorData.objects.filter(sensor__public=True)
