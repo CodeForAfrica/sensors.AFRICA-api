@@ -43,7 +43,6 @@ def sensor_type():
         uid="a", name="b", manufacturer="c")
     return st
 
-
 @pytest.fixture
 def node(logged_in_user, location):
     n, x = Node.objects.get_or_create(

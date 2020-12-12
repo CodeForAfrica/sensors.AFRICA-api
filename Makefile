@@ -25,9 +25,14 @@ migrate:
 test:
 	$(COMPOSE) exec api pytest --pylama
 
+testexpr:
+	$(COMPOSE) exec api pytest --pylama -k '$(expr)'
+
 createsuperuser:
 	$(COMPOSE) exec api python manage.py createsuperuser
 
+down:
+	$(COMPOSE) down
 
 clean:
 	@find . -name "*.pyc" -exec rm -rf {} \;
