@@ -27,10 +27,6 @@ class CitySerializer(serializers.Serializer):
     def get_label(self, obj):
         return "{}, {}".format(obj.name, obj.country)
 
-class SensorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sensor
-        fields = ('id', 'node', 'description', 'pin', 'sensor_type', 'public')
 
 class SensorSerializer(serializers.ModelSerializer):
     class Meta:
