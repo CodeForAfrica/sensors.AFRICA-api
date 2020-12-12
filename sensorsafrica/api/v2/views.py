@@ -373,5 +373,5 @@ class SensorDataView(viewsets.ViewSet):
                 return SensorData.objects.all()
             return SensorData.objects.filter(Q(sensor__node__owner=self.request.user)
 
-        #public sensor can be queried without authentication                                     
+        #else filter public sensors                                     
         return SensorData.objects.filter(sensor__public=True)
