@@ -397,32 +397,14 @@ class SensorsView(viewsets.ViewSet):
         
         return Response(serializer.errors, status=400)
 
-class SensorTypeView(viewsets.ViewSet):
-    authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    pagination_class = StandardResultsSetPagination
-
-    def list(self, request):
-        queryset = SensorType.objects.all()
-        serializer = NestedSensorTypeSerializer(queryset, many=True)
-
-        return Response(serializer.data)
-    
-    def create(self, request):
-        serializer = NestedSensorTypeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=204)
-        
-        return Response(serializer.errors, status=400)
-
 
 class SensorDataView(viewsets.ViewSet):
-    permission_classes = (OwnerPermission,)
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [OwnerPermission]
     serializer_class = VerboseSensorDataSerializer
     queryset = SensorData.objects.all()
     pagination_class = StandardResultsSetPagination
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend, )
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     filter_class = SensorFilter
 
     def get_queryset(self):
