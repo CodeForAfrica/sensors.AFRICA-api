@@ -22,7 +22,6 @@ from .serializers import (
     SensorLocationSerializer,
 )
 
-from feinstaub.sensors.authentication import OwnerPermission
 from feinstaub.sensors.serializers import VerboseSensorDataSerializer
 from feinstaub.sensors.views import StandardResultsSetPagination, SensorFilter
 
@@ -400,7 +399,7 @@ class SensorsView(viewsets.ViewSet):
 
 class SensorDataView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-    permission_classes = [OwnerPermission]
+    permission_classes = [IsAuthenticated]
     serializer_class = VerboseSensorDataSerializer
     queryset = SensorData.objects.all()
     pagination_class = StandardResultsSetPagination
