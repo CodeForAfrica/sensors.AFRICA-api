@@ -12,13 +12,28 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from rest_framework import mixins, pagination, viewsets
 
-from ..models import SensorDataStat, LastActiveNodes, City, Node, Sensor, SensorLocation
-from .serializers import SensorDataStatSerializer, CitySerializer, NestedSensorTypeSerializer, NodeSerializer, SensorSerializer, SensorLocationSerializer
+from ..models import SensorDataStat, LastActiveNodes, City
+from .serializers import (
+    SensorDataStatSerializer,
+    CitySerializer,
+    NestedSensorTypeSerializer,
+    NodeSerializer,
+    SensorSerializer,
+    SensorLocationSerializer,
+)
 
 from feinstaub.sensors.authentication import OwnerPermission
-from feinstaub.sensors.views import StandardResultsSetPagination, SensorFilter
 from feinstaub.sensors.serializers import VerboseSensorDataSerializer
-from feinstaub.sensors.models import SensorLocation, SensorData, SensorDataValue, SensorType
+from feinstaub.sensors.views import StandardResultsSetPagination, SensorFilter
+
+from feinstaub.sensors.models import (
+    Node,
+    Sensor,
+    SensorData,
+    SensorDataValue,
+    SensorLocation,
+    SensorType,
+)
 
 from django.utils.text import slugify
 
@@ -81,7 +96,9 @@ class CustomPagination(pagination.PageNumberPagination):
                 results[city_slug][value_type] = [] if from_date or interval else {}
 
             values = results[city_slug][value_type]
-            include_result = getattr(values, "append" if from_date or interval else "update")
+            include_result = getattr(
+                values, "append" if from_date or interval else "update"
+            )
             include_result(
                 {
                     "average": data_stat["calculated_average"],
@@ -102,7 +119,7 @@ class CustomPagination(pagination.PageNumberPagination):
         )
 
 
-class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
+class SensorDataStatsView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = SensorDataStat.objects.none()
     serializer_class = SensorDataStatSerializer
     pagination_class = CustomPagination
@@ -137,7 +154,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
         if not from_date and not to_date:
             to_date = timezone.now().replace(minute=0, second=0, microsecond=0)
             from_date = to_date - datetime.timedelta(hours=24)
-            interval = 'day' if not interval else interval
+            interval = "day" if not interval else interval
         elif not to_date:
             from_date = beginning_of_day(from_date)
             # Get data from_date until the end
@@ -153,9 +170,9 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             timestamp__lte=to_date,
         )
 
-        if interval == 'month':
+        if interval == "month":
             truncate = TruncMonth("timestamp")
-        elif interval == 'day':
+        elif interval == "day":
             truncate = TruncDay("timestamp")
         else:
             truncate = TruncHour("timestamp")
@@ -164,11 +181,7 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
             queryset = queryset.filter(city_slug__in=city_slugs.split(","))
 
         return (
-            queryset
-            .values(
-                "value_type",
-                "city_slug"
-            )
+            queryset.values("value_type", "city_slug")
             .annotate(
                 truncated_timestamp=truncate,
                 start_datetime=Min("timestamp"),
@@ -188,13 +201,13 @@ class SensorDataStatView(mixins.ListModelMixin, viewsets.GenericViewSet):
                 "end_datetime",
                 "calculated_average",
                 "calculated_minimum",
-                "calculated_maximum"
+                "calculated_maximum",
             )
             .order_by("city_slug", "-truncated_timestamp")
         )
 
 
-class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
+class CitiesView(mixins.ListModelMixin, viewsets.GenericViewSet):
     queryset = City.objects.all()
     serializer_class = CitySerializer
     pagination_class = StandardResultsSetPagination
@@ -202,11 +215,13 @@ class CityView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 class NodesView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
+
     def get_permissions(self):
-        if self.action == 'create':
+        if self.action == "create":
             permission_classes = [IsAuthenticated]
         else:
             permission_classes = [AllowAny]
+
         return [permission() for permission in permission_classes]
 
     def list(self, request):
@@ -267,10 +282,7 @@ class NodesView(viewsets.ViewSet):
                 {
                     "node_moved": moved_to is not None,
                     "moved_to": moved_to,
-                    "node": {
-                        "uid": last_active.node.uid,
-                        "id": last_active.node.id
-                    },
+                    "node": {"uid": last_active.node.uid, "id": last_active.node.id},
                     "location": {
                         "name": last_active.location.location,
                         "longitude": last_active.location.longitude,
@@ -290,12 +302,12 @@ class NodesView(viewsets.ViewSet):
         serializer = NodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=204)
+            return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
 
 
-class SensorsLocationView(viewsets.ViewSet):
+class SensorLocationsView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
@@ -303,14 +315,60 @@ class SensorsLocationView(viewsets.ViewSet):
     def list(self, request):
         queryset = SensorLocation.objects.all()
         serializer = SensorLocationSerializer(queryset, many=True)
-
         return Response(serializer.data)
-    
+
     def create(self, request):
         serializer = SensorLocationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=204)
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+
+class SensorsView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def get_permissions(self):
+        if self.action == "create":
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [AllowAny]
+
+        return [permission() for permission in permission_classes]
+
+    def list(self, request):
+        queryset = Sensor.objects.all()
+        serializer = SensorSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = SensorSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
+        return Response(serializer.errors, status=400)
+
+
+class SensorTypesView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        queryset = SensorType.objects.all()
+        serializer = NestedSensorTypeSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = NestedSensorTypeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+
         return Response(serializer.errors, status=400)
 
 class SensorsView(viewsets.ViewSet):
