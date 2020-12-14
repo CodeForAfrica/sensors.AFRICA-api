@@ -69,3 +69,8 @@ class NodeSerializer(serializers.ModelSerializer):
             "inactive",
             "exact_location",
         )
+
+
+class NestedSensorTypeSerializer(NestedSensorTypeSerializer):
+    class Meta(NestedSensorTypeSerializer.Meta):
+        fields = NestedSensorTypeSerializer.Meta.fields + ('uid', )
