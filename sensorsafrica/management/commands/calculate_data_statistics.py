@@ -1,11 +1,12 @@
 from django.core.management import BaseCommand
+from django.core.paginator import Paginator
 from django.db.models import Avg, Count, FloatField, Max, Min, Q
 from django.db.models.functions import Cast, TruncHour
 from django.utils.text import slugify
-from feinstaub.sensors.models import Node, Sensor, SensorDataValue, SensorLocation
-from ...api.models import SensorDataStat
 
-from django.core.paginator import Paginator
+from feinstaub.sensors.models import Node, Sensor, SensorDataValue, SensorLocation
+
+from sensorsafrica.api.models import SensorDataStat
 
 
 def map_stat(stat, city):
@@ -55,6 +56,8 @@ class Command(BaseCommand):
 
             if last_date_time:
                 queryset = SensorDataValue.objects.filter(
+                    # Pick data from public sensors only
+                    Q(sensordata__sensor__public=True),
                     Q(sensordata__location__city__iexact=city),
                     # Get dates greater than last stat calculation
                     Q(created__gt=last_date_time),
@@ -65,6 +68,8 @@ class Command(BaseCommand):
                 )
             else:
                 queryset = SensorDataValue.objects.filter(
+                    # Pick data from public sensors only
+                    Q(sensordata__sensor__public=True),
                     Q(sensordata__location__city__iexact=city),
                     # Ignore timestamp values
                     ~Q(value_type="timestamp"),
@@ -74,27 +79,28 @@ class Command(BaseCommand):
 
             for stats in chunked_iterator(
                 queryset.annotate(timestamp=TruncHour("created"))
-                    .values(
-                        "timestamp",
-                        "value_type",
-                        "sensordata__sensor",
-                        "sensordata__location",
-                        "sensordata__sensor__node",
-                    )
-                    .order_by()
-                    .annotate(
-                        last_datetime=Max("created"),
-                        average=Avg(Cast("value", FloatField())),
-                        minimum=Min(Cast("value", FloatField())),
-                        maximum=Max(Cast("value", FloatField())),
-                        sample_size=Count("created", FloatField()),
-                    )
-                    .filter(
-                        ~Q(average=float("NaN")),
-                        ~Q(minimum=float("NaN")),
-                        ~Q(maximum=float("NaN")),
-                    )
-                    .order_by("timestamp")):
+                .values(
+                    "timestamp",
+                    "value_type",
+                    "sensordata__sensor",
+                    "sensordata__location",
+                    "sensordata__sensor__node",
+                )
+                .order_by()
+                .annotate(
+                    last_datetime=Max("created"),
+                    average=Avg(Cast("value", FloatField())),
+                    minimum=Min(Cast("value", FloatField())),
+                    maximum=Max(Cast("value", FloatField())),
+                    sample_size=Count("created", FloatField()),
+                )
+                .filter(
+                    ~Q(average=float("NaN")),
+                    ~Q(minimum=float("NaN")),
+                    ~Q(maximum=float("NaN")),
+                )
+                .order_by("timestamp")
+            ):
                 SensorDataStat.objects.bulk_create(
                     list(map(lambda stat: map_stat(stat, city), stats))
                 )
