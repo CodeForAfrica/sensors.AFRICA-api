@@ -34,9 +34,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("SENSORSAFRICA_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = os.getenv(
-    "SENSORSAFRICA_ALLOWED_HOSTS", "*"
-).split(",")
+ALLOWED_HOSTS = os.getenv("SENSORSAFRICA_ALLOWED_HOSTS", "*").split(",")
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -60,7 +58,7 @@ INSTALLED_APPS = [
     "feinstaub.sensors",
     # API
     "sensorsafrica",
-    'corsheaders',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -76,6 +74,14 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "sensorsafrica.urls"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
+}
 
 TEMPLATES = [
     {
@@ -150,29 +156,30 @@ WHITENOISE_AUTOREFRESH = True
 
 # Celery Broker
 CELERY_BROKER_URL = os.environ.get(
-    "SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//")
+    "SENSORSAFRICA_RABBITMQ_URL", "amqp://sensorsafrica:sensorsafrica@localhost//"
+)
 CELERY_IGNORE_RESULT = True
 
 CELERY_BEAT_SCHEDULE = {
     "statistics-task": {
         "task": "sensorsafrica.tasks.calculate_data_statistics",
-        "schedule": crontab(hour="*", minute=0)
+        "schedule": crontab(hour="*", minute=0),
     },
     "archive-task": {
         "task": "sensorsafrica.tasks.archive_data",
-        "schedule": crontab(hour="*", minute=0)
+        "schedule": crontab(hour="*", minute=0),
     },
     "cache-lastactive-nodes-task": {
         "task": "sensorsafrica.tasks.cache_lastactive_nodes",
-        "schedule": crontab(minute="*/5")
+        "schedule": crontab(minute="*/5"),
     },
     "cache-static-json-data": {
         "task": "sensorsafrica.tasks.cache_static_json_data",
-        "schedule": crontab(minute="*/5")
+        "schedule": crontab(minute="*/5"),
     },
     "cache-static-json-data-1h-24h": {
         "task": "sensorsafrica.tasks.cache_static_json_data_1h_24h",
-        "schedule": crontab(hour="*", minute=0)
+        "schedule": crontab(hour="*", minute=0),
     },
 }
 
@@ -186,5 +193,5 @@ sentry_sdk.init(
 
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
-    'sensors': 'sensorsafrica.openstuttgart.feinstaub.sensors.migrations'
+    "sensors": "sensorsafrica.openstuttgart.feinstaub.sensors.migrations"
 }
