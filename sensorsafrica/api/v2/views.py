@@ -36,7 +36,7 @@ from ..models import City, LastActiveNodes, SensorDataStat
 from .serializers import (
     SensorDataStatSerializer,
     CitySerializer,
-    NestedSensorTypeSerializer,
+    SensorTypeSerializer,
     NodeSerializer,
     SensorSerializer,
     SensorLocationSerializer,
@@ -368,11 +368,11 @@ class SensorTypesView(viewsets.ViewSet):
 
     def list(self, request):
         queryset = SensorType.objects.all()
-        serializer = NestedSensorTypeSerializer(queryset, many=True)
+        serializer = SensorTypeSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def create(self, request):
-        serializer = NestedSensorTypeSerializer(data=request.data)
+        serializer = SensorTypeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=201)
