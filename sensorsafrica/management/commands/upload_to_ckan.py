@@ -28,7 +28,15 @@ class Command(BaseCommand):
             .distinct("city")
         )
         for city in city_queryset.iterator():
-            if not city:
+            # Ensure we have a city
+            if not city or city.isspace():
+                continue
+
+            # Ensure city has actual data we can upload
+            timestamp = SensorData.objects.filter(location__city=city).aggregate(
+                Max("timestamp"), Min("timestamp")
+            )
+            if not timestamp or not timestamp['timestamp__min'] or not timestamp['timestamp__max']:
                 continue
 
             try:
@@ -53,14 +61,11 @@ class Command(BaseCommand):
                     if not start_date or date > start_date:
                         start_date = date
 
-            timestamp = SensorData.objects.filter(location__city=city).aggregate(
-                Max("timestamp"), Min("timestamp")
-            )
-
-            if not start_date and "timestamp__min" in timestamp and timestamp["timestamp__min"] is not None:
+            if not start_date:
                 start_date = timestamp["timestamp__min"].replace(
                     day=1, hour=0, minute=0, second=0, microsecond=0
                 )
+
             end_date = timestamp["timestamp__max"].replace(
                 day=1, hour=0, minute=0, second=0, microsecond=0
             )
