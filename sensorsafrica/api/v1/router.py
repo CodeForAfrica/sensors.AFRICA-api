@@ -2,14 +2,13 @@
 from feinstaub.main.views import UsersView
 from feinstaub.sensors.views import (
     NodeView,
-    NowView,
     PostSensorDataView,
     SensorView,
     StatisticsView,
     SensorDataView,
 )
 
-from .views import SensorDataView as SensorsAfricaSensorDataView, FilterView
+from .views import FilterView, NowView, SensorDataView as SensorsAfricaSensorDataView
 
 from rest_framework import routers
 
