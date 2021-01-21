@@ -77,6 +77,7 @@ class Command(BaseCommand):
             while date <= end_date:
                 qs = (
                     SensorData.objects.filter(
+                        sensor__public=True,
                         location__city=city,
                         timestamp__month=date.month,
                         timestamp__year=date.year,
