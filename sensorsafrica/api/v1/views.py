@@ -9,12 +9,16 @@ from django.db.models.functions import Cast, TruncDate
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from rest_framework import mixins, pagination, viewsets
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from feinstaub.sensors.models import SensorData
-from feinstaub.sensors.serializers import NowSerializer
+from feinstaub.sensors.models import Node, SensorData
+from feinstaub.sensors.serializers import NodeSerializer, NowSerializer
+from feinstaub.sensors.views import StandardResultsSetPagination
 
 from .serializers import SensorDataSerializer
+
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
@@ -33,6 +37,34 @@ class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .only("sensor", "timestamp")
             .prefetch_related("sensordatavalues")
         )
+
+
+class NodeView(
+    mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
+):
+    """Show all nodes belonging to authenticated user"""
+
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    pagination_class = StandardResultsSetPagination
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = SensorData.objects.none()
+    serializer_class = NodeSerializer
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated():
+            if self.request.user.groups.filter(name="show_me_everything").exists():
+                return Node.objects.all()
+
+            return Node.objects.filter(
+                Q(owner=self.request.user)
+                | Q(
+                    owner__groups__name__in=[
+                        g.name for g in self.request.user.groups.all()
+                    ]
+                )
+            )
+
+        return Node.objects.none()
 
 
 class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
