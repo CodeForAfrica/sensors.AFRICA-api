@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 from django.utils import timezone
+from django.db import connection
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from django.utils.decorators import method_decorator
@@ -426,7 +427,6 @@ def meta_data(request):
     })
 
 def get_database_size():
-    from django.db import connection
     with connection.cursor() as c:
-        c.execute("SELECT pg_size_pretty(pg_database_size('sensorsafrica'))")
+        c.execute(f"SELECT pg_size_pretty(pg_database_size('{connection.settings_dict['NAME']}'))")
         return c.fetchall()
