@@ -9,6 +9,7 @@ from .views import (
     SensorLocationsView,
     SensorTypesView,
     SensorsView,
+    meta_data,
 )
 
 stat_data_router = routers.DefaultRouter()
@@ -40,4 +41,5 @@ api_urls = [
     url(r"locations/", include(sensor_locations_router.urls)),
     url(r"sensors/", include(sensors_router.urls)),
     url(r"sensor-types/", include(sensor_types_router.urls)),
+    url(r"meta/", meta_data),
 ]

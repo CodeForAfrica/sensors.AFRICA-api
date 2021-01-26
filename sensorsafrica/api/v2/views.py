@@ -18,6 +18,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view
 
 from feinstaub.sensors.views import SensorFilter, StandardResultsSetPagination
 
@@ -405,3 +406,27 @@ class SensorsView(viewsets.ViewSet):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+def meta_data(request):
+    nodes_count = Node.objects.count()
+    sensors_count = Sensor.objects.count()
+    sensor_data_count = SensorData.objects.count()
+    sensor_location_count = SensorLocation.objects.count()
+
+    database_size = get_database_size()
+
+    return Response({
+        "nodes_count": nodes_count,
+        "sensors_count": sensors_count,
+        "sensor_data_count": sensor_data_count,
+        "sensor_location_count": sensor_location_count,
+        "database_size": database_size[0]
+    })
+
+def get_database_size():
+    from django.db import connection
+    with connection.cursor() as c:
+        c.execute("SELECT pg_size_pretty(pg_database_size('sensorsafrica'))")
+        return c.fetchall()
