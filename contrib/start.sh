@@ -16,7 +16,8 @@ celery -A sensorsafrica flower --basic_auth=$SENSORSAFRICA_FLOWER_ADMIN_USERNAME
 echo Starting Gunicorn.
 exec gunicorn \
     --bind 0.0.0.0:8000 \
-    --workers 3 \
+    --timeout 180 \
+    --workers 5 \
     --worker-class gevent \
     --log-level=info \
     --log-file=/src/logs/gunicorn.log \
