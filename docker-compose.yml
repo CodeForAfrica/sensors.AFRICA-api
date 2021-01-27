@@ -28,7 +28,6 @@ services:
       SENSORSAFRICA_FLOWER_ADMIN_USERNAME: admin
       SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: password
       DOKKU_APP_NAME: sensorsafrica
-      NETWORKS_OWNER: data4dsgs
     depends_on:
       - postgres
       - rabbitmq
