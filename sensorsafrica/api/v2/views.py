@@ -5,6 +5,7 @@ import json
 
 from dateutil.relativedelta import relativedelta
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 from django.db import connection
@@ -19,7 +20,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 
 from feinstaub.sensors.views import SensorFilter, StandardResultsSetPagination
 
@@ -410,6 +411,7 @@ class SensorsView(viewsets.ViewSet):
 
 
 @api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
 def meta_data(request):
     nodes_count = Node.objects.count()
     sensors_count = Sensor.objects.count()
