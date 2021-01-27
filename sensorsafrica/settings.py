@@ -196,4 +196,4 @@ MIGRATION_MODULES = {
     "sensors": "sensorsafrica.openstuttgart.feinstaub.sensors.migrations"
 }
 
-NETWORKS_USER = os.getenv("NETWORKS_USER", "data4dsgs")
+NETWORKS_OWNER = os.environ["NETWORKS_OWNER"]
