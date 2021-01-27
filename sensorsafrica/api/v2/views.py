@@ -440,7 +440,7 @@ def get_sensors_networks():
 
 def get_sensors_locations():
     sensor_locations = SensorLocation.objects.filter(country__isnull=False).values_list('country', flat=True)
-    return set(sensor_locations)
+    return sorted(set(sensor_locations))
 
 def get_database_size():
     with connection.cursor() as c:
