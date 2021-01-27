@@ -4,6 +4,8 @@ from feinstaub.sensors.serializers import (
     NestedSensorTypeSerializer,
 )
 from feinstaub.sensors.models import Node, Sensor, SensorType
+from feinstaub.sensors.serializers import (VerboseSensorDataSerializer,
+    NestedSensorLocationSerializer, )
 
 
 class SensorDataStatSerializer(serializers.Serializer):
@@ -76,3 +78,12 @@ class NodeSerializer(serializers.ModelSerializer):
             "inactive",
             "exact_location",
         )
+
+class SensorLocationSerializer(NestedSensorLocationSerializer):
+    class Meta(NestedSensorLocationSerializer.Meta):
+        fields = NestedSensorLocationSerializer.Meta.fields + (
+            'country',
+        )
+
+class SensorDataSerializer(VerboseSensorDataSerializer):
+    location = SensorLocationSerializer()
