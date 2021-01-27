@@ -414,19 +414,30 @@ def meta_data(request):
     nodes_count = Node.objects.count()
     sensors_count = Sensor.objects.count()
     sensor_data_count = SensorData.objects.count()
-    sensor_location_count = SensorLocation.objects.count()
 
     database_size = get_database_size()
+    database_last_updated = get_database_last_updated()
+    sensors_locations = get_sensors_locations()
 
     return Response({
         "nodes_count": nodes_count,
         "sensors_count": sensors_count,
         "sensor_data_count": sensor_data_count,
-        "sensor_location_count": sensor_location_count,
-        "database_size": database_size[0]
+        "sensors_locations": sensors_locations,
+        "database_size": database_size[0],
+        "database_last_updated": database_last_updated,
     })
+
+def get_sensors_locations():
+    sensor_locations = SensorLocation.objects.values('country')
+    return set(map(lambda location: location['country'], sensor_locations))
 
 def get_database_size():
     with connection.cursor() as c:
         c.execute(f"SELECT pg_size_pretty(pg_database_size('{connection.settings_dict['NAME']}'))")
         return c.fetchall()
+
+def get_database_last_updated():
+    sensor_data_value = SensorDataValue.objects.last()
+    if sensor_data_value:
+        return sensor_data_value.modified
