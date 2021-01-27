@@ -5,8 +5,10 @@ import json
 
 from dateutil.relativedelta import relativedelta
 
+from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
+from django.db import connection
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from django.utils.decorators import method_decorator
@@ -18,6 +20,7 @@ from rest_framework.authentication import SessionAuthentication, TokenAuthentica
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view, authentication_classes
 
 from feinstaub.sensors.views import SensorFilter, StandardResultsSetPagination
 
@@ -405,3 +408,46 @@ class SensorsView(viewsets.ViewSet):
             return Response(serializer.data, status=201)
 
         return Response(serializer.errors, status=400)
+
+
+@api_view(['GET'])
+@authentication_classes([SessionAuthentication, TokenAuthentication])
+def meta_data(request):
+    nodes_count = Node.objects.count()
+    sensors_count = Sensor.objects.count()
+    sensor_data_count = SensorData.objects.count()
+
+    database_size = get_database_size()
+    database_last_updated = get_database_last_updated()
+    sensors_locations = get_sensors_locations()
+
+    return Response({
+        "sensor_networks": get_sensors_networks(),
+        "nodes_count": nodes_count,
+        "sensors_count": sensors_count,
+        "sensor_data_count": sensor_data_count,
+        "sensors_locations": sensors_locations,
+        "database_size": database_size[0],
+        "database_last_updated": database_last_updated,
+    })
+
+def get_sensors_networks():
+    user = User.objects.filter(username=settings.NETWORKS_OWNER).first()
+    if user:
+        networks = list(user.groups.values_list('name', flat=True))
+        networks.append("sensors.AFRICA")
+        return {"networks": networks, "count": len(networks)}
+
+def get_sensors_locations():
+    sensor_locations = SensorLocation.objects.filter(country__isnull=False).values_list('country', flat=True)
+    return set(sensor_locations)
+
+def get_database_size():
+    with connection.cursor() as c:
+        c.execute(f"SELECT pg_size_pretty(pg_database_size('{connection.settings_dict['NAME']}'))")
+        return c.fetchall()
+
+def get_database_last_updated():
+    sensor_data_value = SensorDataValue.objects.latest('created')
+    if sensor_data_value:
+        return sensor_data_value.modified
