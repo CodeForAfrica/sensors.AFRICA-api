@@ -432,11 +432,11 @@ def meta_data(request):
     })
 
 def get_sensors_networks():
-    user = User.objects.filter(username=settings.NETWORKS_USER).first()
+    user = User.objects.filter(username=settings.NETWORKS_OWNER).first()
     if user:
         networks = list(user.groups.values_list('name', flat=True))
         networks.append("sensors.AFRICA")
-        return {"networks": networks, "networks_count": len(networks)}
+        return {"networks": networks, "count": len(networks)}
 
 def get_sensors_locations():
     sensor_locations = SensorLocation.objects.values_list('country', flat=True)
@@ -448,6 +448,6 @@ def get_database_size():
         return c.fetchall()
 
 def get_database_last_updated():
-    sensor_data_value = SensorDataValue.objects.last()
+    sensor_data_value = SensorDataValue.objects.latest('created')
     if sensor_data_value:
         return sensor_data_value.modified
