@@ -33,7 +33,6 @@ from feinstaub.sensors.models import (
     SensorType,
 )
 
-from feinstaub.sensors.serializers import VerboseSensorDataSerializer
 
 from ..models import City, LastActiveNodes, SensorDataStat
 from .serializers import (
@@ -43,6 +42,7 @@ from .serializers import (
     NodeSerializer,
     SensorSerializer,
     SensorLocationSerializer,
+    SensorDataSerializer,
 )
 
 
@@ -238,7 +238,7 @@ class SensorDataView(
     permission_classes = [IsAuthenticated]
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_class = SensorFilter
-    serializer_class = VerboseSensorDataSerializer
+    serializer_class = SensorDataSerializer
 
     def get_queryset(self):
         if self.request.user.is_authenticated():
