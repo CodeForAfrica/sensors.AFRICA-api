@@ -1,10 +1,13 @@
 from rest_framework import serializers
 from feinstaub.sensors.models import (
+    Node,
     SensorData,
     SensorDataValue,
     SensorLocation
 )
 from feinstaub.sensors.serializers import (
+    NestedSensorLocationSerializer,
+    NestedSensorSerializer,
     SensorDataValueSerializer
 )
 
