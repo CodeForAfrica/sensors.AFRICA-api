@@ -45,9 +45,6 @@ class VerboseSensorDataSerializer(PostSensorDataSerializer):
         sd = super().create(validated_data)
          # use sensor from authenticator
         successful_authenticator = self.context['request'].successful_authenticator
-        if not successful_authenticator:
-            raise exceptions.NotAuthenticated
-
         node, pin = successful_authenticator.authenticate(self.context['request'])
         node.last_notify = sd.timestamp
         node.save()
