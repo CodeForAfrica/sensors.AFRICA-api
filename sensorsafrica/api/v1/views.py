@@ -14,11 +14,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from feinstaub.sensors.models import Node, SensorData
-from feinstaub.sensors.serializers import NodeSerializer, NowSerializer
+from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.views import StandardResultsSetPagination
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
-from .serializers import SensorDataSerializer, PostSensorDataSerializer
+from .serializers import NodeSerializer, SensorDataSerializer, PostSensorDataSerializer
 
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
