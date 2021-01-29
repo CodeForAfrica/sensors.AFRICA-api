@@ -18,7 +18,7 @@ from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.views import StandardResultsSetPagination
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
-from .serializers import NodeSerializer, SensorDataSerializer, PostSensorDataSerializer
+from .serializers import NodeSerializer, SensorDataSerializer, VerboseSensorDataSerializer
 
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -88,7 +88,7 @@ class PostSensorDataView(mixins.CreateModelMixin,
     """
     authentication_classes = (NodeUidAuthentication,)
     permission_classes = tuple()
-    serializer_class = PostSensorDataSerializer
+    serializer_class = VerboseSensorDataSerializer
     queryset = SensorData.objects.all()
     
 

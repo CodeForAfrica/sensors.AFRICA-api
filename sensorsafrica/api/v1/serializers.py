@@ -7,8 +7,7 @@ from feinstaub.sensors.models import (
 )
 from feinstaub.sensors.serializers import (
     NestedSensorLocationSerializer,
-    NestedSensorSerializer,
-    SensorDataValueSerializer
+    NestedSensorSerializer
 )
 
 class NodeSerializer(serializers.ModelSerializer):
@@ -24,6 +23,11 @@ class SensorLocationSerializer(serializers.ModelSerializer):
         model = SensorLocation
         fields = '__all__'
 
+class SensorDataValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorDataValue
+        fields = ['value_type', 'value']
+
 class SensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = SensorDataValueSerializer(many=True)
     location = SensorLocationSerializer()
@@ -32,7 +36,7 @@ class SensorDataSerializer(serializers.ModelSerializer):
         model = SensorData
         fields = ['location', 'timestamp', 'sensordatavalues']
 
-class PostSensorDataSerializer(serializers.ModelSerializer):
+class VerboseSensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = SensorDataValueSerializer(many=True)
     sensor = serializers.IntegerField(required=False,
                                       source='sensor.pk')
