@@ -140,7 +140,6 @@ class NodesView(viewsets.ViewSet):
 
     def list(self, request):
         nodes = []
-
         # Loop through the last active nodes
         for last_active in LastActiveNodes.objects.iterator():
             # Get the current node
