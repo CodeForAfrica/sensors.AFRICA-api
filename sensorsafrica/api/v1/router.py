@@ -11,7 +11,8 @@ from .views import (
     NodeView,
     NowView,
     PostSensorDataView,
-    SensorDataView as SensorsAfricaSensorDataView,
+    SensorsAfricaSensorDataView,
+    VerboseSensorDataView,
 )
 
 from rest_framework import routers
@@ -20,7 +21,7 @@ router = routers.DefaultRouter()
 router.register(r"push-sensor-data", PostSensorDataView)
 router.register(r"node", NodeView)
 router.register(r"sensor", SensorView)
-router.register(r"data", SensorDataView)
+router.register(r"data", VerboseSensorDataView)
 router.register(r"statistics", StatisticsView, basename="statistics")
 router.register(r"now", NowView)
 router.register(r"user", UsersView)
