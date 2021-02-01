@@ -46,7 +46,11 @@ class LastNotifySensorDataSerializer(PostSensorDataSerializer):
          # use node from authenticator
         successful_authenticator = self.context['request'].successful_authenticator
         node, pin = successful_authenticator.authenticate(self.context['request'])
-        node.last_notify = sd.timestamp
-        node.save()
+
+        #sometimes we post historical data (eg: from other network)
+        #this means we have to update last_notify only if current timestamp is greater than what's there
+        if node.last_notify is None or node.last_notify < sd.timestamp: 
+            node.last_notify = sd.timestamp
+            node.save()
 
         return sd
