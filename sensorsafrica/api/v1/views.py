@@ -50,7 +50,6 @@ class NodeView(
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = SensorData.objects.none()
     serializer_class = NodeSerializer
-    filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
     filter_class = NodeFilter
 
     def get_queryset(self):
