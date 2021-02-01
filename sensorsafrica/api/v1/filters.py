@@ -1,4 +1,5 @@
 import django_filters
+from django.db import models
 
 from feinstaub.sensors.models import Node, SensorData
 
@@ -6,7 +7,7 @@ class NodeFilter(django_filters.FilterSet):
     class Meta:
         model = Node
         fields = {
-            "location__country": ["iexact"],
+            "location__country": ["exact"],
             "last_notify": ["exact", "gte", "lte"]}
         filter_overrides = {
             models.DateTimeField: {
