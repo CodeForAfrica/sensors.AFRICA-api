@@ -1,6 +1,7 @@
 import datetime
 import pytz
 import json
+import django_filters
 
 
 from django.conf import settings
@@ -18,8 +19,8 @@ from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.views import StandardResultsSetPagination
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
+from .filters import NodeFilter
 from .serializers import LastNotifySensorDataSerializer, NodeSerializer, SensorDataSerializer
-
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
@@ -50,6 +51,7 @@ class NodeView(
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = SensorData.objects.none()
     serializer_class = NodeSerializer
+    filter_class = NodeFilter
 
     def get_queryset(self):
         if self.request.user.is_authenticated():
