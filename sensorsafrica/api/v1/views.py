@@ -1,8 +1,6 @@
 import datetime
 import pytz
 import json
-import django_filters
-
 
 from django.conf import settings
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
