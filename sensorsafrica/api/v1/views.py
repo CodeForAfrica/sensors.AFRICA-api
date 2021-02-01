@@ -16,10 +16,10 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from feinstaub.sensors.models import Node, SensorData
 from feinstaub.sensors.serializers import NowSerializer
-from feinstaub.sensors.views import StandardResultsSetPagination
+from feinstaub.sensors.views import SensorDataView, StandardResultsSetPagination
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
-from .filters import NodeFilter
+from .filters import NodeFilter, SensorFilter
 from .serializers import LastNotifySensorDataSerializer, NodeSerializer, SensorDataSerializer
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -94,7 +94,10 @@ class PostSensorDataView(mixins.CreateModelMixin,
     queryset = SensorData.objects.all()
     
 
-class SensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
+class VerboseSensorDataView(SensorDataView):
+    filter_class = SensorFilter
+
+class SensorsAfricaSensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
 
     def get_queryset(self):
