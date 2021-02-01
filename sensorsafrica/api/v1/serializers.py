@@ -39,7 +39,7 @@ class SensorDataSerializer(serializers.ModelSerializer):
         model = SensorData
         fields = ['location', 'timestamp', 'sensordatavalues']
 
-class VerboseSensorDataSerializer(PostSensorDataSerializer):
+class LastNotifySensorDataSerializer(PostSensorDataSerializer):
 
     def create(self, validated_data):
         sd = super().create(validated_data)
