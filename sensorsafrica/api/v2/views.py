@@ -140,8 +140,8 @@ class NodesView(viewsets.ViewSet):
 
     def list(self, request):
         nodes = []
-        if 'location' in request.query_params:
-            last_active_nodes = LastActiveNodes.objects.filter(location__country=request.query_params['location'])
+        if 'location__country' in request.query_params:
+            last_active_nodes = LastActiveNodes.objects.filter(location__country=request.query_params['location__country'])
         else:
             last_active_nodes = LastActiveNodes.objects.iterator()
 
