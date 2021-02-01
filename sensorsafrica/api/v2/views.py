@@ -45,6 +45,7 @@ from .serializers import (
     SensorDataSerializer,
 )
 
+from .filters import CustomSensorFilter
 
 value_types = {"air": ["P1", "P2", "humidity", "temperature"]}
 
@@ -237,7 +238,7 @@ class SensorDataView(
     pagination_class = SensorDataPagination
     permission_classes = [IsAuthenticated]
     filter_backends = (django_filters.rest_framework.DjangoFilterBackend,)
-    filter_class = SensorFilter
+    filter_class = CustomSensorFilter
     serializer_class = SensorDataSerializer
 
     def get_queryset(self):
