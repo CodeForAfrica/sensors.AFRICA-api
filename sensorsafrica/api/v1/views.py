@@ -15,11 +15,12 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from feinstaub.sensors.models import Node, SensorData
-from feinstaub.sensors.serializers import NodeSerializer, NowSerializer
+from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.views import StandardResultsSetPagination
+from feinstaub.sensors.authentication import NodeUidAuthentication
 
-from .serializers import SensorDataSerializer
 from .filters import NodeFilter
+from .serializers import LastNotifySensorDataSerializer, NodeSerializer, SensorDataSerializer
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
@@ -83,6 +84,15 @@ class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
             sensor__public=True, modified__range=[startdate, now]
         )
 
+class PostSensorDataView(mixins.CreateModelMixin,
+                         viewsets.GenericViewSet):
+    """ This endpoint is to POST data from the sensor to the api.
+    """
+    authentication_classes = (NodeUidAuthentication,)
+    permission_classes = tuple()
+    serializer_class = LastNotifySensorDataSerializer
+    queryset = SensorData.objects.all()
+    
 
 class SensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
@@ -96,3 +106,4 @@ class SensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
             .only("sensor", "timestamp")
             .prefetch_related("sensordatavalues")
         )
+

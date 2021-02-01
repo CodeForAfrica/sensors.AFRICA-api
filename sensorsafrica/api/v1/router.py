@@ -1,7 +1,6 @@
 # The base version is entirely based on feinstaub
 from feinstaub.main.views import UsersView
 from feinstaub.sensors.views import (
-    PostSensorDataView,
     SensorView,
     StatisticsView,
     SensorDataView,
@@ -11,6 +10,7 @@ from .views import (
     FilterView,
     NodeView,
     NowView,
+    PostSensorDataView,
     SensorDataView as SensorsAfricaSensorDataView,
 )
 
