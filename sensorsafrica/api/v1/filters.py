@@ -7,7 +7,7 @@ class NodeFilter(django_filters.FilterSet):
         model = Node
         fields = {
             "location__country": ["iexact"],
-            "last_notify": ["gte", "lte"]}
+            "last_notify": ["exact", "gte", "lte"]}
         filter_overrides = {
             models.DateTimeField: {
                 'filter_class': django_filters.IsoDateTimeFilter,
@@ -20,7 +20,7 @@ class SensorFilter(django_filters.FilterSet):
         model = SensorData
         fields = {
             "sensor": ["exact"],
-            "timestamp": ["gte", "lte"]
+            "timestamp": ["exact", "gte", "lte"]
             }
         filter_overrides = {
             models.DateTimeField: {
