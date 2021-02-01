@@ -11,15 +11,6 @@ class NodeFilter(django_filters.FilterSet):
         filter_overrides = {
             models.DateTimeField: {
                 'filter_class': django_filters.IsoDateTimeFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'gte',
-                },
-            },
-            models.DateTimeField: {
-                'filter_class': django_filters.IsoDateTimeFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'lte',
-                },
             },
         }
 
@@ -34,14 +25,5 @@ class SensorFilter(django_filters.FilterSet):
         filter_overrides = {
             models.DateTimeField: {
                 'filter_class': django_filters.IsoDateTimeFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'gte',
-                },
-            },
-            models.DateTimeField: {
-                'filter_class': django_filters.IsoDateTimeFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'lte',
-                },
             },
         }
