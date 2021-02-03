@@ -16,7 +16,7 @@ class NodeLocationSerializer(NestedSensorLocationSerializer):
 
 class NodeSerializer(serializers.ModelSerializer):
     sensors = NestedSensorSerializer(many=True)
-    location = NodesLocationSerializer()
+    location = NodeLocationSerializer()
 
     class Meta:
         model = Node
