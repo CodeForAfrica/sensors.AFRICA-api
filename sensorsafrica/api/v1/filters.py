@@ -8,6 +8,7 @@ class NodeFilter(django_filters.FilterSet):
         model = Node
         fields = {
             "location__country": ["exact"],
+            "location__city": ["exact"],
             "last_notify": ["exact", "gte", "lte"]}
         filter_overrides = {
             models.DateTimeField: {
