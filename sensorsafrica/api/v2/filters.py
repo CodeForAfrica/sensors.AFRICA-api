@@ -6,6 +6,7 @@ class CustomSensorFilter(SensorFilter):
     class Meta(SensorFilter.Meta):
         fields = {"sensor": ["exact"],
                     "location__country": ['exact'],
+                    "location__city": ['exact'],
                     "timestamp": ("gte", "lte"),
                 }
         filter_overrides = {
