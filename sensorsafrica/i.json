@@ -1,0 +1,25 @@
+{"count": 1, "next": None, "previous": None, "results": [
+        {"id": 2, "sensors": [
+                {"id": 2, "description": "", "pin": "-", "sensor_type": {"id": 1, "name": "p3m3", "manufacturer": "sfjh"
+                    }, "sensordatas": [
+                        {"id": 37, "sampling_rate": None, "timestamp": "2021-02-07T00: 04: 00Z", "sensordatavalues": [
+                                {"id": 73, "value": "10", "value_type": "P1"
+                                },
+                                {"id": 74, "value": "99", "value_type": "P2"
+                                }
+                            ]
+                        },
+                        {"id": 36, "sampling_rate": None, "timestamp": "2021-02-06T00: 04: 00Z", "sensordatavalues": [
+                                {"id": 71, "value": "10", "value_type": "P1"
+                                },
+                                {"id": 72, "value": "99", "value_type": "P2"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ], "uid": "ad22", "owner": 1, "location": {"id": 1, "location": "location", "indoor": False, "description": "", "latitude": None, "longitude": None, "city": ""
+            }, "last_notify": "2021-02-07T00: 04: 00Z"
+        }
+    ]
+}
