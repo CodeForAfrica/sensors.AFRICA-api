@@ -8,6 +8,8 @@ from django.conf import settings
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncDate
 from dateutil.relativedelta import relativedelta
+from django.utils.text import slugify
+
 from django.utils import timezone
 from rest_framework import mixins, pagination, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
@@ -70,72 +72,17 @@ class NodeView(
         return Node.objects.none()
 
 
-    def add_stat_var_to_nodes(data):
-        nodes = []
-        for node in data:
-            # last data received for this node
-            stats = []
-            moved_to = None
-           
-            # Get data stats from 5mins before last_data_received_at
-            if node.last_notify:
-                last_5_mins = last_notify - datetime.timedelta(minutes=5)
-                stats = (
-                    SensorDataValue.objects.filter(
-                        Q(sensordata__sensor__node=node.id),
-                        Q(sensordata__location=node.location.id),
-                        Q(sensordata__timestamp__gte=last_5_mins),
-                        Q(sensordata__timestamp__lte=node.last_notify),
-                        # Ignore timestamp values
-                        ~Q(value_type="timestamp"),
-                        # Match only valid float text
-                        Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
-                    )
-                    .order_by()
-                    .values("value_type")
-                    .annotate(
-                        sensor_id=F("sensordata__sensor__id"),
-                        start_datetime=Min("sensordata__timestamp"),
-                        end_datetime=Max("sensordata__timestamp"),
-                        average=Avg(Cast("value", FloatField())),
-                        minimum=Min(Cast("value", FloatField())),
-                        maximum=Max(Cast("value", FloatField())),
-                    )
-                )
-
-            nodes.append(
-                {
-                    "node_moved": moved_to is not None,
-                    "moved_to": moved_to,
-                    "node": {"uid": last_active.node.uid, "id": last_active.node.id, "owner": last_active.node.owner.id},
-                    "location": {
-                        "name": last_active.location.location,
-                        "longitude": last_active.location.longitude,
-                        "latitude": last_active.location.latitude,
-                        "city": {
-                            "name": last_active.location.city,
-                            "slug": slugify(last_active.location.city),
-                        },
-                    },
-                    "last_data_received_at": last_data_received_at,
-                    "stats": stats,
-                }
-            )
-        return nodes
-
-
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 
         page = self.paginate_queryset(queryset)
+        
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            data = add_stat_var_to_nodes(serializer.data)
-            return self.get_paginated_response(data)
+            return self.get_paginated_response(serializer.data)
         
         serializer = self.get_serializer(queryset, many=True)
-        data = add_stat_var_to_nodes(serializer.data)
-        return Response(data)
+        return Response(serializer.data)
 
 
 class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
