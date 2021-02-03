@@ -10,7 +10,7 @@ from feinstaub.sensors.serializers import (
     NestedSensorSerializer,
     SensorDataSerializer as PostSensorDataSerializer
 )
-class NodesLocationSerializer(NestedSensorLocationSerializer):
+class NodeLocationSerializer(NestedSensorLocationSerializer):
     class Meta(NestedSensorLocationSerializer.Meta):
         fields = NestedSensorLocationSerializer.Meta.fields + ("latitude", "longitude", "city")
 
