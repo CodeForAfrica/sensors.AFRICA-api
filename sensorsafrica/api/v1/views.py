@@ -8,8 +8,11 @@ from django.conf import settings
 from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
 from django.db.models.functions import Cast, TruncDate
 from dateutil.relativedelta import relativedelta
+<<<<<<< HEAD
 from django.utils.text import slugify
 
+=======
+>>>>>>> master
 from django.utils import timezone
 from rest_framework import mixins, pagination, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
