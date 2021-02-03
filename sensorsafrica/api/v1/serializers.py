@@ -11,9 +11,13 @@ from feinstaub.sensors.serializers import (
     SensorDataSerializer as PostSensorDataSerializer
 )
 
+class NodeLocationSerializer(NestedSensorLocationSerializer):
+    class Meta(NestedSensorLocationSerializer.Meta):
+        fields = NestedSensorLocationSerializer.Meta.fields + ("latitude", "longitude", "city")
+
 class NodeSerializer(serializers.ModelSerializer):
     sensors = NestedSensorSerializer(many=True)
-    location = NestedSensorLocationSerializer()
+    location = NodeLocationSerializer()
 
     class Meta:
         model = Node
