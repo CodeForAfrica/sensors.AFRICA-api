@@ -21,3 +21,5 @@ celery-slack==0.3.0
 urllib3<1.25,>=1.21.1 #requests 2.21.0
 
 django-cors-headers==3.0.2
+
+geopy==2.1.0
