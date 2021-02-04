@@ -424,13 +424,20 @@ def meta_data(request):
 
     return Response({
         "sensor_networks": get_sensors_networks(),
-        "nodes_count": nodes_count,
+        "nodes": {
+            "active": get_active_nodes(),
+            "count": nodes_count
+        },
         "sensors_count": sensors_count,
         "sensor_data_count": sensor_data_count,
         "sensors_locations": sensors_locations,
         "database_size": database_size[0],
         "database_last_updated": database_last_updated,
     })
+
+def get_active_nodes():
+    nodes_count = Node.objects.filter(last_notify__gte=timezone.now() - datetime.timedelta(days=14)).count()
+    return nodes_count
 
 def get_sensors_networks():
     user = User.objects.filter(username=settings.NETWORKS_OWNER).first()
