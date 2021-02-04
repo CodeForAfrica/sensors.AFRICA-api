@@ -421,6 +421,7 @@ def meta_data(request):
     database_size = get_database_size()
     database_last_updated = get_database_last_updated()
     sensors_locations = get_sensors_locations()
+    sensors_cities = get_sensors_cities()
 
     return Response({
         "sensor_networks": get_sensors_networks(),
@@ -428,6 +429,7 @@ def meta_data(request):
         "sensors_count": sensors_count,
         "sensor_data_count": sensor_data_count,
         "sensors_locations": sensors_locations,
+        "sensors_cities": sensors_cities,
         "database_size": database_size[0],
         "database_last_updated": database_last_updated,
     })
@@ -442,6 +444,10 @@ def get_sensors_networks():
 def get_sensors_locations():
     sensor_locations = SensorLocation.objects.filter(country__isnull=False).values_list('country', flat=True)
     return sorted(set(sensor_locations))
+
+def get_sensors_cities():
+    sensor_cities = Node.objects.filter(location__city__isnull=False).values_list('location__city', flat=True)
+    return sorted(set(sensor_cities))
 
 def get_database_size():
     with connection.cursor() as c:
