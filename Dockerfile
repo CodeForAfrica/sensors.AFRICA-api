@@ -16,7 +16,7 @@ ADD . /src/
 # Upgrade pip and setuptools
 RUN pip install -q -U pip setuptools
 
-# Install feinstaub from opendata-stuttgart
+# Install feinstaub from codeforafrica
 RUN pip install -q git+https://github.com/CodeForAfrica/feinstaub-api
 
 # Install sensors.AFRICA-api and its dependencies
