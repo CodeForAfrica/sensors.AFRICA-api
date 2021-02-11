@@ -5,6 +5,7 @@ from feinstaub.sensors.views import SensorFilter
 class CustomSensorFilter(SensorFilter):
     class Meta(SensorFilter.Meta):
         fields = {"sensor": ["exact"],
+                    "sensor__public": ["exact"],
                     "location__country": ['exact'],
                     "location__city": ['exact'],
                     "timestamp": ("gte", "lte"),
