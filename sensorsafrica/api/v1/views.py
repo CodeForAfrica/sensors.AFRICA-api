@@ -49,7 +49,7 @@ class NodeView(
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
-    queryset = SensorData.objects.none()
+    queryset = Node.objects.none()
     serializer_class = NodeSerializer
     filter_class = NodeFilter
 
