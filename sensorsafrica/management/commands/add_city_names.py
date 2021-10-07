@@ -21,4 +21,4 @@ class Command(BaseCommand):
                 continue
             city = location.raw['address'].get('city')
             node.location.city = city
-            node.save()
+            node.location.save()
