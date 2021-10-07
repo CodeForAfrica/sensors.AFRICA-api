@@ -4,6 +4,7 @@ import os
 import time
 
 import ckanapi
+import requests
 import pytz
 from django.core.management import BaseCommand
 from django.db.models import Max, Min
@@ -19,7 +20,10 @@ class Command(BaseCommand):
         CKAN_ARCHIVE_OWNER_ID = os.environ.get("CKAN_ARCHIVE_OWNER_ID")
         CKAN_ARCHIVE_URL = os.environ.get("CKAN_ARCHIVE_URL")
 
-        ckan = ckanapi.RemoteCKAN(CKAN_ARCHIVE_URL, apikey=CKAN_ARCHIVE_API_KEY)
+        session = requests.Session()
+        session.verify = False
+
+        ckan = ckanapi.RemoteCKAN(CKAN_ARCHIVE_URL, apikey=CKAN_ARCHIVE_API_KEY, session=session)
 
         city_queryset = (
             SensorLocation.objects.all()
