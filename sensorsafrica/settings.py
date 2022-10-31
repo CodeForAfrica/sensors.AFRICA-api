@@ -118,7 +118,7 @@ DATABASES = {
                 "read_replica": dj_database_url.parse(SENSORSAFRICA_READ_DATABASE_URL),
             }
 
-DATABASE_ROUTERS = ["sensorsafrica.routers.ReplicaRouter", ]
+DATABASE_ROUTERS = ["router.ReplicaRouter", ]
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
