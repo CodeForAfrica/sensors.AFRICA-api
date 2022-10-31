@@ -12,7 +12,7 @@ services:
       - RABBITMQ_USERNAME=sensorsafrica
       - RABBITMQ_PASSWORD=sensorsafrica
   postgres:
-    image: postgres:9.6
+    image: postgres:13.7
     ports:
       - "54321:5432"
     environment:
