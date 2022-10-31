@@ -1,28 +1,15 @@
 from rest_framework import serializers
 from feinstaub.sensors.models import (
     Node,
-    Sensor,
     SensorData,
     SensorDataValue,
     SensorLocation
 )
 from feinstaub.sensors.serializers import (
     NestedSensorLocationSerializer,
-    NestedSensorDataSerializer,
+    NestedSensorSerializer,
     SensorDataSerializer as PostSensorDataSerializer
 )
-
-class NestedSensorSerializer(serializers.ModelSerializer):
-    sensordatas = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Sensor
-        fields = ('id', 'description', 'pin', 'sensordatas')
-    
-    def get_sensordatas(self, obj):
-        sensordatas = SensorData.objects.filter(sensor=obj).order_by('-timestamp')[:2]
-        serializer = NestedSensorDataSerializer(instance=sensordatas, many=True)
-        return serializer.data
 
 class NodeLocationSerializer(NestedSensorLocationSerializer):
     class Meta(NestedSensorLocationSerializer.Meta):
