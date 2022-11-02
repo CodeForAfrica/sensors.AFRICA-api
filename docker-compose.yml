@@ -19,11 +19,14 @@ services:
       - POSTGRES_USER=sensorsafrica
       - POSTGRES_PASSWORD=sensorsafrica
       - POSTGRES_DB=sensorsafrica
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
   api:
     build:
       context: .
     environment:
       SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
+      SENSORSAFRICA_READ_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/read_replica
       SENSORSAFRICA_RABBITMQ_URL: amqp://sensorsafrica:sensorsafrica@rabbitmq//
       SENSORSAFRICA_FLOWER_ADMIN_USERNAME: admin
       SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: password
@@ -38,3 +41,6 @@ services:
     ports:
       - "8000:8000"
       - "5555:5555"
+
+volumes:
+  postgres_data:
