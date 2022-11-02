@@ -109,16 +109,16 @@ DATABASE_URL = os.getenv(
     "SENSORSAFRICA_DATABASE_URL",
     "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
 )
-SENSORSAFRICA_READ_DATABASE_URL = os.getenv(
+READ_DATABASE_URL = os.getenv(
     "SENSORSAFRICA_READ_DATABASE_URL", DATABASE_URL
 )
 
 DATABASES = {
                 "default": dj_database_url.parse(DATABASE_URL),
-                "read_replica": dj_database_url.parse(SENSORSAFRICA_READ_DATABASE_URL),
+                "read_replica": dj_database_url.parse(READ_DATABASE_URL),
             }
 
-DATABASE_ROUTERS = ["router.ReplicaRouter", ]
+DATABASE_ROUTERS = ["sensorsafrica.router.ReplicaRouter", ]
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
