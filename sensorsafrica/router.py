@@ -1,10 +1,13 @@
+import random
+
 class ReplicaRouter:
-    route_app_labels = {'auth', 'sessions',}
+    read_replica_app_labels = {'sensors', }
+    read_replicas = ['read_replica_1', 'read_replica_2']
 
     def db_for_read(self, model, **hints):
-        if model._meta.app_label in self.route_app_labels:
-            return 'default'
-        return "read_replica"
+        if model._meta.app_label in self.read_replica_app_labels:
+            return random.choice(self.read_replicas)
+        return 'default'
     
     def db_for_write(self, model, **hints):
         return "default"
