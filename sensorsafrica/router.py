@@ -1,8 +1,10 @@
 import random
 
+from django.conf import settings
+
 class ReplicaRouter:
     read_replica_app_labels = {'sensors', }
-    read_replicas = ['read_replica_1', 'read_replica_2']
+    read_replicas = list(settings.DATABASES.keys() - {'default', })
 
     def db_for_read(self, model, **hints):
         if model._meta.app_label in self.read_replica_app_labels:
