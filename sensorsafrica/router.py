@@ -1,10 +1,15 @@
+import random
+
+from django.conf import settings
+
 class ReplicaRouter:
-    route_app_labels = {'auth', 'sessions',}
+    read_replica_app_labels = {'sensors', }
+    read_replicas = list(settings.DATABASES.keys() - {'default', })
 
     def db_for_read(self, model, **hints):
-        if model._meta.app_label in self.route_app_labels:
-            return 'default'
-        return "read_replica"
+        if model._meta.app_label in self.read_replica_app_labels:
+            return random.choice(self.read_replicas)
+        return 'default'
     
     def db_for_write(self, model, **hints):
         return "default"

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from feinstaub.sensors.serializers import (
     NestedSensorLocationSerializer,
-    NestedSensorTypeSerializer,
 )
 from feinstaub.sensors.models import Node, Sensor, SensorType, SensorLocation
 from feinstaub.sensors.serializers import (VerboseSensorDataSerializer, )
