@@ -110,11 +110,11 @@ DATABASE_URL = os.getenv(
     "postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica",
 )
 
-READ_DATABASE_URLS = os.getenv("SENSORSAFRICA_READ_DATABASE_URLS", DATABASE_URL).split(" ")
+READ_DATABASE_URLS = os.getenv("SENSORSAFRICA_READ_DATABASE_URLS", DATABASE_URL).split(",")
 
 DATABASES = {"default": dj_database_url.parse(DATABASE_URL), }
 
-for index, read_database_url in enumerate(1, READ_DATABASE_URLS):
+for index, read_database_url in enumerate(READ_DATABASE_URLS,start=1):
     DATABASES[f"read_replica_{index}"] = dj_database_url.parse(read_database_url)
 
 DATABASE_ROUTERS = ["sensorsafrica.router.ReplicaRouter", ]
