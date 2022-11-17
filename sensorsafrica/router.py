@@ -16,10 +16,16 @@ class ReplicaRouter:
 
     def allow_relation(self, obj1, obj2, **hints):
         """
-        Relations between objects are allowed if both objects are
-        in the primary/replica pool.
+        Relation not applicable for our use case
         """
-        db_set = {'default', 'read_replica'}
-        if obj1._state.db in db_set and obj2._state.db in db_set:
+        return None
+    
+    def allow_migrate(self,db,app_label,model_name=None, **hints):
+        """
+        Restrict migration operations to the master/primary db
+        """
+        if db == "default":
             return True
         return None
+
+
