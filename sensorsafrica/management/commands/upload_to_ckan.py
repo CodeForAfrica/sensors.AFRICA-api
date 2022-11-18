@@ -104,11 +104,11 @@ class Command(BaseCommand):
 
                 if qs.exists():
                     time_now = datetime.datetime.now()
-                    resource_name = "{hour} {day} {month} {year} Sensor Data Archive".format(
-                        hour=time_now.hour, day=time_now.day, month=calendar.month_name[date.month], year=date.year
+                    resource_name = "{month} {year} Sensor Data Archive".format(
+                        month=calendar.month_name[date.month], year=date.year
                     )
 
-                    filepath = "/tmp/%s.csv" % resource_name.lower().replace(" ", "_")
+                    filepath = f"/tmp/{time_now.hour}_{time_now.day}_{resource_name.lower().replace('', '_')}.csv" 
 
                     self._write_file(filepath=filepath, qs=qs)
                     self._create_or_update_resource(
