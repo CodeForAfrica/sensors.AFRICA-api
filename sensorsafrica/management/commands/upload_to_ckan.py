@@ -2,6 +2,8 @@ import calendar
 import datetime
 import os
 import time
+import datetime
+
 
 import ckanapi
 import requests
@@ -101,8 +103,9 @@ class Command(BaseCommand):
                 )
 
                 if qs.exists():
-                    resource_name = "{month} {year} Sensor Data Archive".format(
-                        month=calendar.month_name[date.month], year=date.year
+                    time_now = datetime.datetime.now()
+                    resource_name = "{hour} {day} {month} {year} Sensor Data Archive".format(
+                        hour=time_now.hour, day=time_now.day, month=calendar.month_name[date.month], year=date.year
                     )
 
                     filepath = "/tmp/%s.csv" % resource_name.lower().replace(" ", "_")
