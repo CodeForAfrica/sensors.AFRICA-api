@@ -160,6 +160,9 @@ class NodesView(viewsets.ViewSet):
                 stats = (
                     SensorDataValue.objects.filter(
                         Q(sensordata__sensor__node=last_active.node.id),
+                        # Open endpoints should return data from public sensors
+                        # only.
+                        Q(sensordata__sensor__public=True),
                         Q(sensordata__location=last_active.location.id),
                         Q(sensordata__timestamp__gte=last_5_mins),
                         Q(sensordata__timestamp__lte=last_data_received_at),
