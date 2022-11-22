@@ -22,10 +22,8 @@ class ReplicaRouter:
     
     def allow_migrate(self,db,app_label,model_name=None, **hints):
         """
-        Restrict migration operations to the master/primary db
+        Restrict migration operations to the master db i.e. default
         """
-        if db == "default":
-            return True
-        return None
+        return db == "default"
 
 
