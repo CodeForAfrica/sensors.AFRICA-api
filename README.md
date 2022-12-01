@@ -30,6 +30,21 @@ GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 - Migrate the database; `python manage.py migrate`
 - Run the server; `python manage.py runserver`
 
+### Development Settings
+
+For development we use the `settings.dev.py` file.
+To run the django app in `development mode` make this change to the `manage.py` and `wsgi.py` files
+
+From
+```
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'sensorsafrica.settings')
+```
+
+To
+```
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", 'sensorsafrica.settings.dev')
+```
+
 ### Docker
 
 Using docker compose:
