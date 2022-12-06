@@ -1,5 +1,5 @@
 #!/bin/sh
-python manage.py migrate --noinput                # Apply database migrations
+python manage.py migrate --no-input -v 3       # Apply database migrations
 python manage.py collectstatic --clear --noinput  # Collect static files
 
 # Prepare log files and start outputting logs to stdout

@@ -6,7 +6,8 @@ class ReplicaRouter:
     read_replicas = list(settings.DATABASES.keys() - {'default', })
 
     def db_for_read(self, model, **hints):
-        return random.choice(self.read_replicas)
+        # return random.choice(self.read_replicas)
+        return "default"
         
     def db_for_write(self, model, **hints):
         return "default"
@@ -17,10 +18,10 @@ class ReplicaRouter:
         """
         return None
     
-    def allow_migrate(self,db,app_label,model_name=None, **hints):
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
         """
         Restrict migration operations to the master db i.e. default
         """
-        return db == "default"
+        return True
 
 
