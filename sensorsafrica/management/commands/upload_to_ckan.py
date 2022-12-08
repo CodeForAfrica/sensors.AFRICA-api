@@ -3,6 +3,7 @@ import datetime
 import os
 import time
 import datetime
+import tempfile
 
 
 import ckanapi
@@ -132,6 +133,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _write_file(filepath, qs):
+        temp = tempfile.NamedTemporaryFile(suffix="_temp", prefix=f"{filepath}")
         with open(filepath, "w") as fp:
             fp.write(
                 "sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
