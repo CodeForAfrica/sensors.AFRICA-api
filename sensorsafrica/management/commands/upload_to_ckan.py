@@ -134,9 +134,9 @@ class Command(BaseCommand):
     @staticmethod
     def _write_file(filepath, qs):
         temp = tempfile.NamedTemporaryFile(suffix="_temp", prefix=f"{filepath}")
-        with open(filepath, "w") as fp:
+        with tempfile.NamedTemporaryFile(mode="w+b", suffix="_temp", prefix=f"{filepath}") as fp:
             fp.write(
-                "sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
+                b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
             )
             for sd in qs.iterator():
                 s = ";".join(
