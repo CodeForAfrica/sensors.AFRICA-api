@@ -12,9 +12,9 @@ def migrate_sensor(apps, schema_editor):
     # if we directly import it, it'll be the wrong version
     Sensor = apps.get_model("sensors", "Sensor")
     Node = apps.get_model("sensors", "Node")
-    for sensor in Sensor.objects.all():
+    for sensor in Sensor.objects.using("default").all():
         print("sensor: {}".format(sensor.id))
-        node = Node.objects.create(uid=sensor.uid,
+        node = Node.objects.using("default").create(uid=sensor.uid,
                                    description=sensor.description,
                                    owner=sensor.owner,
                                    location=sensor.location)
