@@ -101,6 +101,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "sensorsafrica.wsgi.application"
 
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
