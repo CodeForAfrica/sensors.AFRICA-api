@@ -151,7 +151,7 @@ class Command(BaseCommand):
                         sd["sensordatavalues__value"],
                     ]
                 )
-                fp.write(s + "\n")
+                fp.write(b"s + '\n'")
 
     @staticmethod
     def _create_or_update_resource(resource_name, filepath, resources, ckan, package):
