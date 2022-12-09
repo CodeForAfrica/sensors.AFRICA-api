@@ -10,18 +10,17 @@ import django.utils.timezone
 def migrate_sensor(apps, schema_editor):
     # We get the model from the versioned app registry;
     # if we directly import it, it'll be the wrong version
-    print({"SCHEMA":schema_editor.connection.alias})
     Sensor = apps.get_model("sensors", "Sensor")
     Node = apps.get_model("sensors", "Node")
-    with schema_editor.connection.alias("default") as primary:
-        for sensor in Sensor.objects.using(primary).all():
-            print("sensor: {}".format(sensor.id))
-            node = Node.objects.using(primary).create(uid=sensor.uid,
-                                    description=sensor.description,
-                                    owner=sensor.owner,
-                                    location=sensor.location)
-            sensor.node = node
-            sensor.save()
+    if schema_editor.connection.alias != "default":
+        return
+    for sensor in Sensor.objects.all():
+        node = Node.objects.create(uid=sensor.uid,
+                                description=sensor.description,
+                                owner=sensor.owner,
+                                location=sensor.location)
+        sensor.node = node
+        sensor.save()
 
 
 class Migration(migrations.Migration):
@@ -63,7 +62,7 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunPython(
-            migrate_sensor,
+            migrate_sensor
         ),
 
         migrations.AlterModelOptions(
