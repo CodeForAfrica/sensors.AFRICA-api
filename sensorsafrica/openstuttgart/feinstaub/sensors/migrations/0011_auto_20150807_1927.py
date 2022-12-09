@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
         ),
 
         migrations.RunPython(
-            migrate_sensor
+            migrate_sensor,
         ),
 
         migrations.AlterModelOptions(
