@@ -104,22 +104,20 @@ class Command(BaseCommand):
                 )
 
                 if qs.exists():
-                    time_now = datetime.datetime.now()
                     resource_name = "{month} {year} Sensor Data Archive".format(
                         month=calendar.month_name[date.month], year=date.year
                     )
 
-                    filepath = f"/tmp/{time_now.hour}_{time_now.day}_{resource_name.lower().replace('', '_')}.csv" 
+                    filename = f"{resource_name.lower().replace('', '_')}" 
 
-                    self._write_file(filepath=filepath, qs=qs)
+                    temp = self._write_file(filename=filename, qs=qs)
+                    filepath = temp.name
                     self._create_or_update_resource(
                         resource_name, filepath, resources, ckan, package
                     )
 
-                    # Cleanup
-                    if os.path.exists(filepath):
-                        os.remove(filepath)
-
+                    # Cleanup temp file
+                    os.unlink(filepath)
                     # Don't DDOS openAFRICA
                     time.sleep(5)
 
@@ -132,9 +130,8 @@ class Command(BaseCommand):
                 )
 
     @staticmethod
-    def _write_file(filepath, qs):
-        temp = tempfile.NamedTemporaryFile(suffix="_temp", prefix=f"{filepath}")
-        with tempfile.NamedTemporaryFile(mode="w+b", suffix="_temp", prefix=f"{filepath}") as fp:
+    def _write_file(filename, qs):
+        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv", prefix=f"{filename}", delete=False) as fp:
             fp.write(
                 b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
             )
@@ -151,7 +148,9 @@ class Command(BaseCommand):
                         sd["sensordatavalues__value"],
                     ]
                 )
-                fp.write(b"s + '\n'")
+                fp.write(bytes(s + "\n","utf-8"))
+
+        return fp
 
     @staticmethod
     def _create_or_update_resource(resource_name, filepath, resources, ckan, package):
