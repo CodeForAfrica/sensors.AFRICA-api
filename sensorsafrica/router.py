@@ -3,7 +3,7 @@ import random
 from django.conf import settings
 
 class ReplicaRouter:
-    read_replicas = settings.READ_DATABASE_URLS
+    read_replicas = list(settings.DATABASES.keys())
 
     def db_for_read(self, model, **hints):
         return random.choice(self.read_replicas)
