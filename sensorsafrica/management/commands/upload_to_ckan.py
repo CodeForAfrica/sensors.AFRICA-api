@@ -107,17 +107,16 @@ class Command(BaseCommand):
                     resource_name = "{month} {year} Sensor Data Archive".format(
                         month=calendar.month_name[date.month], year=date.year
                     )
-
-                    filename = f"{resource_name.lower().replace('', '_')}" 
-
-                    temp = self._write_file(filename=filename, qs=qs)
+                    temp = self._write_file(qs=qs)
                     filepath = temp.name
+                   
                     self._create_or_update_resource(
                         resource_name, filepath, resources, ckan, package
                     )
 
                     # Cleanup temp file
                     os.unlink(filepath)
+                 
                     # Don't DDOS openAFRICA
                     time.sleep(5)
 
@@ -130,8 +129,8 @@ class Command(BaseCommand):
                 )
 
     @staticmethod
-    def _write_file(filename, qs):
-        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv", prefix=f"{filename}", delete=False) as fp:
+    def _write_file(qs):
+        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv", delete=False) as fp:
             fp.write(
                 b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
             )
