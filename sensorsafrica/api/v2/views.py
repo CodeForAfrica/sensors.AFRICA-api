@@ -143,10 +143,12 @@ class NodesView(viewsets.ViewSet):
         nodes = []
         # Loop through the last active nodes
         for last_active in LastActiveNodes.objects.iterator():
-            # Get the current node
+            # Get the current node only if it has public sensors
             node = Node.objects.filter(
-                Q(id=last_active.node.id), ~Q(sensors=None)
-            ).get()
+                Q(id=last_active.node.id), Q(sensors__public=True)
+            ).first()
+            if node is None:
+                continue
 
             # The last acive date
             last_data_received_at = last_active.last_data_received_at
@@ -160,6 +162,9 @@ class NodesView(viewsets.ViewSet):
                 stats = (
                     SensorDataValue.objects.filter(
                         Q(sensordata__sensor__node=last_active.node.id),
+                        # Open endpoints should return data from public sensors
+                        # only in case a node has both public & private sensors
+                        Q(sensordata__sensor__public=True),
                         Q(sensordata__location=last_active.location.id),
                         Q(sensordata__timestamp__gte=last_5_mins),
                         Q(sensordata__timestamp__lte=last_data_received_at),
@@ -211,6 +216,7 @@ class NodesView(viewsets.ViewSet):
                     "stats": stats,
                 }
             )
+
         return Response(nodes)
 
     def create(self, request):
