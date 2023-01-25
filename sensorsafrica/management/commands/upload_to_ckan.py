@@ -5,7 +5,6 @@ import time
 import datetime
 import tempfile
 
-
 import ckanapi
 import requests
 import pytz
@@ -115,7 +114,7 @@ class Command(BaseCommand):
                     )
 
                     # Cleanup temp file
-                    os.unlink(filepath)
+                    temp.close()
                  
                     # Don't DDOS openAFRICA
                     time.sleep(5)
@@ -130,24 +129,24 @@ class Command(BaseCommand):
 
     @staticmethod
     def _write_file(qs):
-        with tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv", delete=False) as fp:
-            fp.write(
-                b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
+        fp = tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv")
+        fp.write(
+            b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
+        )
+        for sd in qs.iterator():
+            s = ";".join(
+                [
+                    str(sd["sensor__id"]),
+                    sd["sensor__sensor_type__name"],
+                    str(sd["location__id"]),
+                    "{:.3f}".format(sd["location__latitude"]),
+                    "{:.3f}".format(sd["location__longitude"]),
+                    sd["timestamp"].isoformat(),
+                    sd["sensordatavalues__value_type"],
+                    sd["sensordatavalues__value"],
+                ]
             )
-            for sd in qs.iterator():
-                s = ";".join(
-                    [
-                        str(sd["sensor__id"]),
-                        sd["sensor__sensor_type__name"],
-                        str(sd["location__id"]),
-                        "{:.3f}".format(sd["location__latitude"]),
-                        "{:.3f}".format(sd["location__longitude"]),
-                        sd["timestamp"].isoformat(),
-                        sd["sensordatavalues__value_type"],
-                        sd["sensordatavalues__value"],
-                    ]
-                )
-                fp.write(bytes(s + "\n","utf-8"))
+            fp.write(bytes(s + "\n","utf-8"))
 
         return fp
 
