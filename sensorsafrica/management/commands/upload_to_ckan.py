@@ -148,8 +148,6 @@ class Command(BaseCommand):
             )
             fp.write(bytes(s + "\n","utf-8"))
 
-        return fp
-
     @staticmethod
     def _create_or_update_resource(resource_name, filepath, resources, ckan, package):
         extension = "CSV"
