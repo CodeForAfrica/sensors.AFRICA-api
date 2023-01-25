@@ -2,6 +2,8 @@ import calendar
 import datetime
 import os
 import time
+import datetime
+import tempfile
 
 import ckanapi
 import requests
@@ -104,18 +106,17 @@ class Command(BaseCommand):
                     resource_name = "{month} {year} Sensor Data Archive".format(
                         month=calendar.month_name[date.month], year=date.year
                     )
-
-                    filepath = "/tmp/%s.csv" % resource_name.lower().replace(" ", "_")
-
-                    self._write_file(filepath=filepath, qs=qs)
+                    fp = tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv")
+                    self._write_file(fp, qs)
+                    filepath = fp.name
+                   
                     self._create_or_update_resource(
                         resource_name, filepath, resources, ckan, package
                     )
 
-                    # Cleanup
-                    if os.path.exists(filepath):
-                        os.remove(filepath)
-
+                    # Cleanup temp file
+                    fp.close()
+                 
                     # Don't DDOS openAFRICA
                     time.sleep(5)
 
@@ -128,25 +129,24 @@ class Command(BaseCommand):
                 )
 
     @staticmethod
-    def _write_file(filepath, qs):
-        with open(filepath, "w") as fp:
-            fp.write(
-                "sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
+    def _write_file(fp, qs):
+        fp.write(
+            b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
+        )
+        for sd in qs.iterator():
+            s = ";".join(
+                [
+                    str(sd["sensor__id"]),
+                    sd["sensor__sensor_type__name"],
+                    str(sd["location__id"]),
+                    "{:.3f}".format(sd["location__latitude"]),
+                    "{:.3f}".format(sd["location__longitude"]),
+                    sd["timestamp"].isoformat(),
+                    sd["sensordatavalues__value_type"],
+                    sd["sensordatavalues__value"],
+                ]
             )
-            for sd in qs.iterator():
-                s = ";".join(
-                    [
-                        str(sd["sensor__id"]),
-                        sd["sensor__sensor_type__name"],
-                        str(sd["location__id"]),
-                        "{:.3f}".format(sd["location__latitude"]),
-                        "{:.3f}".format(sd["location__longitude"]),
-                        sd["timestamp"].isoformat(),
-                        sd["sensordatavalues__value_type"],
-                        sd["sensordatavalues__value"],
-                    ]
-                )
-                fp.write(s + "\n")
+            fp.write(bytes(s + "\n","utf-8"))
 
     @staticmethod
     def _create_or_update_resource(resource_name, filepath, resources, ckan, package):
