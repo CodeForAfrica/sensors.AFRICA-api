@@ -128,8 +128,7 @@ class Command(BaseCommand):
                 )
 
     @staticmethod
-    def _write_file(qs):
-        fp = tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv")
+    def _write_file(fp, qs):
         fp.write(
             b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
         )
