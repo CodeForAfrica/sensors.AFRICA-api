@@ -106,8 +106,9 @@ class Command(BaseCommand):
                     resource_name = "{month} {year} Sensor Data Archive".format(
                         month=calendar.month_name[date.month], year=date.year
                     )
-                    temp = self._write_file(qs=qs)
-                    filepath = temp.name
+                    fp = tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv")
+                    self._write_file(fp, qs)
+                    filepath = fp.name
                    
                     self._create_or_update_resource(
                         resource_name, filepath, resources, ckan, package
