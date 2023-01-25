@@ -115,7 +115,7 @@ class Command(BaseCommand):
                     )
 
                     # Cleanup temp file
-                    temp.close()
+                    fp.close()
                  
                     # Don't DDOS openAFRICA
                     time.sleep(5)
