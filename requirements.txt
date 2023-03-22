@@ -5,7 +5,7 @@ timeago==1.0.10
 
 flower==0.9.5
 tornado<6
-sentry-sdk==0.19.5
+sentry-sdk==1.14.0
 celery==4.2.1
 gevent==1.2.2
 greenlet==0.4.12
