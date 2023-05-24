@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('sensors', '0019_auto_20190125_0521'),
+        ('../feinstaub/sensors', '0019_auto_20190125_0521'),
     ]
 
     operations = [

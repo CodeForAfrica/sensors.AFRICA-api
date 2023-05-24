@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('notification_type', models.CharField(max_length=100, choices=[('none', 'no notification'), ('email', 'email'), ('pushover', 'pushover'), ('notifymyandroid', 'notifymyandroid')])),
                 ('pushover_clientkey', models.CharField(max_length=100, blank=True, default='')),
                 ('notifymyandroid_apikey', models.CharField(max_length=100, blank=True, default='')),
-                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, related_name='profile')),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL, related_name='profile',on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('-modified', '-created'),

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(blank=True, default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('uid', models.SlugField(unique=True)),
                 ('description', models.CharField(max_length=10000)),
-                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('owner', models.ForeignKey(to=settings.AUTH_USER_MODEL,on_delete=models.CASCADE)),
             ],
             options={
                 'get_latest_by': 'modified',
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(blank=True, default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('value1', models.IntegerField()),
                 ('value2', models.IntegerField(blank=True, null=True)),
-                ('sensor', models.ForeignKey(to='sensors.Sensor')),
+                ('sensor', models.ForeignKey(to='sensors.Sensor',on_delete=models.CASCADE)),
             ],
             options={
                 'get_latest_by': 'modified',
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 ('created', django_extensions.db.fields.CreationDateTimeField(blank=True, default=django.utils.timezone.now, editable=False, verbose_name='created')),
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(blank=True, default=django.utils.timezone.now, editable=False, verbose_name='modified')),
                 ('location', models.TextField(blank=True, null=True)),
-                ('sensor', models.ForeignKey(to='sensors.Sensor')),
+                ('sensor', models.ForeignKey(to='sensors.Sensor',on_delete=models.CASCADE)),
             ],
             options={
                 'get_latest_by': 'modified',
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sensor',
             name='sensor_type',
-            field=models.ForeignKey(to='sensors.SensorType'),
+            field=models.ForeignKey(to='sensors.SensorType',on_delete=models.CASCADE),
             preserve_default=True,
         ),
     ]

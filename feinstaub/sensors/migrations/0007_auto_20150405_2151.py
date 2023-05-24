@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sensordatavalue',
             name='sensordata',
-            field=models.ForeignKey(to='sensors.SensorData', related_name='sensordatavalues'),
+            field=models.ForeignKey(to='sensors.SensorData', related_name='sensordatavalues',on_delete=models.CASCADE),
         ),
     ]

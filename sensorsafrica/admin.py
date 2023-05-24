@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.conf.urls import include, url
+# from django.conf.urls import include, url "django.conf.urls.url() was deprecated in Django 3.0, and is removed in Django 4.0+."
+from django.urls import re_path as url, include
 from django.template.response import TemplateResponse
 from .api.models import LastActiveNodes, SensorDataStat, City
 from django.db.models import Q

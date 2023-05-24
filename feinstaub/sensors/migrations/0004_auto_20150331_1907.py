@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('modified', django_extensions.db.fields.ModificationDateTimeField(editable=False, default=django.utils.timezone.now, blank=True, verbose_name='modified')),
                 ('value', models.TextField()),
                 ('value_type', models.CharField(choices=[('P1', '1µm particles'), ('P2', '2.5µm particles'), ('temperature', 'Temperature'), ('humidity', 'Humidity'), ('brightness', 'Brightness')], max_length=100)),
-                ('sensordata', models.ForeignKey(to='sensors.SensorData')),
+                ('sensordata', models.ForeignKey(to='sensors.SensorData',on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -47,13 +47,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sensor',
             name='location',
-            field=models.ForeignKey(default=False, to='sensors.SensorLocation'),
+            field=models.ForeignKey(default=False, to='sensors.SensorLocation',on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(
             model_name='sensordata',
             name='location',
-            field=models.ForeignKey(default=1, blank=True, to='sensors.SensorLocation'),
+            field=models.ForeignKey(default=1, blank=True, to='sensors.SensorLocation',on_delete=models.CASCADE),
             preserve_default=False,
         ),
         migrations.AddField(
@@ -71,7 +71,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sensorlocation',
             name='owner',
-            field=models.ForeignKey(blank=True, help_text='If not set, location is public.', null=True, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, help_text='If not set, location is public.', null=True, to=settings.AUTH_USER_MODEL,on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterField(

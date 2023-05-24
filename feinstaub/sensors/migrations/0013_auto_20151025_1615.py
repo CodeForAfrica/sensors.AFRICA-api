@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sensor',
             name='node',
-            field=models.ForeignKey(related_name='sensors', to='sensors.Node'),
+            field=models.ForeignKey(related_name='sensors', to='sensors.Node',on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='sensordata',
@@ -60,7 +60,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='sensordata',
             name='sensor',
-            field=models.ForeignKey(related_name='sensordatas', to='sensors.Sensor'),
+            field=models.ForeignKey(related_name='sensordatas', to='sensors.Sensor',on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='sensordatavalue',

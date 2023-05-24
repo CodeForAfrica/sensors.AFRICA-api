@@ -21,9 +21,9 @@ class City(TimeStampedModel):
 
 
 class SensorDataStat(TimeStampedModel):
-    node = models.ForeignKey(Node)
-    sensor = models.ForeignKey(Sensor)
-    location = models.ForeignKey(SensorLocation)
+    node = models.ForeignKey(Node,on_delete=models.CASCADE)
+    sensor = models.ForeignKey(Sensor,on_delete=models.CASCADE)
+    location = models.ForeignKey(SensorLocation,on_delete=models.CASCADE)
 
     city_slug = models.CharField(max_length=255, db_index=True, null=False, blank=False)
     value_type = models.CharField(max_length=255, db_index=True, null=False, blank=False)
@@ -51,7 +51,7 @@ class SensorDataStat(TimeStampedModel):
 
 
 class LastActiveNodes(TimeStampedModel):
-    node = models.ForeignKey(Node)
+    node = models.ForeignKey(Node,on_delete=models.CASCADE)
     location = models.ForeignKey(SensorLocation,on_delete=models.CASCADE)
     last_data_received_at = models.DateTimeField()
 

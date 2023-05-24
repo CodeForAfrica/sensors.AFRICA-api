@@ -46,17 +46,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='node',
             name='location',
-            field=models.ForeignKey(to='sensors.SensorLocation'),
+            field=models.ForeignKey(to='sensors.SensorLocation',on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='node',
             name='owner',
-            field=models.ForeignKey(to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL,on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='sensor',
             name='node',
-            field=models.ForeignKey(to='sensors.Node', blank=True, null=True),
+            field=models.ForeignKey(to='sensors.Node', blank=True, null=True,on_delete=models.CASCADE),
             preserve_default=False,
         ),
 
