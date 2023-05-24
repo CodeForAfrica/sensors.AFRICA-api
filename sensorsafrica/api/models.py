@@ -52,7 +52,7 @@ class SensorDataStat(TimeStampedModel):
 
 class LastActiveNodes(TimeStampedModel):
     node = models.ForeignKey(Node)
-    location = models.ForeignKey(SensorLocation)
+    location = models.ForeignKey(SensorLocation,on_delete=models.CASCADE)
     last_data_received_at = models.DateTimeField()
 
     class Meta:

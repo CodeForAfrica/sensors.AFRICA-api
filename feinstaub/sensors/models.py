@@ -19,12 +19,12 @@ class SensorType(TimeStampedModel):
 
 class Node(TimeStampedModel):
     uid = models.SlugField(unique=True)
-    owner = models.ForeignKey(User)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.TextField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     height = models.IntegerField(null=True)
     sensor_position = models.IntegerField(null=True) # 0 = no information, 1 = in backyard, 10 = just in front of the house at the street
-    location = models.ForeignKey("SensorLocation")
+    location = models.ForeignKey("SensorLocation",on_delete=models.CASCADE)
     email = models.EmailField(null=True, blank=True)
     last_notify = models.DateTimeField(null=True, blank=True)
     description_internal = models.TextField(null=True, blank=True) # for internal purposes, should never been provided via API / dump / ...
@@ -40,14 +40,14 @@ class Node(TimeStampedModel):
 
 
 class Sensor(TimeStampedModel):
-    node = models.ForeignKey(Node, related_name="sensors")
+    node = models.ForeignKey(Node, related_name="sensors",on_delete=models.CASCADE)
     pin = models.CharField(
         max_length=10,
         default='-',
         db_index=True,
         help_text='differentiate the sensors on one node by giving pin used',
     )
-    sensor_type = models.ForeignKey(SensorType)
+    sensor_type = models.ForeignKey(SensorType, on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     public = models.BooleanField(default=False, db_index=True)
 
@@ -59,11 +59,11 @@ class Sensor(TimeStampedModel):
 
 
 class SensorData(TimeStampedModel):
-    sensor = models.ForeignKey(Sensor, related_name="sensordatas")
+    sensor = models.ForeignKey(Sensor, related_name="sensordatas",on_delete=models.CASCADE)
     sampling_rate = models.IntegerField(null=True, blank=True,
                                         help_text="in milliseconds")
     timestamp = models.DateTimeField(default=now, db_index=True)
-    location = models.ForeignKey("SensorLocation", blank=True)
+    location = models.ForeignKey("SensorLocation",on_delete=models.CASCADE , blank=True)
     software_version = models.CharField(max_length=100, default="",
                                         help_text="sensor software version")
 
@@ -155,7 +155,7 @@ SENSOR_TYPE_CHOICES = (
 
 class SensorDataValue(TimeStampedModel):
 
-    sensordata = models.ForeignKey(SensorData, related_name='sensordatavalues')
+    sensordata = models.ForeignKey(SensorData, related_name='sensordatavalues', on_delete=models.CASCADE)
     value = models.TextField(null=False)
     value_type = models.CharField(max_length=100, choices=SENSOR_TYPE_CHOICES,
                                   db_index=True)
@@ -186,7 +186,7 @@ class SensorLocation(TimeStampedModel):
     oven_in_area = models.IntegerField(null=True) # 0 = no information, 1 = no ovens in area, 10 = it REALLY smells
     industry_in_area = models.IntegerField(null=True) # 0 = no information, 1 = no industry in area, 10 = industry all around
     owner = models.ForeignKey(User, null=True, blank=True,
-                              help_text="If not set, location is public.")
+                              help_text="If not set, location is public.",on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(default=now)
 
