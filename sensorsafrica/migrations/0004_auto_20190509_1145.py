@@ -10,7 +10,7 @@ import django_extensions.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('sensors', '0020_auto_20190314_1232'),
+        # ('sensors', '0020_auto_20190314_1232'),
         ('sensorsafrica', '0003_auto_20190222_1137'),
     ]
 
