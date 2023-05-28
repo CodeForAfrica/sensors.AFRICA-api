@@ -400,3 +400,7 @@ celerybeat.pid
 logs/
 
 /static
+
+
+#folder in project directory to store temporary files or backup files locally
+temp/ 
