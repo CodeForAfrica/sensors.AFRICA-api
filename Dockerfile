@@ -1,4 +1,4 @@
-FROM python:3.6.3
+FROM python:3.9.7
 
 ENV PYTHONUNBUFFERED 1
 
@@ -17,7 +17,7 @@ ADD . /src/
 RUN pip install -q -U pip setuptools
 
 # Install feinstaub from opendata-stuttgart
-RUN pip install -q git+https://github.com/opendata-stuttgart/feinstaub-api
+# RUN pip install -q git+https://github.com/opendata-stuttgart/feinstaub-api
 
 # Install sensors.AFRICA-api and its dependencies
 RUN pip install -q -U .

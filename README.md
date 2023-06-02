@@ -12,23 +12,45 @@ Gitignore is standardized for this project using [gitignore.io](https://www.giti
 To get the project up and running:
 
 - Clone this repo
-
+- 
+### Prerequisites
+  
+  - Have [PostgreSQL](https://www.postgresql.org/download/) installed 
+  - Have **psql** installed - a command line tool to interact with PostgreSQL. To install, follow instructions as shown [here](https://www.timescale.com/blog/how-to-install-psql-on-mac-ubuntu-debian-windows/).
+  - Have a Python version 3.9.7 installed in your system. If you are using a different Python version you could use a   tool like [Pyenv](https://github.com/pyenv/pyenv) to manage different versions  
 ### Virtual environment
-
-- Use virtualenv to create your virtual environment; `virtualenv venv`
+  
+- Use virtualenv to create your virtual environment; `python -m venv venv` or `virtualenv venv`
 - Activate the virtual environment; `source venv/bin/activate`
-- Install feinstaub; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`
-- Install the requirements; `pip install .`
-- Create a sensorsafrica database with the following sql script:
+- ~~Install feinstaub; `pip install git+https://github.com/opendata-stuttgart/feinstaub-api`~~ issues detected. Feinstaub sensors app manually include in project directory 
+- ~~Install the requirements; `pip install .`~~ Dependency hell with older conflicting module versions.
+- Run the below commands in the virtual environment to install depencencies. Note : latest versions will be installed
+```bash
+
+pip install —upgrade pip
+pip install —upgrade setuptools
+
+pip install django django-cors-headers django-filter djangorestframework coreapi celery celery_slack python-dateutil timeago psycopg2-binary dj_database_url sentry_sdk django_extensions whitenoise
+
+```
+
+### Database setup
+- Create a sensorsafrica database open your terminal and hit `psql postgres`, then run following sql script:
 
 ```sql
 CREATE DATABASE sensorsafrica;
 CREATE USER sensorsafrica WITH ENCRYPTED PASSWORD 'sensorsafrica';
 GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 ```
+### Running the app
+
+Still in your virtual enviroment, run the following:
 
 - Migrate the database; `python manage.py migrate`
 - Run the server; `python manage.py runserver`
+
+
+---
 
 ### Docker
 
