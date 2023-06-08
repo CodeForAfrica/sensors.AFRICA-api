@@ -150,6 +150,10 @@ SENSOR_TYPE_CHOICES = (
     ('no2_ppb','NO2 in ppb'),
     ('ozone_ppb','O3 in ppb'),
     ('so2_ppb','SO2 in ppb'),
+    #battery monitoring
+    ('batt_level', 'battery percentage level'),
+    ('batt_voltage', 'battery voltage'),
+    ('batt_charging','battery boolean charging state')
 )
 
 
