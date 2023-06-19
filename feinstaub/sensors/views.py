@@ -58,7 +58,7 @@ class SensorView(mixins.ListModelMixin,
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return Sensor.objects.all()
             return Sensor.objects.filter(node__owner=self.request.user)
@@ -92,7 +92,7 @@ class SensorDataView(mixins.ListModelMixin,
     filter_class = SensorFilter
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return SensorData.objects.all()
             return SensorData.objects.filter(Q(sensor__node__owner=self.request.user) |
@@ -110,7 +110,7 @@ class NodeView(mixins.ListModelMixin,
     queryset = Node.objects.all()
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return Node.objects.all()
             return Node.objects.filter(owner=self.request.user)
