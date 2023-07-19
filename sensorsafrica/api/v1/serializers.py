@@ -63,4 +63,4 @@ class LastNotifySensorDataSerializer(PostSensorDataSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta(object):
         model = User
-        fields = ['id','username','email']
+        fields = ['id','username','email','is_superuser','is_staff','is_active']
