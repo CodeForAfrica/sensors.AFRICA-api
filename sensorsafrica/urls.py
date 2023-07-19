@@ -35,3 +35,8 @@ urlpatterns = [
     url(r"^docs/", include_docs_urls(title="sensors.Africa API")),
     url(r"^adddevice/", AddSensordeviceView.as_view(), name="adddevice"),
 ] + staticfiles_urlpatterns()
+
+
+
+admin.site.site_header="sensors.AFRCIA API admin"
+admin.site.site_title="sensors.AFRICA admin"
