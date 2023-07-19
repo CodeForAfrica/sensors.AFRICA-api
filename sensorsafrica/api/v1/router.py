@@ -30,6 +30,6 @@ router.register(
     r"sensors/(?P<sensor_id>\d+)", SensorsAfricaSensorDataView, basename="sensors"
 )
 router.register(r"filter", FilterView, basename="filter")
-router.register(r"login",login)
+router.register(r"login",login, basename="login")
 
 api_urls = router.urls
