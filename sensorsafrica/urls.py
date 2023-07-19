@@ -24,7 +24,7 @@ from rest_framework.documentation import include_docs_urls
 
 from .api.v1.router import api_urls as sensors_api_v1
 from .api.v2.router import api_urls as sensors_api_v2
-
+from .api.v1.views import login
 urlpatterns = [
     url(r"^$", RedirectView.as_view(url="/docs/", permanent=False)),
     url(r"^admin/", admin.site.urls),
@@ -34,6 +34,7 @@ urlpatterns = [
     url(r"^auth/", include("rest_framework.urls", namespace="rest_framework")),
     url(r"^docs/", include_docs_urls(title="sensors.Africa API")),
     url(r"^adddevice/", AddSensordeviceView.as_view(), name="adddevice"),
+    url(r"login/",login)
 ] + staticfiles_urlpatterns()
 
 
