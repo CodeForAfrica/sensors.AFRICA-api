@@ -9,10 +9,16 @@ from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Av
 from django.db.models.functions import Cast, TruncDate
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
-from rest_framework import mixins, pagination, viewsets
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+
+from rest_framework import mixins, pagination, viewsets, status
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from feinstaub.sensors.models import Node, SensorData
 from feinstaub.sensors.serializers import NowSerializer
@@ -20,7 +26,7 @@ from feinstaub.sensors.views import SensorDataView, StandardResultsSetPagination
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
 from .filters import NodeFilter, SensorFilter
-from .serializers import LastNotifySensorDataSerializer, NodeSerializer, SensorDataSerializer
+from .serializers import LastNotifySensorDataSerializer, NodeSerializer, SensorDataSerializer, UserSerializer
 
 class FilterView(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = SensorDataSerializer
@@ -110,3 +116,11 @@ class SensorsAfricaSensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet
             .prefetch_related("sensordatavalues")
         )
 
+@api_view(['POST'])
+def login(request):
+    user = get_object_or_404(User,email=request.data['email'])
+    if not user.check_password(request.data['password']):
+        return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+    token, created = Token.objects.get_or_create(user=user)
+    serializer = UserSerializer(user)
+    return Response({'token': token.key,'user': serializer.data})

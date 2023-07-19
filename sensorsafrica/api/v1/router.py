@@ -13,6 +13,7 @@ from .views import (
     PostSensorDataView,
     SensorsAfricaSensorDataView,
     VerboseSensorDataView,
+    login
 )
 
 from rest_framework import routers
@@ -29,5 +30,6 @@ router.register(
     r"sensors/(?P<sensor_id>\d+)", SensorsAfricaSensorDataView, basename="sensors"
 )
 router.register(r"filter", FilterView, basename="filter")
+router.register(r"login",login)
 
 api_urls = router.urls

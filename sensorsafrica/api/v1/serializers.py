@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from feinstaub.sensors.models import (
     Node,
     SensorData,
@@ -58,3 +59,8 @@ class LastNotifySensorDataSerializer(PostSensorDataSerializer):
             node.save()
 
         return sd
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta(object):
+        model = User
+        fields = ['id','username','email']
