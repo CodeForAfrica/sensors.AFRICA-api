@@ -26,7 +26,11 @@ CREATE DATABASE sensorsafrica;
 CREATE USER sensorsafrica WITH ENCRYPTED PASSWORD 'sensorsafrica';
 GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 ```
-
+- Create super user for admin login; `python manage.py createsuperuser` 
+  username: `sensorsafrica`
+  email: blank
+  password: `sensorsafrica`
+  
 - Migrate the database; `python manage.py migrate`
 - Run the server; `python manage.py runserver`
 
