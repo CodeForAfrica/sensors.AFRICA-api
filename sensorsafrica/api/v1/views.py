@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework import mixins, pagination, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from feinstaub.sensors.models import Node, SensorData
 from feinstaub.sensors.serializers import NowSerializer
@@ -72,8 +72,8 @@ class NodeView(
 
 class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
     """Show all public sensors active in the last 5 minutes with newest value"""
-
-    permission_classes = []
+    authentication_classes=[SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = NowSerializer
     queryset = SensorData.objects.none()
 
@@ -95,6 +95,8 @@ class PostSensorDataView(mixins.CreateModelMixin,
     
 
 class VerboseSensorDataView(SensorDataView):
+    authentication_classes=[SessionAuthentication, TokenAuthentication]
+    permission_classes=[IsAuthenticated]
     filter_class = SensorFilter
 
 class SensorsAfricaSensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet):
