@@ -13,6 +13,9 @@ VOLUME [ "/src/logs" ]
 # Copy the current directory contents into the container at sensorsafrica
 ADD . /src/
 
+# Upgrade pip from trusted hosts
+RUN python -m pip install --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --upgrade pip
+
 # Upgrade pip and setuptools
 RUN pip install -q -U pip setuptools
 
