@@ -201,7 +201,7 @@ sentry_sdk.init(
 
 # Put fenstaub migrations into sensorsafrica
 MIGRATION_MODULES = {
-    "sensors": "sensorsafrica.openstuttgart.feinstaub.sensors.migrations"
+    "sensors": "feinstaub.sensors.migrations"
 }
 
 NETWORKS_OWNER = os.getenv("NETWORKS_OWNER")
