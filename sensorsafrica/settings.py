@@ -118,7 +118,7 @@ READ_DATABASE_URLS = os.getenv("SENSORSAFRICA_READ_DATABASE_URLS", DATABASE_URL)
 for index, read_database_url in enumerate(READ_DATABASE_URLS,start=1):
     DATABASES[f"read_replica_{index}"] = dj_database_url.parse(read_database_url)
 
-DATABASE_ROUTERS = ["sensorsafrica.router.ReplicaRouter", ]
+# DATABASE_ROUTERS = ["sensorsafrica.router.ReplicaRouter", ]
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
