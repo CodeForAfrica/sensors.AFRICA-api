@@ -31,10 +31,10 @@ services:
     build:
       context: .
     environment:
-      SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@postgres:5432/sensorsafrica
-      SENSORSAFRICA_RABBITMQ_URL: amqp://sensorsafrica:sensorsafrica@rabbitmq:5672
-      SENSORSAFRICA_FLOWER_ADMIN_USERNAME: admin
-      SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: password
+      SENSORSAFRICA_DATABASE_URL: ${SENSORSAFRICA_DATABASE_URL}
+      SENSORSAFRICA_RABBITMQ_URL: ${SENSORSAFRICA_RABBITMQ_URL}
+      SENSORSAFRICA_FLOWER_ADMIN_USERNAME: ${SENSORSAFRICA_FLOWER_ADMIN_USERNAME}
+      SENSORSAFRICA_FLOWER_ADMIN_PASSWORD: ${SENSORSAFRICA_FLOWER_ADMIN_PASSWORD}
       DOKKU_APP_NAME: sensorsafrica
     depends_on:
       - postgres
