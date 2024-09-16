@@ -5,18 +5,22 @@ import django_filters
 
 
 from django.conf import settings
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
-from django.db.models.functions import Cast, TruncDate
-from dateutil.relativedelta import relativedelta
+from django.db.models import Q
 from django.utils import timezone
-from rest_framework import mixins, pagination, viewsets
+from rest_framework import mixins,viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
-from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
+from feinstaub.main.views import UsersView as FeinstaubUsersView
 from feinstaub.sensors.models import Node, SensorData
 from feinstaub.sensors.serializers import NowSerializer
-from feinstaub.sensors.views import SensorDataView, StandardResultsSetPagination
+from feinstaub.sensors.views import (
+    SensorDataView,
+    StandardResultsSetPagination,
+    SensorView as FeinstaubSensorView,
+    StatisticsView as FeinstaubStatisticsView
+
+)
 from feinstaub.sensors.authentication import NodeUidAuthentication
 
 from .filters import NodeFilter, SensorFilter
@@ -92,7 +96,7 @@ class PostSensorDataView(mixins.CreateModelMixin,
     permission_classes = tuple()
     serializer_class = LastNotifySensorDataSerializer
     queryset = SensorData.objects.all()
-    
+
 
 class VerboseSensorDataView(SensorDataView):
     authentication_classes=[SessionAuthentication, TokenAuthentication]
@@ -112,3 +116,15 @@ class SensorsAfricaSensorDataView(mixins.ListModelMixin, viewsets.GenericViewSet
             .prefetch_related("sensordatavalues")
         )
 
+
+class UsersView(FeinstaubUsersView):
+    authentication_classes=[SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class SensorView(FeinstaubSensorView):
+    authentication_classes=[SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class StatisticsView(FeinstaubStatisticsView):
+    authentication_classes=[SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
