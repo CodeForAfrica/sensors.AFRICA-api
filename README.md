@@ -4,7 +4,7 @@ API to save and access data from deployed sensors in cities all around Africa.
 
 ## Documentation
 
-The API is documented [here.](https://github.com/CodeForAfricaLabs/sensors.AFRICA-api/wiki/API-Documentation) 
+The API is documented [here.](https://github.com/CodeForAfricaLabs/sensors.AFRICA-api/wiki/API-Documentation)
 
 ## Development
 
@@ -29,6 +29,11 @@ GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 
 - Migrate the database; `python manage.py migrate`
 - Run the server; `python manage.py runserver`
+- Create super user for admin login; `python manage.py createsuperuser`
+
+  username: `<username>`
+  email: blank
+  password: `<password>`
 
 ### Docker
 
