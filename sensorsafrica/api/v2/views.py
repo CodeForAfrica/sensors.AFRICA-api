@@ -248,7 +248,7 @@ class SensorDataView(
     serializer_class = SensorDataSerializer
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return SensorData.objects.all()
 
