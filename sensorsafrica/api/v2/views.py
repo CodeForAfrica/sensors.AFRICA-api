@@ -23,7 +23,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, authentication_classes
 
 from feinstaub.sensors.views import SensorFilter, StandardResultsSetPagination
-
+from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.models import (
     Node,
     Sensor,
@@ -471,3 +471,18 @@ def get_database_last_updated():
     sensor_data_value = SensorDataValue.objects.latest('created')
     if sensor_data_value:
         return sensor_data_value.modified
+
+
+class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Show all public sensors active in the last 5 minutes with newest value"""
+
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = NowSerializer
+
+    def get_queryset(self):
+        now = timezone.now()
+        startdate = now - datetime.timedelta(minutes=5)
+        return SensorData.objects.filter(
+            sensor__public=True, modified__range=[startdate, now]
+        )

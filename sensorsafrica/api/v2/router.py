@@ -4,6 +4,7 @@ from django.conf.urls import url, include
 from .views import (
     CitiesView,
     NodesView,
+    NowView,
     SensorDataStatsView,
     SensorDataView,
     SensorLocationsView,
@@ -12,34 +13,17 @@ from .views import (
     meta_data,
 )
 
-stat_data_router = routers.DefaultRouter()
-stat_data_router.register(r"", SensorDataStatsView)
-
-data_router = routers.DefaultRouter()
-data_router.register(r"", SensorDataView)
-
-cities_router = routers.DefaultRouter()
-cities_router.register(r"", CitiesView, basename="cities")
-
-nodes_router = routers.DefaultRouter()
-nodes_router.register(r"", NodesView, basename="map")
-
-sensors_router = routers.DefaultRouter()
-sensors_router.register(r"", SensorsView, basename="sensors")
-
-sensor_locations_router = routers.DefaultRouter()
-sensor_locations_router.register(r"", SensorLocationsView, basename="locations")
-
-sensor_types_router = routers.DefaultRouter()
-sensor_types_router.register(r"", SensorTypesView, basename="sensor_types")
+router = routers.DefaultRouter()
+router.register(r"data", SensorDataView, basename="sensor-data")
+router.register(r"data/(?P<sensor_type>[air]+)", SensorDataStatsView, basename="sensor-data-stats")
+router.register(r"cities", CitiesView, basename="cities")
+router.register(r"nodes", NodesView, basename="nodes")
+router.register(r"now", NowView, basename="now")
+router.register(r"locations", SensorLocationsView, basename="sensor-locations")
+router.register(r"sensors", SensorsView, basename="sensors")
+router.register(r"sensor-types", SensorTypesView, basename="sensor-types")
 
 api_urls = [
-    url(r"data/(?P<sensor_type>[air]+)/", include(stat_data_router.urls)),
-    url(r"data/", include(data_router.urls)),
-    url(r"cities/", include(cities_router.urls)),
-    url(r"nodes/", include(nodes_router.urls)),
-    url(r"locations/", include(sensor_locations_router.urls)),
-    url(r"sensors/", include(sensors_router.urls)),
-    url(r"sensor-types/", include(sensor_types_router.urls)),
-    url(r"meta/", meta_data),
+    url(r"^", include(router.urls)),
+    url(r"^meta/", meta_data),
 ]
