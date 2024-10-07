@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 from django.db import connection
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q, Count
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
@@ -486,3 +486,40 @@ class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
         return SensorData.objects.filter(
             sensor__public=True, modified__range=[startdate, now]
         )
+
+
+class StatisticsView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        user_count = User.objects.aggregate(count=Count('id'))['count']
+        sensor_count = Sensor.objects.aggregate(count=Count('id'))['count']
+        sensor_data_count = SensorData.objects.aggregate(count=Count('id'))['count']
+        sensor_data_value_count = SensorDataValue.objects.aggregate(count=Count('id'))['count']
+        sensor_type_count = SensorType.objects.aggregate(count=Count('id'))['count']
+        sensor_type_list = list(SensorType.objects.order_by('uid').values_list('name', flat=True))
+        location_count = SensorLocation.objects.aggregate(count=Count('id'))['count']
+
+        stats = {
+            'user': {
+                'count': user_count,
+            },
+            'sensor': {
+                'count': sensor_count,
+            },
+            'sensor_data': {
+                'count': sensor_data_count,
+            },
+            'sensor_data_value': {
+                'count': sensor_data_value_count,
+            },
+            'sensor_type': {
+                'count': sensor_type_count,
+                'list': sensor_type_list,
+            },
+            'location': {
+                'count': location_count,
+            }
+        }
+        return Response(stats)

@@ -18,7 +18,6 @@ from .views import (
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register(r"push-sensor-data", PostSensorDataView)
 router.register(r"node", NodeView)
 router.register(r"sensor", SensorView)
 router.register(r"data", VerboseSensorDataView)
@@ -31,3 +30,8 @@ router.register(
 router.register(r"filter", FilterView, basename="filter")
 
 api_urls = router.urls
+
+push_sensor_data_router = routers.DefaultRouter()
+push_sensor_data_router.register(r"push-sensor-data", PostSensorDataView)
+
+push_sensor_data_urls = push_sensor_data_router.urls

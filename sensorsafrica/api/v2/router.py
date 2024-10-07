@@ -10,6 +10,7 @@ from .views import (
     SensorLocationsView,
     SensorTypesView,
     SensorsView,
+    StatisticsView,
     meta_data,
 )
 
@@ -22,6 +23,7 @@ router.register(r"now", NowView, basename="now")
 router.register(r"locations", SensorLocationsView, basename="sensor-locations")
 router.register(r"sensors", SensorsView, basename="sensors")
 router.register(r"sensor-types", SensorTypesView, basename="sensor-types")
+router.register(r"statistics", StatisticsView, basename="statistics")
 
 api_urls = [
     url(r"^", include(router.urls)),
