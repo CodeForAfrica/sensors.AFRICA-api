@@ -17,6 +17,7 @@ from django.views.decorators.cache import cache_page
 
 from rest_framework import mixins, pagination, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -129,6 +130,7 @@ class CitiesView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
+    """Create and list nodes, with the option to list authenticated user's nodes."""
     authentication_classes = [SessionAuthentication, TokenAuthentication]
 
     def get_permissions(self):
@@ -139,7 +141,9 @@ class NodesView(viewsets.ViewSet):
 
         return [permission() for permission in permission_classes]
 
-    def list(self, request):
+    @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes")
+    def list_nodes(self, request):
+        """List all public nodes with active sensors."""
         nodes = []
         # Loop through the last active nodes
         for last_active in LastActiveNodes.objects.iterator():
@@ -219,7 +223,17 @@ class NodesView(viewsets.ViewSet):
 
         return Response(nodes)
 
-    def create(self, request):
+    @action(detail=False, methods=["get"], url_path="my-nodes", url_name="my_nodes")
+    def list_my_nodes(self, request):
+        """List only the nodes owned by the authenticated user."""
+        if request.user.is_authenticated:
+            queryset = Node.objects.filter(owner=request.user)
+            serializer = NodeSerializer(queryset, many=True)
+            return Response(serializer.data)
+        return Response({"detail": "Authentication credentials were not provided."}, status=403)
+
+    @action(detail=False, methods=["post"], url_path="create-node", url_name="create_node")
+    def create_node(self, request):
         serializer = NodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
