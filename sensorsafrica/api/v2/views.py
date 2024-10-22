@@ -227,13 +227,20 @@ class NodesView(viewsets.ViewSet):
     def list_my_nodes(self, request):
         """List only the nodes owned by the authenticated user."""
         if request.user.is_authenticated:
-            queryset = Node.objects.filter(owner=request.user)
+            queryset = Node.objects.filter(
+                Q(owner=request.user)
+                | Q(
+                    owner__groups__name__in=[
+                        g.name for g in request.user.groups.all()
+                    ]
+                )
+            )
             serializer = NodeSerializer(queryset, many=True)
             return Response(serializer.data)
         return Response({"detail": "Authentication credentials were not provided."}, status=403)
 
-    @action(detail=False, methods=["post"], url_path="create-node", url_name="create_node")
-    def create_node(self, request):
+    @action(detail=False, methods=["post"], url_path="register-node", url_name="register_node")
+    def register_node(self, request):
         serializer = NodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
