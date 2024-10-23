@@ -39,6 +39,7 @@ GRANT ALL PRIVILEGES ON DATABASE sensorsafrica TO sensorsafrica;
 
 Using docker compose:
 
+- Create a `.env` file using `.env.template` . ***docker-compose has some default values for these variables***
 - Build the project; `docker-compose build` or `make build`
 - Run the project; `docker-compose up -d` or `make up`
 
