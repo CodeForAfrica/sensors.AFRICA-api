@@ -18,7 +18,7 @@ ckanapi==4.1
 
 celery-slack==0.3.0
 
-urllib3<1.25,>=1.21.1 #requests 2.21.0
+urllib3<2
 
 django-cors-headers==3.0.2
 

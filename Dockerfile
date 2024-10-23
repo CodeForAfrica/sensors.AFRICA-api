@@ -2,25 +2,21 @@ FROM python:3.6.3
 
 ENV PYTHONUNBUFFERED 1
 
-# Create root directory for our project in the container
-RUN mkdir /src
-
-# Create application subdirectories
+# Create application root directory
 WORKDIR /src
+
 RUN mkdir media static logs
 VOLUME [ "/src/logs" ]
 
+# Upgrade pip and setuptools with trusted hosts
+RUN python -m pip install --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org --upgrade pip setuptools
+
 # Copy the current directory contents into the container at sensorsafrica
-ADD . /src/
+COPY . /src/
 
-# Upgrade pip and setuptools
-RUN pip install -q -U pip setuptools
-
-# Install feinstaub from opendata-stuttgart
-RUN pip install -q git+https://github.com/opendata-stuttgart/feinstaub-api
-
-# Install sensors.AFRICA-api and its dependencies
-RUN pip install -q -U .
+# Upgrade pip and setuptools, install dependencies
+RUN pip install -q git+https://github.com/opendata-stuttgart/feinstaub-api && \
+    pip install -q -U .
 
 # Expose port server
 EXPOSE 8000
@@ -31,3 +27,4 @@ COPY ./contrib/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD [ "/start.sh" ]
+

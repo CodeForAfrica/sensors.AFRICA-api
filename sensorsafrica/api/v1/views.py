@@ -54,7 +54,7 @@ class NodeView(
     filter_class = NodeFilter
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return Node.objects.all()
 
@@ -92,7 +92,7 @@ class PostSensorDataView(mixins.CreateModelMixin,
     permission_classes = tuple()
     serializer_class = LastNotifySensorDataSerializer
     queryset = SensorData.objects.all()
-    
+
 
 class VerboseSensorDataView(SensorDataView):
     filter_class = SensorFilter
