@@ -132,14 +132,7 @@ class CitiesView(mixins.ListModelMixin, viewsets.GenericViewSet):
 class NodesView(viewsets.ViewSet):
     """Create and list nodes, with the option to list authenticated user's nodes."""
     authentication_classes = [SessionAuthentication, TokenAuthentication]
-
-    def get_permissions(self):
-        if self.action == "create":
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [AllowAny]
-
-        return [permission() for permission in permission_classes]
+    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes")
     def list_nodes(self, request):
