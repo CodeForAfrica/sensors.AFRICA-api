@@ -251,7 +251,17 @@ class SensorDataPagination(pagination.CursorPagination):
 class SensorDataView(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    """This endpoint is to download sensor data from the api."""
+    """
+    View for retrieving and downloading detailed sensor data records, with access controlled based on
+    user permissions and ownership.
+
+    This endpoint allows authenticated users to retrieve sensor data records, with the following access rules:
+    - Users in the `show_me_everything` group have access to all sensor data records.
+    - Other users can access data from sensors they own, sensors owned by members of their groups, or public sensors.
+    - Non-authenticated users can only access public sensor data.
+    """
+
+
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SensorData.objects.all()
@@ -279,9 +289,40 @@ class SensorDataView(
 
 
 class SensorDataStatsView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    View to retrieve summarized statistics for specific sensor types (e.g., air quality) within a defined date range,
+    filtered by city and grouped by specified intervals (hourly, daily, or monthly).
+
+    **URL Parameters:**
+        - `sensor_type` (str): The type of sensor data to retrieve (e.g., air_quality).
+
+    **Query Parameters:**
+        - `city` (str, optional): Comma-separated list of city slugs to filter data by location.
+        - `from` (str, optional): Start date in "YYYY-MM-DD" format. Required if `to` is specified.
+        - `to` (str, optional): End date in "YYYY-MM-DD" format. Defaults to 24 hours before `to_date` if unspecified.
+        - `interval` (str, optional): Aggregation interval for results - either "hour", "day", or "month". Defaults to "day".
+        - `value_type` (str, optional): Comma-separated list of value types to filter (e.g., "PM2.5, PM10").
+
+    **Caching:**
+        - Results are cached for 1 hour (`@cache_page(3600)`) to reduce server load.
+
+    **Returns:**
+        - A list of sensor data statistics, grouped by city, value type, and specified interval.
+        - Each entry includes:
+            - `value_type` (str): Type of sensor value (e.g., PM2.5).
+            - `city_slug` (str): City identifier.
+            - `truncated_timestamp` (datetime): Timestamp truncated to the specified interval.
+            - `start_datetime` (datetime): Start of the aggregated time period.
+            - `end_datetime` (datetime): End of the aggregated time period.
+            - `calculated_average` (float): Weighted average of sensor values.
+            - `calculated_minimum` (float): Minimum recorded value within the period.
+            - `calculated_maximum` (float): Maximum recorded value within the period.
+    """
     queryset = SensorDataStat.objects.none()
     serializer_class = SensorDataStatSerializer
     pagination_class = CustomPagination
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @method_decorator(cache_page(3600))
     def dispatch(self, request, *args, **kwargs):
@@ -367,6 +408,9 @@ class SensorDataStatsView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class SensorLocationsView(viewsets.ViewSet):
+    """
+    View for retrieving and creating sensor entries.
+    """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
@@ -386,6 +430,9 @@ class SensorLocationsView(viewsets.ViewSet):
 
 
 class SensorTypesView(viewsets.ViewSet):
+    """
+    View for retrieving and creating sensor type entries.
+    """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
