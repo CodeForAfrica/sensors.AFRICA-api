@@ -16,7 +16,7 @@ from .views import (
 
 router = routers.DefaultRouter()
 router.register(r"data", SensorDataView, basename="sensor-data")
-router.register(r"data/(?P<sensor_type>[air]+)", SensorDataStatsView, basename="sensor-data-stats")
+router.register(r"data/stats/(?P<sensor_type>[air]+)", SensorDataStatsView, basename="sensor-data-stats")
 router.register(r"cities", CitiesView, basename="cities")
 router.register(r"nodes", NodesView, basename="nodes")
 router.register(r"now", NowView, basename="now")
