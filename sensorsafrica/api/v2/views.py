@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 from django.db import connection
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q, Count
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
@@ -17,13 +17,14 @@ from django.views.decorators.cache import cache_page
 
 from rest_framework import mixins, pagination, viewsets
 from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, authentication_classes
 
 from feinstaub.sensors.views import SensorFilter, StandardResultsSetPagination
-
+from feinstaub.sensors.serializers import NowSerializer
 from feinstaub.sensors.models import (
     Node,
     Sensor,
@@ -129,17 +130,13 @@ class CitiesView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class NodesView(viewsets.ViewSet):
+    """Create and list nodes, with the option to list authenticated user's nodes."""
     authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
-    def get_permissions(self):
-        if self.action == "create":
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [AllowAny]
-
-        return [permission() for permission in permission_classes]
-
-    def list(self, request):
+    @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes")
+    def list_nodes(self, request):
+        """List all public nodes with active sensors."""
         nodes = []
         # Loop through the last active nodes
         for last_active in LastActiveNodes.objects.iterator():
@@ -219,7 +216,24 @@ class NodesView(viewsets.ViewSet):
 
         return Response(nodes)
 
-    def create(self, request):
+    @action(detail=False, methods=["get"], url_path="my-nodes", url_name="my_nodes")
+    def list_my_nodes(self, request):
+        """List only the nodes owned by the authenticated user."""
+        if request.user.is_authenticated:
+            queryset = Node.objects.filter(
+                Q(owner=request.user)
+                | Q(
+                    owner__groups__name__in=[
+                        g.name for g in request.user.groups.all()
+                    ]
+                )
+            )
+            serializer = NodeSerializer(queryset, many=True)
+            return Response(serializer.data)
+        return Response({"detail": "Authentication credentials were not provided."}, status=403)
+
+    @action(detail=False, methods=["post"], url_path="register-node", url_name="register_node")
+    def register_node(self, request):
         serializer = NodeSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -237,7 +251,17 @@ class SensorDataPagination(pagination.CursorPagination):
 class SensorDataView(
     mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet
 ):
-    """This endpoint is to download sensor data from the api."""
+    """
+    View for retrieving and downloading detailed sensor data records, with access controlled based on
+    user permissions and ownership.
+
+    This endpoint allows authenticated users to retrieve sensor data records, with the following access rules:
+    - Users in the `show_me_everything` group have access to all sensor data records.
+    - Other users can access data from sensors they own, sensors owned by members of their groups, or public sensors.
+    - Non-authenticated users can only access public sensor data.
+    """
+
+
 
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     queryset = SensorData.objects.all()
@@ -248,7 +272,7 @@ class SensorDataView(
     serializer_class = SensorDataSerializer
 
     def get_queryset(self):
-        if self.request.user.is_authenticated():
+        if self.request.user.is_authenticated:
             if self.request.user.groups.filter(name="show_me_everything").exists():
                 return SensorData.objects.all()
 
@@ -265,9 +289,40 @@ class SensorDataView(
 
 
 class SensorDataStatsView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """
+    View to retrieve summarized statistics for specific sensor types (e.g., air quality) within a defined date range,
+    filtered by city and grouped by specified intervals (hourly, daily, or monthly).
+
+    **URL Parameters:**
+        - `sensor_type` (str): The type of sensor data to retrieve (e.g., air_quality).
+
+    **Query Parameters:**
+        - `city` (str, optional): Comma-separated list of city slugs to filter data by location.
+        - `from` (str, optional): Start date in "YYYY-MM-DD" format. Required if `to` is specified.
+        - `to` (str, optional): End date in "YYYY-MM-DD" format. Defaults to 24 hours before `to_date` if unspecified.
+        - `interval` (str, optional): Aggregation interval for results - either "hour", "day", or "month". Defaults to "day".
+        - `value_type` (str, optional): Comma-separated list of value types to filter (e.g., "PM2.5, PM10").
+
+    **Caching:**
+        - Results are cached for 1 hour (`@cache_page(3600)`) to reduce server load.
+
+    **Returns:**
+        - A list of sensor data statistics, grouped by city, value type, and specified interval.
+        - Each entry includes:
+            - `value_type` (str): Type of sensor value (e.g., PM2.5).
+            - `city_slug` (str): City identifier.
+            - `truncated_timestamp` (datetime): Timestamp truncated to the specified interval.
+            - `start_datetime` (datetime): Start of the aggregated time period.
+            - `end_datetime` (datetime): End of the aggregated time period.
+            - `calculated_average` (float): Weighted average of sensor values.
+            - `calculated_minimum` (float): Minimum recorded value within the period.
+            - `calculated_maximum` (float): Maximum recorded value within the period.
+    """
     queryset = SensorDataStat.objects.none()
     serializer_class = SensorDataStatSerializer
     pagination_class = CustomPagination
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @method_decorator(cache_page(3600))
     def dispatch(self, request, *args, **kwargs):
@@ -353,6 +408,9 @@ class SensorDataStatsView(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class SensorLocationsView(viewsets.ViewSet):
+    """
+    View for retrieving and creating sensor entries.
+    """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
@@ -372,6 +430,9 @@ class SensorLocationsView(viewsets.ViewSet):
 
 
 class SensorTypesView(viewsets.ViewSet):
+    """
+    View for retrieving and creating sensor type entries.
+    """
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
@@ -471,3 +532,55 @@ def get_database_last_updated():
     sensor_data_value = SensorDataValue.objects.latest('created')
     if sensor_data_value:
         return sensor_data_value.modified
+
+
+class NowView(mixins.ListModelMixin, viewsets.GenericViewSet):
+    """Show all public sensors active in the last 5 minutes with newest value"""
+
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    serializer_class = NowSerializer
+
+    def get_queryset(self):
+        now = timezone.now()
+        startdate = now - datetime.timedelta(minutes=5)
+        return SensorData.objects.filter(
+            sensor__public=True, modified__range=[startdate, now]
+        )
+
+
+class StatisticsView(viewsets.ViewSet):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        user_count = User.objects.aggregate(count=Count('id'))['count']
+        sensor_count = Sensor.objects.aggregate(count=Count('id'))['count']
+        sensor_data_count = SensorData.objects.aggregate(count=Count('id'))['count']
+        sensor_data_value_count = SensorDataValue.objects.aggregate(count=Count('id'))['count']
+        sensor_type_count = SensorType.objects.aggregate(count=Count('id'))['count']
+        sensor_type_list = list(SensorType.objects.order_by('uid').values_list('name', flat=True))
+        location_count = SensorLocation.objects.aggregate(count=Count('id'))['count']
+
+        stats = {
+            'user': {
+                'count': user_count,
+            },
+            'sensor': {
+                'count': sensor_count,
+            },
+            'sensor_data': {
+                'count': sensor_data_count,
+            },
+            'sensor_data_value': {
+                'count': sensor_data_value_count,
+            },
+            'sensor_type': {
+                'count': sensor_type_count,
+                'list': sensor_type_list,
+            },
+            'location': {
+                'count': location_count,
+            }
+        }
+        return Response(stats)
