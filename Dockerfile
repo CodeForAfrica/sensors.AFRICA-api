@@ -14,9 +14,9 @@ RUN python -m pip install --trusted-host pypi.python.org --trusted-host files.py
 # Copy the current directory contents into the container at sensorsafrica
 COPY . /src/
 
-# Upgrade pip and setuptools, install dependencies
+# Install dependencies
 RUN pip install -q git+https://github.com/opendata-stuttgart/feinstaub-api && \
-    pip install -q -U .
+    pip install -q .
 
 # Expose port server
 EXPOSE 8000
