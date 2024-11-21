@@ -134,17 +134,17 @@ class NodesView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes")
+    # Note: Allow access to list_nodes for https://v2.map.aq.sensors.africa/#4/-4.46/19.54
+    @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes", permission_classes=[AllowAny])
     def list_nodes(self, request):
         """List all public nodes with active sensors."""
         nodes = []
+        last_active_nodes = LastActiveNodes.objects.select_related("node", "location").iterator()
         # Loop through the last active nodes
-        for last_active in LastActiveNodes.objects.iterator():
+        for last_active in last_active_nodes:
             # Get the current node only if it has public sensors
-            node = Node.objects.filter(
-                Q(id=last_active.node.id), Q(sensors__public=True)
-            ).first()
-            if node is None:
+            node = last_active.node
+            if not node.sensors.filter(public=True).exists():
                 continue
 
             # The last acive date
@@ -152,13 +152,12 @@ class NodesView(viewsets.ViewSet):
 
             # last_data_received_at
             stats = []
-            moved_to = None
             # Get data stats from 5mins before last_data_received_at
             if last_data_received_at:
                 last_5_mins = last_data_received_at - datetime.timedelta(minutes=5)
                 stats = (
                     SensorDataValue.objects.filter(
-                        Q(sensordata__sensor__node=last_active.node.id),
+                        Q(sensordata__sensor__node=node.id),
                         # Open endpoints should return data from public sensors
                         # only in case a node has both public & private sensors
                         Q(sensordata__sensor__public=True),
@@ -170,7 +169,6 @@ class NodesView(viewsets.ViewSet):
                         # Match only valid float text
                         Q(value__regex=r"^\-?\d+(\.?\d+)?$"),
                     )
-                    .order_by()
                     .values("value_type")
                     .annotate(
                         sensor_id=F("sensordata__sensor__id"),
@@ -184,6 +182,7 @@ class NodesView(viewsets.ViewSet):
 
             # If the last_active node location is not same as current node location
             # then the node has moved locations since it was last active
+            moved_to = None
             if last_active.location.id != node.location.id:
                 moved_to = {
                     "name": node.location.location,
