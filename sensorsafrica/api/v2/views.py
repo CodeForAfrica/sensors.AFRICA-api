@@ -139,10 +139,10 @@ class NodesView(viewsets.ViewSet):
     def list_nodes(self, request):
         """List all public nodes with active sensors."""
         now = datetime.datetime.now()
-        one_hour_ago = now - datetime.timedelta(hours=1)
+        one_year_ago = now - datetime.timedelta(days=365)
 
         last_active_nodes = (
-            LastActiveNodes.objects.filter(last_data_received_at__gte=one_hour_ago)
+            LastActiveNodes.objects.filter(last_data_received_at__gte=one_year_ago)
             .select_related("node", "location")
             .prefetch_related(
                 Prefetch(
