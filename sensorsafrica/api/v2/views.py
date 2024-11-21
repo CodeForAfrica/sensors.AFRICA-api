@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 from django.db import connection
-from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q, Count
+from django.db.models import ExpressionWrapper, F, FloatField, Max, Min, Sum, Avg, Q, Count, Prefetch
 from django.db.models.functions import Cast, TruncHour, TruncDay, TruncMonth
 from django.utils.decorators import method_decorator
 from django.utils.text import slugify
@@ -138,13 +138,27 @@ class NodesView(viewsets.ViewSet):
     @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes", permission_classes=[AllowAny])
     def list_nodes(self, request):
         """List all public nodes with active sensors."""
+        now = datetime.datetime.now()
+        one_hour_ago = now - datetime.timedelta(hours=1)
+
+        last_active_nodes = (
+            LastActiveNodes.objects.filter(last_data_received_at__gte=one_hour_ago)
+            .select_related("node", "location")
+            .prefetch_related(
+                Prefetch(
+                    "node__sensors",
+                    queryset=Sensor.objects.filter(public=True),
+                )
+            )
+        )
+
         nodes = []
-        last_active_nodes = LastActiveNodes.objects.select_related("node", "location").iterator()
+
         # Loop through the last active nodes
         for last_active in last_active_nodes:
             # Get the current node only if it has public sensors
             node = last_active.node
-            if not node.sensors.filter(public=True).exists():
+            if not node.sensors.exists():
                 continue
 
             # The last acive date
