@@ -2,7 +2,7 @@ from rest_framework import serializers
 from feinstaub.sensors.serializers import (
     NestedSensorLocationSerializer,
 )
-from feinstaub.sensors.models import Node, Sensor, SensorType, SensorLocation
+from feinstaub.sensors.models import Node, Sensor, SensorType, SensorLocation, SensorData, SensorDataValue
 from feinstaub.sensors.serializers import (VerboseSensorDataSerializer, )
 
 
@@ -80,7 +80,17 @@ class NodeSerializer(serializers.ModelSerializer):
 class SensorDataSensorLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorLocation
-        fields = ('id', "country", )
+        fields = ( "country",)
 
-class SensorDataSerializer(VerboseSensorDataSerializer):
+
+class NestedSensorDataValueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SensorDataValue
+        fields = ( 'value', 'value_type')
+
+class SensorDataSerializer(serializers.ModelSerializer):
+    sensordatavalues = NestedSensorDataValueSerializer(many=True)
     location = SensorDataSensorLocationSerializer()
+    class Meta:
+        model = SensorData
+        fields = ('timestamp', 'sensordatavalues', 'location','sensor')
