@@ -45,17 +45,28 @@ class Command(BaseCommand):
             if not timestamp or not timestamp['timestamp__min'] or not timestamp['timestamp__max']:
                 continue
 
+            package_name = f"sensorsafrica-airquality-archive-{slugify(city)}"
+            package_title = f"sensors.AFRICA Air Quality Archive {city}"
+
             try:
-                package = ckan.action.package_create(
-                    owner_org=CKAN_ARCHIVE_OWNER_ID,
-                    name="sensorsafrica-airquality-archive-" + slugify(city),
-                    title="sensors.AFRICA Air Quality Archive " + city,
-                    groups=[{"name": "sensorsafrica-airquality-archive"}]
-                )
-            except ckanapi.ValidationError:
-                package = ckan.action.package_show(
-                    id="sensorsafrica-airquality-archive-" + slugify(city)
-                )
+                package = ckan.action.package_show(id=package_name)
+                #To Do:xavier Implement Logging
+                print(f"Package '{package_name}' already exists. Skipping creation.")
+            except ckanapi.NotFound:
+                try:
+                    package = ckan.action.package_create(
+                        owner_org=CKAN_ARCHIVE_OWNER_ID,
+                        name=package_name,
+                        title=package_title,
+                        groups=[{"name": "sensorsafrica-airquality-archive"}]
+                    )
+                    print(f"Created new package '{package_name}' for city '{city}'.")
+                except ckanapi.ValidationError as e:
+                    print(f"Validation error creating package for city '{city}': {e}")
+                    continue
+            except Exception as e:
+                print(f"Unexpected error fetching package for city '{city}': {e}")
+                continue
 
             resources = package["resources"]
 
@@ -89,6 +100,7 @@ class Command(BaseCommand):
                         timestamp__year=date.year,
                         sensordatavalues__value__isnull=False,
                     )
+                    .select_related("sensor","location")
                     .values(
                         "sensor__id",
                         "sensor__sensor_type__name",
@@ -107,16 +119,16 @@ class Command(BaseCommand):
                         month=calendar.month_name[date.month], year=date.year
                     )
                     fp = tempfile.NamedTemporaryFile(mode="w+b", suffix=".csv")
-                    self._write_file(fp, qs)
-                    filepath = fp.name
-                   
-                    self._create_or_update_resource(
-                        resource_name, filepath, resources, ckan, package
-                    )
+                    try:
+                        self._write_file(fp, qs)
+                        filepath = fp.name
+                        self._create_or_update_resource(
+                            resource_name, filepath, resources, ckan, package
+                        )
+                    finally:
+                        # Cleanup temp file
+                        fp.close()
 
-                    # Cleanup temp file
-                    fp.close()
-                 
                     # Don't DDOS openAFRICA
                     time.sleep(5)
 
