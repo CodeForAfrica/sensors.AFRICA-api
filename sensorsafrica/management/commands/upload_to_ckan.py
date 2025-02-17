@@ -51,7 +51,7 @@ class Command(BaseCommand):
             try:
                 package = ckan.action.package_show(id=package_name)
                 #To Do:xavier Implement Logging
-                print(f"Package '{package_name}' already exists. Skipping creation.")
+                self.stdout.write(f"Package '{package_name}' already exists. Skipping creation.")
             except ckanapi.NotFound:
                 try:
                     package = ckan.action.package_create(
@@ -60,12 +60,12 @@ class Command(BaseCommand):
                         title=package_title,
                         groups=[{"name": "sensorsafrica-airquality-archive"}]
                     )
-                    print(f"Created new package '{package_name}' for city '{city}'.")
+                    self.stdout.write("Created new package '%s' for city." % city)
                 except ckanapi.ValidationError as e:
-                    print(f"Validation error creating package for city '{city}': {e}")
+                    self.stdout.write(f"Validation error creating package for city %s: %s" %city %e)
                     continue
             except Exception as e:
-                print(f"Unexpected error fetching package for city '{city}': {e}")
+                self.stdout.write(f"Unexpected error fetching package for city '{city}': {e}")
                 continue
 
             resources = package["resources"]
@@ -139,6 +139,8 @@ class Command(BaseCommand):
                     year=date.year + date.month // 12,
                     tzinfo=pytz.UTC,
                 )
+
+        self.stdout.write("Data upload completed successfully.")
 
     @staticmethod
     def _write_file(fp, qs):
