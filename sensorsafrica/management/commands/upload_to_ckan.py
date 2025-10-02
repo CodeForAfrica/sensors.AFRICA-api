@@ -153,7 +153,7 @@ class Command(BaseCommand):
             b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
         )
         for sd in qs.iterator():
-            lat = "{:.3f}".format(sd["location__latitude"]) if sd["location__latitude"] is not None else "NULL"
+            lat = "{:.3f}".format(sd["location__latitude"]) if sd["location__latitude"] else "NULL"
             lon = "{:.3f}".format(sd["location__longitude"]) if sd["location__longitude"] is not None else "NULL"
 
             s = ";".join([
