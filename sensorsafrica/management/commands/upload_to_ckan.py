@@ -10,8 +10,10 @@ import requests
 import pytz
 from django.core.management import BaseCommand
 from django.db.models import Max, Min
+from django.utils import timezone
 from django.utils.text import slugify
 from feinstaub.sensors.models import SensorData, SensorLocation
+from sensorsafrica.api.models import LastActiveNodes
 
 
 class Command(BaseCommand):
@@ -27,11 +29,14 @@ class Command(BaseCommand):
 
         ckan = ckanapi.RemoteCKAN(CKAN_ARCHIVE_URL, apikey=CKAN_ARCHIVE_API_KEY, session=session)
 
+        # Get list of cities with active sensors in the last year
+        one_year_ago = timezone.now() - datetime.timedelta(days=365)
         city_queryset = (
-            SensorLocation.objects.all()
-            .values_list("city", flat=True)
-            .order_by("city")
-            .distinct("city")
+            LastActiveNodes.objects.filter(last_data_received_at__gte=one_year_ago)
+            .select_related("location")
+            .values_list("location__city", flat=True)
+            .order_by("location__city")
+            .distinct()
         )
         for city in city_queryset.iterator():
             # Ensure we have a city
@@ -148,36 +153,59 @@ class Command(BaseCommand):
             b"sensor_id;sensor_type;location;lat;lon;timestamp;value_type;value\n"
         )
         for sd in qs.iterator():
-            s = ";".join(
-                [
-                    str(sd["sensor__id"]),
-                    sd["sensor__sensor_type__name"],
-                    str(sd["location__id"]),
-                    "{:.3f}".format(sd["location__latitude"]),
-                    "{:.3f}".format(sd["location__longitude"]),
-                    sd["timestamp"].isoformat(),
-                    sd["sensordatavalues__value_type"],
-                    sd["sensordatavalues__value"],
-                ]
-            )
+            lat = "{:.3f}".format(sd["location__latitude"]) if sd["location__latitude"] is not None else "NULL"
+            lon = "{:.3f}".format(sd["location__longitude"]) if sd["location__longitude"] is not None else "NULL"
+
+            s = ";".join([
+                str(sd["sensor__id"]),
+                sd["sensor__sensor_type__name"] or "NULL",
+                str(sd["location__id"]),
+                lat,
+                lon,
+                sd["timestamp"].isoformat(),
+                sd["sensordatavalues__value_type"] or "NULL",
+                str(sd["sensordatavalues__value"]),
+            ])
             fp.write(bytes(s + "\n","utf-8"))
 
     @staticmethod
-    def _create_or_update_resource(resource_name, filepath, resources, ckan, package):
+    def _create_or_update_resource(resource_name, filepath, resources, ckan, package, stdout=None):
         extension = "CSV"
 
-        resource = list(
-            filter(lambda resource: resource["name"] == resource_name, resources)
-        )
-        if resource:
-            resource = ckan.action.resource_update(
-                id=resource[0]["id"], url="upload", upload=open(filepath)
-            )
+        existing_resources = [
+            r for r in resources
+            if r.get("name") == resource_name and r.get("id")
+        ]
+        if existing_resources:
+            resource_id = existing_resources[0]["id"]
+            if stdout:
+                stdout.write(f"Updating resource: id={resource_id}, name={resource_name}")
+            try:
+                with open(filepath, "rb") as f:
+                    resource = ckan.action.resource_update(
+                        id=resource_id, url="upload", upload=f
+                    )
+            except ckanapi.errors.ValidationError as e:
+                if stdout:
+                    stdout.write(f"ValidationError during resource_update for id={resource_id}, name={resource_name}: {e}")
+                else:
+                    print(f"ValidationError during resource_update for id={resource_id}, name={resource_name}: {e}")
+                return
         else:
-            resource = ckan.action.resource_create(
-                package_id=package["id"],
-                name=resource_name,
-                format=extension,
-                url="upload",
-                upload=open(filepath),
-            )
+            if stdout:
+                stdout.write(f"Creating new resource: name={resource_name}")
+            try:
+                with open(filepath, "rb") as f:
+                    resource = ckan.action.resource_create(
+                        package_id=package["id"],
+                        name=resource_name,
+                        format=extension,
+                        url="upload",
+                        upload=f,
+                    )
+            except ckanapi.errors.ValidationError as e:
+                if stdout:
+                    stdout.write(f"ValidationError during resource_create for name={resource_name}: {e}")
+                else:
+                    print(f"ValidationError during resource_create for name={resource_name}: {e}")
+                return
