@@ -30,6 +30,9 @@ class Command(BaseCommand):
         ckan = ckanapi.RemoteCKAN(CKAN_ARCHIVE_URL, apikey=CKAN_ARCHIVE_API_KEY, session=session)
 
         # Get list of cities with active sensors in the last year
+        # We are creating monthly archives for each city based on new data for the month
+        # We only want to create packages for cities with active sensors in the last year
+        # to avoid creating packages for cities that are no longer active. Historical data to last active date exists
         one_year_ago = timezone.now() - datetime.timedelta(days=365)
         city_queryset = (
             LastActiveNodes.objects.filter(last_data_received_at__gte=one_year_ago)
@@ -55,8 +58,6 @@ class Command(BaseCommand):
 
             try:
                 package = ckan.action.package_show(id=package_name)
-                #To Do:xavier Implement Logging
-                self.stdout.write(f"Package '{package_name}' already exists. Skipping creation.")
             except ckanapi.NotFound:
                 try:
                     package = ckan.action.package_create(
@@ -65,12 +66,12 @@ class Command(BaseCommand):
                         title=package_title,
                         groups=[{"name": "sensorsafrica-airquality-archive"}]
                     )
-                    self.stdout.write("Created new package '%s' for city." % city)
+                    self.stdout.write(self.style.SUCCESS("Created new package '%s' for city." % city))
                 except ckanapi.ValidationError as e:
-                    self.stdout.write(f"Validation error creating package for city %s: %s" %city %e)
+                    self.stderr.write(self.style.ERROR("Validation error creating package for city %s: %s" %city %e))
                     continue
             except Exception as e:
-                self.stdout.write(f"Unexpected error fetching package for city '{city}': {e}")
+                self.stderr.write(self.style.ERROR("Unexpected error fetching package for city %s " %city %e))
                 continue
 
             resources = package["resources"]
@@ -145,7 +146,7 @@ class Command(BaseCommand):
                     tzinfo=pytz.UTC,
                 )
 
-        self.stdout.write("Data upload completed successfully.")
+        self.stdout.write(self.style.SUCCESS("Data upload completed successfully."))
 
     @staticmethod
     def _write_file(fp, qs):
@@ -154,7 +155,7 @@ class Command(BaseCommand):
         )
         for sd in qs.iterator():
             lat = "{:.3f}".format(sd["location__latitude"]) if sd["location__latitude"] else "NULL"
-            lon = "{:.3f}".format(sd["location__longitude"]) if sd["location__longitude"] is not None else "NULL"
+            lon = "{:.3f}".format(sd["location__longitude"]) if sd["location__longitude"] else "NULL"
 
             s = ";".join([
                 str(sd["sensor__id"]),
@@ -168,8 +169,7 @@ class Command(BaseCommand):
             ])
             fp.write(bytes(s + "\n","utf-8"))
 
-    @staticmethod
-    def _create_or_update_resource(resource_name, filepath, resources, ckan, package, stdout=None):
+    def _create_or_update_resource(self, resource_name, filepath, resources, ckan, package):
         extension = "CSV"
 
         existing_resources = [
@@ -178,34 +178,26 @@ class Command(BaseCommand):
         ]
         if existing_resources:
             resource_id = existing_resources[0]["id"]
-            if stdout:
-                stdout.write(f"Updating resource: id={resource_id}, name={resource_name}")
             try:
                 with open(filepath, "rb") as f:
-                    resource = ckan.action.resource_update(
-                        id=resource_id, url="upload", upload=f
+                    ckan.action.resource_patch(
+                        id=resource_id, upload=f
                     )
+                self.stdout.write(self.style.SUCCESS("Updated resource: id=%s, name=%s" % (resource_id, resource_name)))
             except ckanapi.errors.ValidationError as e:
-                if stdout:
-                    stdout.write(f"ValidationError during resource_update for id={resource_id}, name={resource_name}: {e}")
-                else:
-                    print(f"ValidationError during resource_update for id={resource_id}, name={resource_name}: {e}")
+                self.stdout.write(self.style.ERROR("ValidationError during resource_update for id=%s, name=%s: %s" % (resource_id, resource_name, e)))
                 return
         else:
-            if stdout:
-                stdout.write(f"Creating new resource: name={resource_name}")
             try:
                 with open(filepath, "rb") as f:
-                    resource = ckan.action.resource_create(
+                    ckan.action.resource_create(
                         package_id=package["id"],
                         name=resource_name,
                         format=extension,
                         url="upload",
                         upload=f,
                     )
+                self.stdout.write(self.style.SUCCESS("Creating new resource: name=%s", resource_name))
             except ckanapi.errors.ValidationError as e:
-                if stdout:
-                    stdout.write(f"ValidationError during resource_create for name={resource_name}: {e}")
-                else:
-                    print(f"ValidationError during resource_create for name={resource_name}: {e}")
+                self.stdout.write(self.style.ERROR("ValidationError during resource_create for name=%s: %s") % (resource_name, e))
                 return
