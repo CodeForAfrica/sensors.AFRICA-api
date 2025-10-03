@@ -197,7 +197,7 @@ class Command(BaseCommand):
                         url="upload",
                         upload=f,
                     )
-                self.stdout.write(self.style.SUCCESS("Creating new resource: name=%s", resource_name))
+                self.stdout.write(self.style.SUCCESS("Creating new resource: name=%s" % resource_name))
             except ckanapi.errors.ValidationError as e:
                 self.stderr.write(self.style.ERROR("ValidationError during resource_create for name=%s: %s") % (resource_name, e))
                 return
