@@ -185,7 +185,7 @@ class Command(BaseCommand):
                     )
                 self.stdout.write(self.style.SUCCESS("Updated resource: id=%s, name=%s" % (resource_id, resource_name)))
             except ckanapi.errors.ValidationError as e:
-                self.stdout.write(self.style.ERROR("ValidationError during resource_update for id=%s, name=%s: %s" % (resource_id, resource_name, e)))
+                self.stderr.write(self.style.ERROR("ValidationError during resource_update for id=%s, name=%s: %s" % (resource_id, resource_name, e)))
                 return
         else:
             try:
