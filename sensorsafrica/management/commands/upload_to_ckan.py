@@ -199,5 +199,5 @@ class Command(BaseCommand):
                     )
                 self.stdout.write(self.style.SUCCESS("Creating new resource: name=%s", resource_name))
             except ckanapi.errors.ValidationError as e:
-                self.stdout.write(self.style.ERROR("ValidationError during resource_create for name=%s: %s") % (resource_name, e))
+                self.stderr.write(self.style.ERROR("ValidationError during resource_create for name=%s: %s") % (resource_name, e))
                 return
