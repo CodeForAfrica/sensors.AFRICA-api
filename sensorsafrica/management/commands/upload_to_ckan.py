@@ -11,7 +11,6 @@ import pytz
 from django.core.management import BaseCommand
 from django.db.models import Max, Min
 from django.utils import timezone
-from django.utils import timezone
 from django.utils.text import slugify
 from feinstaub.sensors.models import SensorData, SensorLocation
 from sensorsafrica.api.models import LastActiveNodes
