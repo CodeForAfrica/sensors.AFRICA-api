@@ -91,6 +91,8 @@ class NestedSensorDataValueSerializer(serializers.ModelSerializer):
 class SensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = NestedSensorDataValueSerializer(many=True)
     location = SensorDataSensorLocationSerializer()
+    # sensor_type = serializers.CharField(source='sensor.sensor_type.name', read_only=True)
+    sensor = serializers.CharField(source='sensor.sensor_type.name', read_only=True)
     class Meta:
         model = SensorData
         fields = ('timestamp', 'sensordatavalues', 'location','sensor')
