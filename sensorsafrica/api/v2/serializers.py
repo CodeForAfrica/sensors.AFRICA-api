@@ -84,9 +84,18 @@ class SensorDataSensorLocationSerializer(serializers.ModelSerializer):
 
 
 class NestedSensorDataValueSerializer(serializers.ModelSerializer):
+    value_type = serializers.SerializerMethodField()
     class Meta:
         model = SensorDataValue
         fields = ( 'value', 'value_type')
+    
+    def get_value_type(self, obj):
+        value_type_mapping = {
+        'P0':'PM1',
+        'P1': 'PM10',
+        'P2': 'PM2.5',
+        }
+        return value_type_mapping.get(obj.value_type, obj.value_type)
 
 class SensorDataSerializer(serializers.ModelSerializer):
     sensordatavalues = NestedSensorDataValueSerializer(many=True)
