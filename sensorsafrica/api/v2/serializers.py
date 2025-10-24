@@ -2,7 +2,7 @@ from rest_framework import serializers
 from feinstaub.sensors.serializers import (
     NestedSensorLocationSerializer,
 )
-from feinstaub.sensors.models import Node, Sensor, SensorType, SensorLocation
+from feinstaub.sensors.models import Node, Sensor, SensorType, SensorLocation, SensorData, SensorDataValue
 from feinstaub.sensors.serializers import (VerboseSensorDataSerializer, )
 
 
@@ -80,7 +80,28 @@ class NodeSerializer(serializers.ModelSerializer):
 class SensorDataSensorLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorLocation
-        fields = ('id', "country", )
+        fields = ( "country","city")
 
-class SensorDataSerializer(VerboseSensorDataSerializer):
+
+class NestedSensorDataValueSerializer(serializers.ModelSerializer):
+    value_type = serializers.SerializerMethodField()
+    class Meta:
+        model = SensorDataValue
+        fields = ( 'value', 'value_type')
+    
+    def get_value_type(self, obj):
+        value_type_mapping = {
+        'P0':'PM1',
+        'P1': 'PM10',
+        'P2': 'PM2.5',
+        }
+        return value_type_mapping.get(obj.value_type, obj.value_type)
+
+class SensorDataSerializer(serializers.ModelSerializer):
+    sensordatavalues = NestedSensorDataValueSerializer(many=True)
     location = SensorDataSensorLocationSerializer()
+    # sensor_type = serializers.CharField(source='sensor.sensor_type.name', read_only=True)
+    sensor = serializers.CharField(source='sensor.sensor_type.name', read_only=True)
+    class Meta:
+        model = SensorData
+        fields = ('timestamp', 'sensordatavalues', 'location','sensor')
