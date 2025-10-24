@@ -80,7 +80,7 @@ class NodeSerializer(serializers.ModelSerializer):
 class SensorDataSensorLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorLocation
-        fields = ( "country",)
+        fields = ( "country","city")
 
 
 class NestedSensorDataValueSerializer(serializers.ModelSerializer):
