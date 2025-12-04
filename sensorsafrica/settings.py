@@ -161,28 +161,28 @@ CELERY_BROKER_URL = os.environ.get(
 )
 CELERY_IGNORE_RESULT = True
 
-CELERY_BEAT_SCHEDULE = {
-    "statistics-task": {
-        "task": "sensorsafrica.tasks.calculate_data_statistics",
-        "schedule": crontab(hour="*", minute=0),
-    },
-    "archive-task": {
-        "task": "sensorsafrica.tasks.archive_data",
-        "schedule": crontab(hour="*", minute=0),
-    },
-    "cache-lastactive-nodes-task": {
-        "task": "sensorsafrica.tasks.cache_lastactive_nodes",
-        "schedule": crontab(minute="*/5"),
-    },
-    "cache-static-json-data": {
-        "task": "sensorsafrica.tasks.cache_static_json_data",
-        "schedule": crontab(minute="*/5"),
-    },
-    "cache-static-json-data-1h-24h": {
-        "task": "sensorsafrica.tasks.cache_static_json_data_1h_24h",
-        "schedule": crontab(hour="*", minute=0),
-    },
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "statistics-task": {
+#         "task": "sensorsafrica.tasks.calculate_data_statistics",
+#         "schedule": crontab(hour="*", minute=0),
+#     },
+#     "archive-task": {
+#         "task": "sensorsafrica.tasks.archive_data",
+#         "schedule": crontab(hour="*", minute=0),
+#     },
+#     "cache-lastactive-nodes-task": {
+#         "task": "sensorsafrica.tasks.cache_lastactive_nodes",
+#         "schedule": crontab(minute="*/5"),
+#     },
+#     "cache-static-json-data": {
+#         "task": "sensorsafrica.tasks.cache_static_json_data",
+#         "schedule": crontab(minute="*/5"),
+#     },
+#     "cache-static-json-data-1h-24h": {
+#         "task": "sensorsafrica.tasks.cache_static_json_data_1h_24h",
+#         "schedule": crontab(hour="*", minute=0),
+#     },
+# }
 
 
 # Sentry
