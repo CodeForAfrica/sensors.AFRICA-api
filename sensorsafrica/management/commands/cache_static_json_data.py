@@ -44,9 +44,14 @@ class Command(BaseCommand):
         parser.add_argument('--interval', type=str)
 
     def handle(self, *args, **options):
-        intervals = {'5m': '5 minutes', '1h': '1 hour', '24h': '24 hours'}
+        intervals = {'5m': '5 minutes', '30m': '30 minutes', '1h': '1 hour', '24h': '24 hours'}
         paths = {
             '5m': [
+                '../../../static/v2/data.json',
+                '../../../static/v2/data.dust.min.json',
+                '../../../static/v2/data.temp.min.json'
+            ],
+            '30m': [
                 '../../../static/v2/data.json',
                 '../../../static/v2/data.dust.min.json',
                 '../../../static/v2/data.temp.min.json'
@@ -66,28 +71,44 @@ class Command(BaseCommand):
                 GROUP BY sd.sensor_id, sdv.value_type, sd.location_id
         ''', [intervals[options['interval']]])
 
-        data = {}
-        while True:
-            row = cursor.fetchone()
-            if row is None:
-                break
+        # Fetch all rows once and build maps to avoid N+1 ORM queries
+        rows = cursor.fetchall()
+        if not rows:
+            return
 
-            if row[0] in data:
-                data[row[0]]['sensordatavalues'].append(dict({
-                    'samples': row[3],
-                    'value': row[2],
-                    'value_type': row[1]
-                }))
-            else:
-                data[row[0]] = dict({
-                    'location': SensorLocationSerializer(SensorLocation.objects.get(pk=row[4])).data,
-                    'sensor': SensorSerializer(Sensor.objects.get(pk=row[0])).data,
-                    'sensordatavalues': [{
-                        'samples': row[3],
-                        'value': row[2],
-                        'value_type': row[1]
-                    }]
+        sensor_ids = set([r[0] for r in rows])
+        location_ids = set([r[4] for r in rows if r[4] is not None])
+
+        sensors_qs = Sensor.objects.filter(pk__in=sensor_ids).select_related('sensor_type')
+        sensor_map = {s.pk: SensorSerializer(s).data for s in sensors_qs}
+
+        locations_qs = SensorLocation.objects.filter(pk__in=location_ids)
+        location_map = {l.pk: SensorLocationSerializer(l).data for l in locations_qs}
+
+        data = {}
+        for row in rows:
+            sid = row[0]
+            val_type = row[1]
+            avg_value = row[2]
+            sample_count = row[3]
+            loc_id = row[4]
+
+            if sid in data:
+                data[sid]['sensordatavalues'].append({
+                    'samples': sample_count,
+                    'value': avg_value,
+                    'value_type': val_type,
                 })
+            else:
+                data[sid] = {
+                    'location': location_map.get(loc_id) if loc_id in location_map else None,
+                    'sensor': sensor_map.get(sid),
+                    'sensordatavalues': [{
+                        'samples': sample_count,
+                        'value': avg_value,
+                        'value_type': val_type,
+                    }],
+                }
 
         for path in paths[options['interval']]:
             with open(
