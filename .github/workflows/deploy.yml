@@ -1,0 +1,95 @@
+
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "sensorsafrica/**"
+      - "requirements.txt"
+      - "setup.py"
+      - "Dockerfile"
+      - "contrib/**"
+      - ".github/workflows/deploy.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+  cancel-in-progress: false
+
+jobs:
+  image:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    outputs:
+      sha_tag: ${{ steps.meta.outputs.sha_tag }}
+      env_tag: ${{ steps.meta.outputs.env_tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image tags
+        id: meta
+        run: |
+          SHA_SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          ENV_NAME="${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}"
+          echo "sha_tag=sha-${SHA_SHORT}" >> "$GITHUB_OUTPUT"
+          echo "env_tag=${ENV_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ vars.DOCKER_HUB_REPO }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ vars.DOCKER_HUB_REPO }}:${{ steps.meta.outputs.env_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+    needs: image
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'staging' }}
+    env:
+      DOKKU_HOST: ${{ vars.DOKKU_HOST }}
+      DOKKU_APP: ${{ vars.DOKKU_APP }}
+      IMAGE_TAG: ${{ vars.DOCKER_HUB_REPO }}:${{ needs.image.outputs.sha_tag }}
+    steps:
+      - name: Load SSH key into agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+
+      - name: Trust the Dokku host
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.DOKKU_HOST_KEY }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy image
+        run: |
+          ssh dokku@"$DOKKU_HOST" git:from-image "$DOKKU_APP" "$IMAGE_TAG"
