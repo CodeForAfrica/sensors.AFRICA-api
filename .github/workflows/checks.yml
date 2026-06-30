@@ -1,0 +1,65 @@
+name: Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".github/workflows/checks.yml"
+      - "sensorsafrica/**"
+      - "requirements.txt"
+      - "setup.py"
+      - "Dockerfile"
+
+jobs:
+  pytest:
+    name: Pytest
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13.7
+        env:
+          POSTGRES_USER: sensorsafrica
+          POSTGRES_PASSWORD: sensorsafrica
+          POSTGRES_DB: sensorsafrica
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3.12.7-management
+        env:
+          RABBITMQ_DEFAULT_USER: sensorsafrica
+          RABBITMQ_DEFAULT_PASS: sensorsafrica
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SENSORSAFRICA_DATABASE_URL: postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica
+      SENSORSAFRICA_RABBITMQ_URL: amqp://sensorsafrica:sensorsafrica@localhost/
+      SENSORSAFRICA_DEBUG: "True"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.6"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install git+https://github.com/opendata-stuttgart/feinstaub-api
+          pip install .
+          pip install pytest pytest-django pylama
+
+      - name: Run tests
+        run: pytest --pylama
