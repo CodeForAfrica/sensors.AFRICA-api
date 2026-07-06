@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_REPOSITORY || format('%s/sensors.africa', secrets.DOCKERHUB_USERNAME) }}
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_REPOSITORY != '' && secrets.DOCKERHUB_REPOSITORY || format('{0}/sensors.africa', secrets.DOCKERHUB_USERNAME) }}
 
 jobs:
   test:
@@ -36,21 +36,39 @@ jobs:
       version: ${{ steps.set-tags.outputs.version }}
     steps:
       - uses: actions/checkout@v4
-      - name: Read version and set Docker image tags
+      - name: Resolve next semantic version from Docker Hub
         id: set-tags
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_REPOSITORY: ${{ secrets.DOCKERHUB_REPOSITORY }}
         run: |
-          version=$(cat VERSION | tr -d '[:space:]')
-          if [ -z "$version" ]; then
-            echo "VERSION file is empty"
+          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+            echo "DockerHub credentials are missing" >&2
             exit 1
           fi
-          echo "version=$version" >> $GITHUB_OUTPUT
+
+          repository="${DOCKERHUB_REPOSITORY:-${DOCKERHUB_USERNAME}/sensors.africa}"
+          tags_json=$(curl -fsSL -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" "https://hub.docker.com/v2/repositories/${repository}/tags?page_size=100")
+          latest_version=$(echo "$tags_json" | jq -r '.results[].name' 2>/dev/null | grep -E '^v?[0-9]+(\.[0-9]+){1,2}$' | sed 's/^v//' | sort -V | tail -n 1)
+
+          if [ -z "$latest_version" ]; then
+            latest_version="0.1.0"
+          fi
+
+          IFS='.' read -r major minor patch <<< "$latest_version"
+          major="${major:-0}"
+          minor="${minor:-0}"
+          patch="${patch:-0}"
+          next_version="${major}.${minor}.$((patch + 1))"
+
+          echo "version=$next_version" >> $GITHUB_OUTPUT
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             pr_number=${{ github.event.pull_request.number }}
             image_tag="beta-pr-${pr_number}-${GITHUB_SHA:0:8}"
             secondary_tag="pr-${pr_number}"
           else
-            image_tag="v${version}"
+            image_tag="v${next_version}"
             secondary_tag="latest"
           fi
           echo "image_tag=$image_tag" >> $GITHUB_OUTPUT

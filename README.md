@@ -91,7 +91,7 @@ For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/de
 A GitHub Actions workflow now handles PR staging deploys and production deploys.
 
 - Pull requests targeting `master` build a Docker image tagged as `beta-pr-<PR>#` and deploy it to staging.
-- Pushes to `master` build a versioned image from `VERSION`, push it to DockerHub, and deploy it to production with Dokku using `docker-image:from`.
+- Pushes to `master` inspect the latest Docker Hub image tags, bump the next production semantic version, push it to DockerHub, and deploy it to production with Dokku using `docker-image:from`.
 
 Required repository secrets:
 
@@ -105,7 +105,7 @@ Required repository secrets:
 - `PRODUCTION_DOKKU_HOST` — production Dokku hostname
 - `PRODUCTION_APP_NAME` — production Dokku app name
 
-> The workflow reads the current semantic version from `VERSION` and deploys production using Docker image tags like `v0.1`.
+> The workflow checks the latest semantic Docker image tags on Docker Hub, bumps the patch version for the next production release, and deploys using tags like `v0.1.1`.
 
 ### Staging deploys
 
@@ -113,7 +113,7 @@ Staging deploys use a beta tag derived from the PR number to keep deployments is
 
 ### Production deploys
 
-Production deploys use the app version from `VERSION` and deploy the image to Dokku using the same versioned Docker tag.
+Production deploys use the next semantic version derived from the latest Docker Hub tag and deploy the image to Dokku using that versioned Docker tag.
 
 ### Notes
 
