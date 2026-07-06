@@ -86,6 +86,39 @@ git push dokku master
 
 For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/deployment/application-deployment/#deploying-to-dokku).
 
+## GitHub Actions CI/CD
+
+A GitHub Actions workflow now handles PR staging deploys and production deploys.
+
+- Pull requests targeting `master` build a Docker image tagged as `beta-pr-<PR>#` and deploy it to staging.
+- Pushes to `master` build a versioned image from `VERSION`, push it to DockerHub, and deploy it to production with Dokku using `docker-image:from`.
+
+Required repository secrets:
+
+- `DOCKERHUB_USERNAME` — DockerHub username
+- `DOCKERHUB_TOKEN` — DockerHub access token or password
+- `DOCKERHUB_REPOSITORY` — optional DockerHub repository name, e.g. `codeforafrica/sensors-africa-api`
+- `DOKKU_SSH_STAGING_PRIVATE_KEY` — SSH private deploy key for the staging Dokku server
+- `STAGING_DOKKU_HOST` — staging Dokku hostname/IP
+- `STAGING_APP_NAME` — staging Dokku app name
+- `DOKKU_SSH_PRIVATE_KEY` — SSH private deploy key for the production Dokku server
+- `PRODUCTION_DOKKU_HOST` — production Dokku hostname
+- `PRODUCTION_APP_NAME` — production Dokku app name
+
+> The workflow reads the current semantic version from `VERSION` and deploys production using Docker image tags like `v0.1`.
+
+### Staging deploys
+
+Staging deploys use a beta tag derived from the PR number to keep deployments isolated and easy to trace.
+
+### Production deploys
+
+Production deploys use the app version from `VERSION` and deploy the image to Dokku using the same versioned Docker tag.
+
+### Notes
+
+If your DockerHub repo is private, ensure the Dokku server can pull private images from DockerHub.
+
 ### Cronjob
 
 This project uses celery to create cronjobs and flower to monitor the cron jobs as a web admin.

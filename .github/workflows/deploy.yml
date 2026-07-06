@@ -5,11 +5,10 @@ on:
     branches: [master]
   push:
     branches: [master]
-    tags: ["v*"]
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/sensors.africa
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_REPOSITORY || format('%s/sensors.africa', secrets.DOCKERHUB_USERNAME) }}
 
 jobs:
   test:
@@ -31,8 +30,31 @@ jobs:
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.set-tags.outputs.image_tag }}
+      image-name: ${{ env.IMAGE_NAME }}
+      version: ${{ steps.set-tags.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+      - name: Read version and set Docker image tags
+        id: set-tags
+        run: |
+          version=$(cat VERSION | tr -d '[:space:]')
+          if [ -z "$version" ]; then
+            echo "VERSION file is empty"
+            exit 1
+          fi
+          echo "version=$version" >> $GITHUB_OUTPUT
+          if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
+            pr_number=${{ github.event.pull_request.number }}
+            image_tag="beta-pr-${pr_number}-${GITHUB_SHA:0:8}"
+            secondary_tag="pr-${pr_number}"
+          else
+            image_tag="v${version}"
+            secondary_tag="latest"
+          fi
+          echo "image_tag=$image_tag" >> $GITHUB_OUTPUT
+          echo "secondary_tag=$secondary_tag" >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -48,8 +70,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:${{ steps.set-tags.outputs.image_tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.set-tags.outputs.secondary_tag }}
 
   deploy-staging:
     if: github.event_name == 'pull_request'
@@ -63,13 +85,14 @@ jobs:
           echo "${{ secrets.DOKKU_SSH_STAGING_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.STAGING_DOKKU_HOST }} >> ~/.ssh/known_hosts
-      - name: Push to Dokku staging
+      - name: Deploy staging from Docker image
         env:
           STAGING_HOST: ${{ secrets.STAGING_DOKKU_HOST }}
           STAGING_APP: ${{ secrets.STAGING_APP_NAME }}
+          IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          git remote add dokku dokku@${STAGING_HOST}:${STAGING_APP} || true
-          git push dokku HEAD:master -f
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} docker-image:from ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
 
   integration-tests:
     needs: deploy-staging
@@ -99,10 +122,11 @@ jobs:
           echo "${{ secrets.DOKKU_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.PRODUCTION_DOKKU_HOST }} >> ~/.ssh/known_hosts
-      - name: Push to Dokku production
+      - name: Deploy production from Docker image
         env:
           PROD_HOST: ${{ secrets.PRODUCTION_DOKKU_HOST }}
           PROD_APP: ${{ secrets.PRODUCTION_APP_NAME }}
+          IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          git remote add dokku dokku@${PROD_HOST}:${PROD_APP} || true
-          git push dokku HEAD:master -f
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} docker-image:from ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
