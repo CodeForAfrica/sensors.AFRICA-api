@@ -1,0 +1,108 @@
+name: Dokku Deploy CI/CD
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+    tags: ["v*"]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/sensors.africa
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        run: |
+          pytest -q
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy-staging:
+    if: github.event_name == 'pull_request'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH for Dokku (staging)
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DOKKU_SSH_STAGING_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.STAGING_DOKKU_HOST }} >> ~/.ssh/known_hosts
+      - name: Push to Dokku staging
+        env:
+          STAGING_HOST: ${{ secrets.STAGING_DOKKU_HOST }}
+          STAGING_APP: ${{ secrets.STAGING_APP_NAME }}
+        run: |
+          git remote add dokku dokku@${STAGING_HOST}:${STAGING_APP} || true
+          git push dokku HEAD:master -f
+
+  integration-tests:
+    needs: deploy-staging
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps for integration tests
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run integration tests against staging
+        env:
+          STAGING_URL: https://${{ secrets.STAGING_DOKKU_HOST }}
+        run: |
+          pytest -q tests -k "not unit"
+
+  deploy-production:
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH for Dokku (production)
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DOKKU_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.PRODUCTION_DOKKU_HOST }} >> ~/.ssh/known_hosts
+      - name: Push to Dokku production
+        env:
+          PROD_HOST: ${{ secrets.PRODUCTION_DOKKU_HOST }}
+          PROD_APP: ${{ secrets.PRODUCTION_APP_NAME }}
+        run: |
+          git remote add dokku dokku@${PROD_HOST}:${PROD_APP} || true
+          git push dokku HEAD:master -f
