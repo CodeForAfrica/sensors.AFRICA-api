@@ -72,10 +72,31 @@ jobs:
           fi
 
           repository="${DOCKERHUB_REPOSITORY:-${DOCKERHUB_USERNAME}/sensors.africa}"
-          tags_json=$(curl -fsSL -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" "https://hub.docker.com/v2/repositories/${repository}/tags?page_size=100")
-          latest_version=$(echo "$tags_json" | jq -r '.results[].name' 2>/dev/null | grep -E '^v?[0-9]+(\.[0-9]+){1,2}$' | sed 's/^v//' | sort -V | tail -n 1)
+
+          # Check if repository exists; if not, create it
+          repo_check=$(curl -sS -o /dev/null -w "%{http_code}" -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
+            "https://hub.docker.com/v2/repositories/${repository}/")
+          if [ "$repo_check" = "404" ]; then
+            echo "Repository ${repository} does not exist. Creating it..."
+            namespace="${repository%%/*}"
+            repo_name="${repository#*/}"
+            create_response=$(curl -sS -X POST \
+              -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\": \"${repo_name}\", \"namespace\": \"${namespace}\", \"description\": \"sensors.AFRICA API\", \"is_private\": false}" \
+              "https://hub.docker.com/v2/repositories/")
+            echo "Repository creation response: $create_response"
+          elif [ "$repo_check" != "200" ]; then
+            echo "Warning: Unexpected response code $repo_check checking repository, will attempt to continue" >&2
+          fi
+
+          # Fetch existing tags — gracefully handle 404 (no repo) or empty results
+          tags_json=$(curl -sS -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
+            "https://hub.docker.com/v2/repositories/${repository}/tags?page_size=100")
+          latest_version=$(echo "$tags_json" | jq -r '.results // [] | .[].name' 2>/dev/null | grep -E '^v?[0-9]+(\.[0-9]+){1,2}$' | sed 's/^v//' | sort -V | tail -n 1)
 
           if [ -z "$latest_version" ]; then
+            echo "No existing version tags found — starting from 0.1.0"
             latest_version="0.1.0"
           fi
 
