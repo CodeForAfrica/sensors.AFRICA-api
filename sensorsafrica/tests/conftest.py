@@ -1,5 +1,6 @@
 import datetime
 import math
+import os
 from dateutil.relativedelta import relativedelta
 
 import pytest
@@ -7,9 +8,7 @@ import pytest
 
 def pytest_collection_modifyitems(config, items):
     """Auto-skip tests marked with @pytest.mark.postgres_only when using SQLite."""
-    from django.conf import settings
-    is_sqlite = settings.DATABASES['default']['ENGINE'].endswith('sqlite3')
-    if is_sqlite:
+    if os.environ.get("SENSORSAFRICA_IS_SQLITE") == "true":
         skip_sqlite = pytest.mark.skip(reason="PostgreSQL-only test (skipped on SQLite)")
         for item in items:
             if item.get_closest_marker("postgres_only"):
