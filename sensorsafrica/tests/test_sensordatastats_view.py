@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.utils import timezone
 
 
 @pytest.mark.postgres_only
@@ -92,6 +91,7 @@ class TestGettingData:
         assert "humidity" not in data["results"][0]
 
     def test_getting_air_data_from_date(self, client, logged_in_user, sensorsdatastats):
+        from django.utils import timezone
         self._auth(client, logged_in_user)
         response = client.get(
             "/v2/data/stats/air/?city=dar-es-salaam&from=%s"
@@ -114,6 +114,7 @@ class TestGettingData:
         assert most_recent_date.date() < datetime.datetime.today().date()
 
     def test_getting_air_data_from_date_to_date(self, client, logged_in_user, sensorsdatastats):
+        from django.utils import timezone
         self._auth(client, logged_in_user)
         now = timezone.now()
         response = client.get(

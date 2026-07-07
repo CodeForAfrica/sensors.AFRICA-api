@@ -1,11 +1,7 @@
 import pytest
 import datetime
-from django.utils import timezone
 
-from rest_framework.test import APIRequestFactory
 
-from feinstaub.sensors.models import SensorLocation
-from sensorsafrica.api.v2.views import SensorLocationsView
 
 
 @pytest.mark.django_db

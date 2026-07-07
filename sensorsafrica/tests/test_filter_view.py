@@ -1,6 +1,5 @@
 import pytest
 import datetime
-from django.utils import timezone
 
 
 @pytest.mark.skip(reason="v1 endpoints are deprecated")

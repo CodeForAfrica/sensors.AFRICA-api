@@ -1,7 +1,6 @@
 import datetime
 
 import pytest
-from django.utils import timezone
 
 
 @pytest.mark.postgres_only
@@ -9,6 +8,7 @@ from django.utils import timezone
 class TestGettingDataFromLargeDataset:
 
     def test_getting_air_data_on_large_dataset(self, client, logged_in_user, large_sensorsdatastats):
+        from django.utils import timezone
         from rest_framework.authtoken.models import Token
         token = Token.objects.get(user=logged_in_user)
         client.defaults['HTTP_AUTHORIZATION'] = f'Token {token.key}'

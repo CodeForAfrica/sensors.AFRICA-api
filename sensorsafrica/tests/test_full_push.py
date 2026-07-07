@@ -1,10 +1,6 @@
 import pytest
 import pytz
 
-from rest_framework.test import APIRequestFactory
-from feinstaub.sensors.views import PostSensorDataView
-from feinstaub.sensors.models import SensorData
-
 
 @pytest.mark.django_db
 class TestSensorDataPushFull:
@@ -19,6 +15,10 @@ class TestSensorDataPushFull:
         }
 
     def test_full_data_push(self, sensor, data_fixture):
+        from rest_framework.test import APIRequestFactory
+        from feinstaub.sensors.views import PostSensorDataView
+        from feinstaub.sensors.models import SensorData
+
         factory = APIRequestFactory()
         view = PostSensorDataView
         url = '/v1/push-sensor-data/'

@@ -1,11 +1,7 @@
 import pytest
 import datetime
-from django.utils import timezone
 
-from rest_framework.test import APIRequestFactory
 
-from feinstaub.sensors.models import Sensor
-from sensorsafrica.api.v2.views import SensorsView
 
 
 @pytest.mark.django_db
@@ -20,6 +16,9 @@ class TestSensorsView:
         }
 
     def test_create_sensor(self, data_fixture, logged_in_user, node, sensor_type):
+        from sensorsafrica.api.v2.views import SensorsView
+        from rest_framework.test import APIRequestFactory
+        from feinstaub.sensors.models import Sensor
         data_fixture["node"] = node.id
         data_fixture["sensor_type"] = sensor_type.id
         factory = APIRequestFactory()

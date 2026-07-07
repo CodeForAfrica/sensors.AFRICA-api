@@ -1,8 +1,6 @@
 # coding=utf-8
-from rest_framework.test import APIRequestFactory
 import pytest
 
-from feinstaub.sensors.views import PostSensorDataView
 
 
 @pytest.mark.django_db
