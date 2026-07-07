@@ -38,6 +38,8 @@ jobs:
           pip install --no-deps git+https://github.com/opendata-stuttgart/feinstaub-api
           # Pre-install binary wheels for packages that fail to build from source on cp37
           pip install greenlet==0.4.17 gevent==1.4.0
+          # Pin importlib-metadata for compatibility with old pytest
+          pip install "importlib-metadata<5.0"
           # Install remaining requirements, skipping the now-satisfied pins
           pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
       - name: Run tests
