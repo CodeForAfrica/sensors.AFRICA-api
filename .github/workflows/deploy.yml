@@ -45,6 +45,8 @@ jobs:
           # Install remaining requirements, skipping the now-satisfied pins
           pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
       - name: Run tests
+        env:
+          DJANGO_SETTINGS_MODULE: sensorsafrica.tests.settings
         run: |
           pytest -q
 
