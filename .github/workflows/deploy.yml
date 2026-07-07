@@ -156,7 +156,8 @@ jobs:
           IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku docker-image:from ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku apps:create ${STAGING_APP} || true
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku git:from-image ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
 
   integration-tests:
     needs: deploy-staging
@@ -193,4 +194,5 @@ jobs:
           IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku docker-image:from ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku apps:create ${PROD_APP} || true
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku git:from-image ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
