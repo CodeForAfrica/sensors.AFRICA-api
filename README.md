@@ -61,8 +61,45 @@ The Dockerfile is written for production since dokku is being used and it will l
 
 ### Tests
 
-- Virtual Environment; `pytest --pylama`
-- Docker; `docker-compose run api pytest --pylama`
+Tests use SQLite by default so no external database is needed:
+
+```bash
+pytest -q
+```
+
+Run with verbose output:
+
+```bash
+pytest -v
+```
+
+#### Running tests with PostgreSQL (optional)
+
+For full compatibility, you can run tests against PostgreSQL. Start a PostgreSQL container:
+
+```bash
+docker run -d --name test-pg \
+  -e POSTGRES_USER=sensorsafrica \
+  -e POSTGRES_PASSWORD=sensorsafrica \
+  -e POSTGRES_DB=sensorsafrica \
+  -p 5432:5432 postgres:11
+```
+
+Then run tests pointing to it:
+
+```bash
+SENSORSAFRICA_TEST_DATABASE_URL=postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica pytest -q
+```
+
+#### Running tests with `act` (GitHub Actions locally)
+
+```bash
+act -j test
+```
+
+Tests marked with `@pytest.mark.postgres_only` are automatically skipped on SQLite.
+
+#### Running tests against PostgreSQL (for full compatibility)
 
 **NOTE:**
 If entrypoint and start scripts are changed, make sure they have correct/required permissions since we don't grant permissions to the files using the Dockerfile.
