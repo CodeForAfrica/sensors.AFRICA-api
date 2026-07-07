@@ -12,7 +12,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     services:
       postgres:
         image: postgres:11
@@ -22,8 +22,7 @@ jobs:
           POSTGRES_DB: sensorsafrica
         ports:
           - 5432:5432
-        options: 
-          --health-cmd pg_isready
+        options: --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -44,7 +43,7 @@ jobs:
 
   build-and-push:
     needs: test
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     outputs:
       image-tag: ${{ steps.set-tags.outputs.image_tag }}
       image-name: ${{ env.IMAGE_NAME }}
