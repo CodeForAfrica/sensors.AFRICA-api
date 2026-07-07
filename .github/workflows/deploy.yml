@@ -40,6 +40,8 @@ jobs:
           pip install greenlet==0.4.17 gevent==1.4.0
           # Pin importlib-metadata for compatibility with old pytest
           pip install "importlib-metadata<5.0"
+          # Install feinstaub's core deps that are needed but not in requirements.txt
+          pip install djangorestframework==3.9.1 django-extensions==2.1.4 django-filter==2.2.0 psycopg2==2.7.6.1
           # Install remaining requirements, skipping the now-satisfied pins
           pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
       - name: Run tests
