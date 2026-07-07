@@ -3,11 +3,22 @@ import math
 from dateutil.relativedelta import relativedelta
 
 import pytest
+from django.conf import settings
 from django.core.management import call_command
 from django.utils import timezone
 from feinstaub.sensors.models import (Node, Sensor, SensorData,
                                       SensorDataValue, SensorLocation,
                                       SensorType)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Auto-skip tests marked with @pytest.mark.postgres_only when using SQLite."""
+    is_sqlite = settings.DATABASES['default']['ENGINE'].endswith('sqlite3')
+    if is_sqlite:
+        skip_sqlite = pytest.mark.skip(reason="PostgreSQL-only test (skipped on SQLite)")
+        for item in items:
+            if item.get_closest_marker("postgres_only"):
+                item.add_marker(skip_sqlite)
 
 
 @pytest.fixture
@@ -138,6 +149,9 @@ def sensordata(sensors, locations):
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    data = list(SensorData.objects.order_by('id'))
+
     data[1].update_modified = False
     data[1].timestamp = timezone.now() - datetime.timedelta(minutes=40)
     data[1].save()
@@ -181,6 +195,9 @@ def datavalues(sensors, sensordata):
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    values = list(SensorDataValue.objects.order_by('id'))
+
     now = timezone.now()
 
     # Set Dar es salaam a day ago's data
@@ -212,11 +229,14 @@ def sensorsdatastats(datavalues):
 
 @pytest.fixture
 def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
-    sensordata = SensorData.objects.bulk_create([
+    SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),
     ])
+
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    sensordata = list(SensorData.objects.order_by('-id')[:3])[::-1]
 
     SensorDataValue.objects.bulk_create([
         # Dar es salaam today's additional datavalues avg 4 for P2
@@ -264,7 +284,7 @@ def last_active(sensors, locations, sensorsdatastats):
         timezone.now() + datetime.timedelta(minutes=2),
         timezone.now() + datetime.timedelta(minutes=4)
     ]
-    sensordata = SensorData.objects.bulk_create([
+    SensorData.objects.bulk_create([
         SensorData(
             sensor=sensors[0], location=locations[0], timestamp=timestamps[0]),
         SensorData(
@@ -272,6 +292,9 @@ def last_active(sensors, locations, sensorsdatastats):
         SensorData(
             sensor=sensors[4], location=locations[4], timestamp=timestamps[2]),
     ])
+
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    sensordata = list(SensorData.objects.order_by('-id')[:3])[::-1]
 
     SensorDataValue.objects.bulk_create([
         SensorDataValue(

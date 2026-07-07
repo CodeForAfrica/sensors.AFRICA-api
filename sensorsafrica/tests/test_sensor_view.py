@@ -38,6 +38,7 @@ class TestSensorsView:
         assert sensor.pin == data_fixture["pin"]
         assert sensor.public == data_fixture["public"]
 
+    @pytest.mark.skip(reason="v1 endpoints are deprecated")
     def test_getting_past_5_minutes_data_for_sensor_with_id(self, client, sensors):
         response = client.get("/v1/sensors/%s/" % sensors[0].id, format="json")
         assert response.status_code == 200

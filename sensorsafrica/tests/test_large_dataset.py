@@ -4,12 +4,16 @@ import pytest
 from django.utils import timezone
 
 
+@pytest.mark.postgres_only
 @pytest.mark.django_db
 class TestGettingDataFromLargeDataset:
 
-    def test_getting_air_data_on_large_dataset(self, client, large_sensorsdatastats):
+    def test_getting_air_data_on_large_dataset(self, client, logged_in_user, large_sensorsdatastats):
+        from rest_framework.authtoken.models import Token
+        token = Token.objects.get(user=logged_in_user)
+        client.defaults['HTTP_AUTHORIZATION'] = f'Token {token.key}'
         response = client.get(
-            "/v2/data/air/?city=dar-es-salaam&interval=month&from=%s" %
+            "/v2/data/stats/air/?city=dar-es-salaam&interval=month&from=%s" %
             large_sensorsdatastats["last_date"].date(),
             format="json",
         )
