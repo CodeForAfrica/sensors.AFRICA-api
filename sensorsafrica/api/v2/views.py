@@ -134,6 +134,13 @@ class NodesView(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
+    def create(self, request):
+        serializer = NodeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
     # Note: Allow access to list_nodes for https://v2.map.aq.sensors.africa/#4/-4.46/19.54
     @action(detail=False, methods=["get"], url_path="list-nodes", url_name="list_nodes", permission_classes=[AllowAny])
     def list_nodes(self, request):
