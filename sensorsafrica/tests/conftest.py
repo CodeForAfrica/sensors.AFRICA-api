@@ -3,7 +3,6 @@ import math
 from dateutil.relativedelta import relativedelta
 
 import pytest
-from django.conf import settings
 from django.core.management import call_command
 from django.utils import timezone
 from feinstaub.sensors.models import (Node, Sensor, SensorData,
@@ -13,6 +12,7 @@ from feinstaub.sensors.models import (Node, Sensor, SensorData,
 
 def pytest_collection_modifyitems(config, items):
     """Auto-skip tests marked with @pytest.mark.postgres_only when using SQLite."""
+    from django.conf import settings
     is_sqlite = settings.DATABASES['default']['ENGINE'].endswith('sqlite3')
     if is_sqlite:
         skip_sqlite = pytest.mark.skip(reason="PostgreSQL-only test (skipped on SQLite)")
