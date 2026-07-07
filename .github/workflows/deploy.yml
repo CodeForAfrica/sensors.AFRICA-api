@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       image-tag: ${{ steps.set-tags.outputs.image_tag }}
-      image-name: ${{ env.IMAGE_NAME }}
+      image-name: ${{ steps.set-tags.outputs.image_name }}
       version: ${{ steps.set-tags.outputs.version }}
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +72,8 @@ jobs:
           fi
 
           repository="${DOCKERHUB_REPOSITORY:-${DOCKERHUB_USERNAME}/sensors.africa}"
+
+          echo "image_name=${repository}" >> $GITHUB_OUTPUT
 
           # Check if repository exists; if not, create it
           repo_check=$(curl -sS -o /dev/null -w "%{http_code}" -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
@@ -154,7 +156,7 @@ jobs:
           IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} docker-image:from ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku docker-image:from ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
 
   integration-tests:
     needs: deploy-staging
@@ -191,4 +193,4 @@ jobs:
           IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} docker-image:from ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
+          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku docker-image:from ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
