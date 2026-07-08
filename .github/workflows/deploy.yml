@@ -36,14 +36,7 @@ jobs:
         run: |
           python -m pip install --upgrade "pip<24.1"
           pip install --no-deps git+https://github.com/opendata-stuttgart/feinstaub-api
-          # Pre-install binary wheels for packages that fail to build from source on cp37
-          pip install greenlet==0.4.17 gevent==1.4.0
-          # Pin importlib-metadata for compatibility with old pytest
-          pip install "importlib-metadata<5.0"
-          # Install feinstaub's core deps that are needed but not in requirements.txt
-          pip install djangorestframework==3.9.1 django-extensions==2.1.4 django-filter==2.2.0 psycopg2==2.7.6.1
-          # Install remaining requirements, skipping the now-satisfied pins
-          pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
+          pip install -r requirements.txt
       - name: Run tests
         env:
           DJANGO_SETTINGS_MODULE: sensorsafrica.tests.settings
@@ -176,10 +169,7 @@ jobs:
         run: |
           python -m pip install --upgrade "pip<24.1"
           pip install --no-deps git+https://github.com/opendata-stuttgart/feinstaub-api
-          pip install greenlet==0.4.17 gevent==1.4.0
-          pip install "importlib-metadata<5.0"
-          pip install djangorestframework==3.9.1 django-extensions==2.1.4 django-filter==2.2.0 psycopg2==2.7.6.1
-          pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
+          pip install -r requirements.txt
       - name: Run integration tests against staging
         env:
           STAGING_URL: https://${{ secrets.STAGING_DOKKU_HOST }}
