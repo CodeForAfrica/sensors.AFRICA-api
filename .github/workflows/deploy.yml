@@ -55,7 +55,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       image-tag: ${{ steps.set-tags.outputs.image_tag }}
-      image-name: ${{ steps.set-tags.outputs.image_name }}
       version: ${{ steps.set-tags.outputs.version }}
     steps:
       - uses: actions/checkout@v4
@@ -155,6 +154,11 @@ jobs:
           STAGING_APP: ${{ secrets.STAGING_APP_NAME }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
+          if [ -z "$IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$STAGING_APP" ]; then
+            echo "One or more required values are empty: IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' STAGING_APP='${STAGING_APP}'" >&2
+            echo "Check that the build-and-push job outputs (image-tag) and STAGING_APP_NAME secret are set correctly." >&2
+            exit 1
+          fi
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku apps:create ${STAGING_APP} || true
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku git:from-image ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
 
@@ -192,5 +196,10 @@ jobs:
           PROD_APP: ${{ secrets.PRODUCTION_APP_NAME }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
+          if [ -z "$IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$PROD_APP" ]; then
+            echo "One or more required values are empty: IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' PROD_APP='${PROD_APP}'" >&2
+            echo "Check that the build-and-push job outputs (image-tag) and PRODUCTION_APP_NAME secret are set correctly." >&2
+            exit 1
+          fi
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku apps:create ${PROD_APP} || true
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku git:from-image ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
