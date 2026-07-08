@@ -184,7 +184,7 @@ jobs:
         env:
           STAGING_URL: https://${{ secrets.STAGING_DOKKU_HOST }}
         run: |
-          pytest -q tests -k "not unit"
+          pytest -q sensorsafrica/tests -k "not unit"
 
   deploy-production:
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
