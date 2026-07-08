@@ -165,13 +165,21 @@ jobs:
   integration-tests:
     needs: deploy-staging
     if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.7"
       - name: Install deps for integration tests
         run: |
           python -m pip install --upgrade "pip<24.1"
-          pip install -r requirements.txt
+          pip install --no-deps git+https://github.com/opendata-stuttgart/feinstaub-api
+          pip install greenlet==0.4.17 gevent==1.4.0
+          pip install "importlib-metadata<5.0"
+          pip install djangorestframework==3.9.1 django-extensions==2.1.4 django-filter==2.2.0 psycopg2==2.7.6.1
+          pip install -r <(grep -v '^gevent==\|^greenlet==' requirements.txt)
       - name: Run integration tests against staging
         env:
           STAGING_URL: https://${{ secrets.STAGING_DOKKU_HOST }}
