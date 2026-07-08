@@ -153,7 +153,6 @@ jobs:
         env:
           STAGING_HOST: ${{ secrets.STAGING_DOKKU_HOST }}
           STAGING_APP: ${{ secrets.STAGING_APP_NAME }}
-          IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku apps:create ${STAGING_APP} || true
@@ -191,7 +190,6 @@ jobs:
         env:
           PROD_HOST: ${{ secrets.PRODUCTION_DOKKU_HOST }}
           PROD_APP: ${{ secrets.PRODUCTION_APP_NAME }}
-          IMAGE_NAME: ${{ needs.build-and-push.outputs.image-name }}
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
         run: |
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku apps:create ${PROD_APP} || true
