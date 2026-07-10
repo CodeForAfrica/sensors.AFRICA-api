@@ -120,12 +120,14 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-staging:
-    if: github.event_name == 'pull_request'
+  deploy:
+    name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: staging
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
     env:
+      DOKKU_HOST: ${{ vars.DOKKU_HOST }}
+      DOKKU_APP: ${{ vars.DOKKU_APP }}
       IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
     steps:
       - name: Load SSH key into agent
@@ -138,28 +140,6 @@ jobs:
           chmod 700 ~/.ssh
           echo "${{ secrets.DOKKU_HOST_KEY }}" >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
-      - name: Deploy staging from Docker image
+      - name: Deploy image
         run: |
-          ssh dokku@${{ vars.DOKKU_HOST }} dokku git:from-image ${{ vars.DOKKU_APP }} ${{ vars.DOCKER_HUB_REPO }}:${IMAGE_TAG}
-
-  deploy-production:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    environment: production
-    env:
-      IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
-    steps:
-      - name: Load SSH key into agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
-      - name: Trust the Dokku host
-        run: |
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
-          echo "${{ secrets.DOKKU_HOST_KEY }}" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-      - name: Deploy production from Docker image
-        run: |
-          ssh dokku@${{ vars.DOKKU_HOST }} dokku git:from-image ${{ vars.DOKKU_APP }} ${{ vars.DOCKER_HUB_REPO }}:${IMAGE_TAG}
+          ssh dokku@"$DOKKU_HOST" git:from-image "$DOKKU_APP" "$IMAGE_TAG"
