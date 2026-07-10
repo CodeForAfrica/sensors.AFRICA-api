@@ -23,6 +23,10 @@ on:
           - staging
           - production
         default: staging
+      image_tag: # prevent production deployment from using a PR image tag with manual workflow_dispatch trigger
+        description: "Existing image tag to deploy (e.g. v1.4.2)"
+        required: true
+        type: string
 
 env:
   IMAGE_NAME: ${{ vars.DOCKER_HUB_REPO }}
