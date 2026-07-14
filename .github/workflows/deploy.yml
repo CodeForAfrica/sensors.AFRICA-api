@@ -143,7 +143,11 @@ jobs:
 
   deploy:
     name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
-    needs: build-and-push
+    needs: [guard, build-and-push]
+    if: |
+      always() &&
+      needs.guard.result != 'failure' &&
+      (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
     runs-on: ubuntu-latest
     environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
     env:
