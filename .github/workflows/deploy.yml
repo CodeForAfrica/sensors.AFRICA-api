@@ -28,6 +28,13 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
+  cancel-in-progress: false
+
 env:
   IMAGE_NAME: ${{ vars.DOCKER_HUB_REPO }}
 
