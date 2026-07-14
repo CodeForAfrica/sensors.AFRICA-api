@@ -124,6 +124,16 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  guard:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block manual production deploys from non-master refs
+        if: inputs.environment == 'production' && github.ref != 'refs/heads/master'
+        run: |
+          echo "Manual dispatch to 'production' is only allowed from master (current ref: ${{ github.ref }})." >&2
+          exit 1
+
   deploy:
     name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
     needs: build-and-push
