@@ -35,11 +35,9 @@ concurrency:
   group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
   cancel-in-progress: false
 
-env:
-  IMAGE_NAME: ${{ vars.DOCKER_HUB_REPO }}
-
 jobs:
   test:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -72,6 +70,7 @@ jobs:
           pytest -q
 
   build-and-push:
+    if: github.event_name != 'workflow_dispatch'
     needs: test
     runs-on: ubuntu-22.04
     outputs:
@@ -153,7 +152,7 @@ jobs:
     env:
       DOKKU_HOST: ${{ vars.DOKKU_HOST }}
       DOKKU_APP: ${{ vars.DOKKU_APP }}
-      IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+      IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || needs.build-and-push.outputs.image-tag }}
     steps:
       - name: Load SSH key into agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -167,4 +166,4 @@ jobs:
           chmod 600 ~/.ssh/known_hosts
       - name: Deploy image
         run: |
-          ssh dokku@"$DOKKU_HOST" git:from-image "$DOKKU_APP" "$IMAGE_TAG"
+          ssh dokku@"$DOKKU_HOST" git:from-image "$DOKKU_APP" "${{ vars.DOCKER_HUB_REPO }}:$IMAGE_TAG"
