@@ -23,7 +23,7 @@ on:
           - staging
           - production
         default: staging
-      image_tag: # prevent production deployment from using a PR image tag with manual workflow_dispatch trigger
+      image_tag: 
         description: "Existing image tag to deploy (e.g. v1.4.2)"
         required: true
         type: string
@@ -139,6 +139,16 @@ jobs:
         run: |
           echo "Manual dispatch to 'production' is only allowed from master (current ref: ${{ github.ref }})." >&2
           exit 1
+      - name: Validate semantic version for production deploys
+        if: inputs.environment == 'production'
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Manual dispatch to 'production' requires a semantic version tag (e.g., v1.4.2). Provided: '$IMAGE_TAG'." >&2
+            exit 1
+          fi
 
   deploy:
     name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
