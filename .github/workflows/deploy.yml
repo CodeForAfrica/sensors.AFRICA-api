@@ -3,15 +3,41 @@ name: Dokku Deploy CI/CD
 on:
   pull_request:
     branches: [master]
+    paths-ignore:
+      - "README.md"
+      - ".gitignore"
+      - ".env/**"
   push:
     branches: [master]
+    paths-ignore:
+      - "README.md"
+      - ".gitignore"
+      - ".env/**"
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to deploy to"
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      image_tag: 
+        description: "Existing image tag to deploy (e.g. v1.4.2)"
+        required: true
+        type: string
 
-env:
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_REPOSITORY != '' && secrets.DOCKERHUB_REPOSITORY || format('{0}/sensors.africa', secrets.DOCKERHUB_USERNAME) }}
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
+  cancel-in-progress: false
 
 jobs:
   test:
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-22.04
     services:
       postgres:
@@ -44,6 +70,7 @@ jobs:
           pytest -q
 
   build-and-push:
+    if: github.event_name != 'workflow_dispatch'
     needs: test
     runs-on: ubuntu-22.04
     outputs:
@@ -54,43 +81,15 @@ jobs:
       - name: Resolve next semantic version from Docker Hub
         id: set-tags
         env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          DOCKERHUB_REPOSITORY: ${{ secrets.DOCKERHUB_REPOSITORY }}
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+          DOCKER_HUB_REPO: ${{ vars.DOCKER_HUB_REPO }}
         run: |
-          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
-            echo "DockerHub credentials are missing" >&2
-            exit 1
-          fi
-
-          repository="${DOCKERHUB_REPOSITORY:-${DOCKERHUB_USERNAME}/sensors.africa}"
-
-          echo "image_name=${repository}" >> $GITHUB_OUTPUT
-
-          # Check if repository exists; if not, create it
-          repo_check=$(curl -sS -o /dev/null -w "%{http_code}" -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
-            "https://hub.docker.com/v2/repositories/${repository}/")
-          if [ "$repo_check" = "404" ]; then
-            echo "Repository ${repository} does not exist. Creating it..."
-            namespace="${repository%%/*}"
-            repo_name="${repository#*/}"
-            create_response=$(curl -sS -X POST \
-              -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d "{\"name\": \"${repo_name}\", \"namespace\": \"${namespace}\", \"description\": \"sensors.AFRICA API\", \"is_private\": false}" \
-              "https://hub.docker.com/v2/repositories/")
-            echo "Repository creation response: $create_response"
-          elif [ "$repo_check" != "200" ]; then
-            echo "Warning: Unexpected response code $repo_check checking repository, will attempt to continue" >&2
-          fi
-
-          # Fetch existing tags — gracefully handle 404 (no repo) or empty results
-          tags_json=$(curl -sS -u "$DOCKERHUB_USERNAME:$DOCKERHUB_TOKEN" \
-            "https://hub.docker.com/v2/repositories/${repository}/tags?page_size=100")
+          tags_json=$(curl -sS -u "$DOCKER_HUB_USERNAME:$DOCKER_HUB_ACCESS_TOKEN" \
+            "https://hub.docker.com/v2/repositories/${DOCKER_HUB_REPO}/tags?page_size=100")
           latest_version=$(echo "$tags_json" | jq -r '.results // [] | .[].name' 2>/dev/null | grep -E '^v?[0-9]+(\.[0-9]+){1,2}$' | sed 's/^v//' | sort -V | tail -n 1)
 
           if [ -z "$latest_version" ]; then
-            echo "No existing version tags found — starting from 0.1.0"
             latest_version="0.1.0"
           fi
 
@@ -99,8 +98,8 @@ jobs:
           minor="${minor:-0}"
           patch="${patch:-0}"
           next_version="${major}.${minor}.$((patch + 1))"
-
           echo "version=$next_version" >> $GITHUB_OUTPUT
+
           if [ "${GITHUB_EVENT_NAME}" = "pull_request" ]; then
             pr_number=${{ github.event.pull_request.number }}
             image_tag="beta-pr-${pr_number}-${GITHUB_SHA:0:8}"
@@ -114,90 +113,67 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Log in to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Build and push image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.set-tags.outputs.image_tag }}
-            ${{ env.IMAGE_NAME }}:${{ steps.set-tags.outputs.secondary_tag }}
+            ${{ vars.DOCKER_HUB_REPO }}:${{ steps.set-tags.outputs.image_tag }}
+            ${{ vars.DOCKER_HUB_REPO }}:${{ steps.set-tags.outputs.secondary_tag }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-  deploy-staging:
-    if: github.event_name == 'pull_request'
-    needs: build-and-push
+  guard:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Configure SSH for Dokku (staging)
+      - name: Block manual production deploys from non-master refs
+        if: inputs.environment == 'production' && github.ref != 'refs/heads/master'
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.DOKKU_SSH_STAGING_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.STAGING_DOKKU_HOST }} >> ~/.ssh/known_hosts
-      - name: Deploy staging from Docker image
+          echo "Manual dispatch to 'production' is only allowed from master (current ref: ${{ github.ref }})." >&2
+          exit 1
+      - name: Validate semantic version for production deploys
+        if: inputs.environment == 'production'
         env:
-          STAGING_HOST: ${{ secrets.STAGING_DOKKU_HOST }}
-          STAGING_APP: ${{ secrets.STAGING_APP_NAME }}
-          IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          if [ -z "$IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$STAGING_APP" ]; then
-            echo "One or more required values are empty: IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' STAGING_APP='${STAGING_APP}'" >&2
-            echo "Check that the build-and-push job outputs (image-tag) and STAGING_APP_NAME secret are set correctly." >&2
+          set -euo pipefail
+          if [[ ! "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Manual dispatch to 'production' requires a semantic version tag (e.g., v1.4.2). Provided: '$IMAGE_TAG'." >&2
             exit 1
           fi
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku apps:create ${STAGING_APP} || true
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${STAGING_HOST} dokku git:from-image ${STAGING_APP} ${IMAGE_NAME}:${IMAGE_TAG}
 
-  integration-tests:
-    needs: deploy-staging
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-22.04
+  deploy:
+    name: Deploy to ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
+    needs: [guard, build-and-push]
+    if: |
+      always() &&
+      needs.guard.result != 'failure' &&
+      (needs.build-and-push.result == 'success' || needs.build-and-push.result == 'skipped')
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || (github.event_name == 'pull_request' && 'staging' || 'production') }}
+    env:
+      DOKKU_HOST: ${{ vars.DOKKU_HOST }}
+      DOKKU_APP: ${{ vars.DOKKU_APP }}
+      IMAGE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || needs.build-and-push.outputs.image-tag }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Load SSH key into agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
-          python-version: "3.7"
-      - name: Install deps for integration tests
-        run: |
-          python -m pip install --upgrade "pip<24.1"
-          pip install --no-deps git+https://github.com/opendata-stuttgart/feinstaub-api
-          pip install -r requirements.txt
-      - name: Run integration tests against staging
-        env:
-          STAGING_URL: https://${{ secrets.STAGING_DOKKU_HOST }}
-        run: |
-          pytest -q sensorsafrica/tests -k "not unit"
-
-  deploy-production:
-    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure SSH for Dokku (production)
+          ssh-private-key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
+      - name: Trust the Dokku host
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DOKKU_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.PRODUCTION_DOKKU_HOST }} >> ~/.ssh/known_hosts
-      - name: Deploy production from Docker image
-        env:
-          PROD_HOST: ${{ secrets.PRODUCTION_DOKKU_HOST }}
-          PROD_APP: ${{ secrets.PRODUCTION_APP_NAME }}
-          IMAGE_TAG: ${{ needs.build-and-push.outputs.image-tag }}
+          chmod 700 ~/.ssh
+          echo "${{ secrets.DOKKU_HOST_KEY }}" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Deploy image
         run: |
-          if [ -z "$IMAGE_NAME" ] || [ -z "$IMAGE_TAG" ] || [ -z "$PROD_APP" ]; then
-            echo "One or more required values are empty: IMAGE_NAME='${IMAGE_NAME}' IMAGE_TAG='${IMAGE_TAG}' PROD_APP='${PROD_APP}'" >&2
-            echo "Check that the build-and-push job outputs (image-tag) and PRODUCTION_APP_NAME secret are set correctly." >&2
-            exit 1
-          fi
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku apps:create ${PROD_APP} || true
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no dokku@${PROD_HOST} dokku git:from-image ${PROD_APP} ${IMAGE_NAME}:${IMAGE_TAG}
+          ssh dokku@"$DOKKU_HOST" git:from-image "$DOKKU_APP" "${{ vars.DOCKER_HUB_REPO }}:$IMAGE_TAG"
