@@ -400,3 +400,7 @@ celerybeat.pid
 logs/
 
 /static
+
+# Keys
+*.pem
+*rsa*

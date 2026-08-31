@@ -1,8 +1,6 @@
 # coding=utf-8
-from rest_framework.test import APIRequestFactory
 import pytest
 
-from feinstaub.sensors.views import PostSensorDataView
 
 
 @pytest.mark.django_db
@@ -30,6 +28,8 @@ class TestSensorDataPush:
         return dict(zip(keys, request.param))
 
     def test_sensordata_push(self, sensor, sensordatavalue_fixture):
+        from rest_framework.test import APIRequestFactory
+        from feinstaub.sensors.views import PostSensorDataView
         factory = APIRequestFactory()
         view = PostSensorDataView
         url = '/v1/push-sensor-data/'

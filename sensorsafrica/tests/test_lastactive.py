@@ -1,14 +1,12 @@
 import pytest
 import pytz
 
-from rest_framework.test import APIRequestFactory
-from feinstaub.sensors.views import PostSensorDataView
-from sensorsafrica.api.models import LastActiveNodes
-
 
 @pytest.mark.django_db
 class TestLastActiveSensor:
     def test_lastactive_command(self, sensors, last_active):
+        from sensorsafrica.api.models import LastActiveNodes
+
         sensors0_node = LastActiveNodes.objects.filter(
             node=sensors[0].node_id
         ).get()

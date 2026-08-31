@@ -61,8 +61,45 @@ The Dockerfile is written for production since dokku is being used and it will l
 
 ### Tests
 
-- Virtual Environment; `pytest --pylama`
-- Docker; `docker-compose run api pytest --pylama`
+Tests use SQLite by default so no external database is needed:
+
+```bash
+pytest -q
+```
+
+Run with verbose output:
+
+```bash
+pytest -v
+```
+
+#### Running tests with PostgreSQL (optional)
+
+For full compatibility, you can run tests against PostgreSQL. Start a PostgreSQL container:
+
+```bash
+docker run -d --name test-pg \
+  -e POSTGRES_USER=sensorsafrica \
+  -e POSTGRES_PASSWORD=sensorsafrica \
+  -e POSTGRES_DB=sensorsafrica \
+  -p 5432:5432 postgres:11
+```
+
+Then run tests pointing to it:
+
+```bash
+SENSORSAFRICA_TEST_DATABASE_URL=postgres://sensorsafrica:sensorsafrica@localhost:5432/sensorsafrica pytest -q
+```
+
+#### Running tests with `act` (GitHub Actions locally)
+
+```bash
+act -j test
+```
+
+Tests marked with `@pytest.mark.postgres_only` are automatically skipped on SQLite.
+
+#### Running tests against PostgreSQL (for full compatibility)
 
 **NOTE:**
 If entrypoint and start scripts are changed, make sure they have correct/required permissions since we don't grant permissions to the files using the Dockerfile.
@@ -85,6 +122,39 @@ git push dokku master
 ```
 
 For more information read [Deploying to Dokku](http://dokku.viewdocs.io/dokku/deployment/application-deployment/#deploying-to-dokku).
+
+## GitHub Actions CI/CD
+
+A GitHub Actions workflow now handles PR staging deploys and production deploys.
+
+- Pull requests targeting `master` build a Docker image tagged as `beta-pr-<PR>#` and deploy it to staging.
+- Pushes to `master` inspect the latest Docker Hub image tags, bump the next production semantic version, push it to DockerHub, and deploy it to production with Dokku using `docker-image:from`.
+
+Required repository secrets:
+
+- `DOCKERHUB_USERNAME` — DockerHub username
+- `DOCKERHUB_TOKEN` — DockerHub access token or password
+- `DOCKERHUB_REPOSITORY` — optional DockerHub repository name, e.g. `codeforafrica/sensors-africa-api`
+- `DOKKU_SSH_STAGING_PRIVATE_KEY` — SSH private deploy key for the staging Dokku server
+- `STAGING_DOKKU_HOST` — staging Dokku hostname/IP
+- `STAGING_APP_NAME` — staging Dokku app name
+- `DOKKU_SSH_PRIVATE_KEY` — SSH private deploy key for the production Dokku server
+- `PRODUCTION_DOKKU_HOST` — production Dokku hostname
+- `PRODUCTION_APP_NAME` — production Dokku app name
+
+> The workflow checks the latest semantic Docker image tags on Docker Hub, bumps the patch version for the next production release, and deploys using tags like `v0.1.1`.
+
+### Staging deploys
+
+Staging deploys use a beta tag derived from the PR number to keep deployments isolated and easy to trace.
+
+### Production deploys
+
+Production deploys use the next semantic version derived from the latest Docker Hub tag and deploy the image to Dokku using that versioned Docker tag.
+
+### Notes
+
+If your DockerHub repo is private, ensure the Dokku server can pull private images from DockerHub.
 
 ### Cronjob
 

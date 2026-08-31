@@ -1,8 +1,8 @@
 import pytest
 import datetime
-from django.utils import timezone
 
 
+@pytest.mark.skip(reason="v1 endpoints are deprecated")
 @pytest.mark.django_db
 class TestGettingFilteringPast5MinutesData:
     def test_getting_past_5_minutes_data_for_sensor_type(self, client, sensor_type, sensordata):

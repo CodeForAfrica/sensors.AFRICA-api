@@ -1,11 +1,7 @@
 import pytest
 import datetime
-from django.utils import timezone
 
-from rest_framework.test import APIRequestFactory
 
-from feinstaub.sensors.models import Node
-from sensorsafrica.api.v2.views import NodesView
 
 
 @pytest.mark.django_db
@@ -17,6 +13,9 @@ class TestNodesView:
         }
 
     def test_create_node(self, data_fixture, logged_in_user, location):
+        from sensorsafrica.api.v2.views import NodesView
+        from rest_framework.test import APIRequestFactory
+        from feinstaub.sensors.models import Node
         data_fixture["location"] = location.id
         data_fixture["owner"] = logged_in_user.id
         factory = APIRequestFactory()

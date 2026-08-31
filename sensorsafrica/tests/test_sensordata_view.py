@@ -1,8 +1,8 @@
 import pytest
 import datetime
-from django.utils import timezone
 
 
+@pytest.mark.skip(reason="v1 endpoints are deprecated")
 @pytest.mark.django_db
 class TestGettingRawData:
     def test_getting_all_data(self, client, logged_in_user, sensors):

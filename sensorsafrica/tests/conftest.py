@@ -1,17 +1,23 @@
 import datetime
 import math
+import os
 from dateutil.relativedelta import relativedelta
 
 import pytest
-from django.core.management import call_command
-from django.utils import timezone
-from feinstaub.sensors.models import (Node, Sensor, SensorData,
-                                      SensorDataValue, SensorLocation,
-                                      SensorType)
+
+
+def pytest_collection_modifyitems(config, items):
+    """Auto-skip tests marked with @pytest.mark.postgres_only when using SQLite."""
+    if os.environ.get("SENSORSAFRICA_IS_SQLITE") == "true":
+        skip_sqlite = pytest.mark.skip(reason="PostgreSQL-only test (skipped on SQLite)")
+        for item in items:
+            if item.get_closest_marker("postgres_only"):
+                item.add_marker(skip_sqlite)
 
 
 @pytest.fixture
 def django_db_setup(django_db_setup, django_db_blocker):
+    from django.core.management import call_command
     with django_db_blocker.unblock():
         call_command("loaddata", "auth.json")
 
@@ -33,18 +39,21 @@ def logged_in_user():
 
 @pytest.fixture
 def location():
+    from feinstaub.sensors.models import SensorLocation
     l, x = SensorLocation.objects.get_or_create(description="somewhere")
     return l
 
 
 @pytest.fixture
 def sensor_type():
+    from feinstaub.sensors.models import SensorType
     st, x = SensorType.objects.get_or_create(
         uid="a", name="b", manufacturer="c")
     return st
 
 @pytest.fixture
 def node(logged_in_user, location):
+    from feinstaub.sensors.models import Node
     n, x = Node.objects.get_or_create(
         uid="test123", owner=logged_in_user, location=location
     )
@@ -53,12 +62,14 @@ def node(logged_in_user, location):
 
 @pytest.fixture
 def sensor(logged_in_user, sensor_type, node):
+    from feinstaub.sensors.models import Sensor
     s, x = Sensor.objects.get_or_create(node=node, sensor_type=sensor_type)
     return s
 
 
 @pytest.fixture
 def locations():
+    from feinstaub.sensors.models import SensorLocation
     return [
         SensorLocation.objects.get_or_create(
             city="Dar es Salaam", country="Tanzania", description="active")[0],
@@ -75,6 +86,7 @@ def locations():
 
 @pytest.fixture
 def nodes(logged_in_user, locations):
+    from feinstaub.sensors.models import Node
     return [
         Node.objects.get_or_create(
             uid="0", owner=logged_in_user, location=locations[0])[0],
@@ -91,6 +103,7 @@ def nodes(logged_in_user, locations):
 
 @pytest.fixture
 def sensors(sensor_type, nodes):
+    from feinstaub.sensors.models import Sensor
     return [
         # Active Dar Sensor
         Sensor.objects.get_or_create(
@@ -112,6 +125,8 @@ def sensors(sensor_type, nodes):
 
 @pytest.fixture(autouse=True)
 def sensordata(sensors, locations):
+    from django.utils import timezone
+    from feinstaub.sensors.models import SensorData
 
     sensor_datas = [
         # Bagamoyo SensorData
@@ -138,6 +153,9 @@ def sensordata(sensors, locations):
 
     data = SensorData.objects.bulk_create(sensor_datas)
 
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    data = list(SensorData.objects.order_by('id'))
+
     data[1].update_modified = False
     data[1].timestamp = timezone.now() - datetime.timedelta(minutes=40)
     data[1].save()
@@ -147,6 +165,9 @@ def sensordata(sensors, locations):
 
 @pytest.fixture(autouse=True)
 def datavalues(sensors, sensordata):
+    from django.utils import timezone
+    from feinstaub.sensors.models import SensorDataValue
+
     data_values = [
         # Bagamoyo
         SensorDataValue(
@@ -181,6 +202,9 @@ def datavalues(sensors, sensordata):
 
     values = SensorDataValue.objects.bulk_create(data_values)
 
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    values = list(SensorDataValue.objects.order_by('id'))
+
     now = timezone.now()
 
     # Set Dar es salaam a day ago's data
@@ -206,17 +230,22 @@ def datavalues(sensors, sensordata):
 @pytest.fixture
 def sensorsdatastats(datavalues):
     from django.core.management import call_command
-
     call_command("calculate_data_statistics")
 
 
 @pytest.fixture
 def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
-    sensordata = SensorData.objects.bulk_create([
+    from feinstaub.sensors.models import SensorData, SensorDataValue
+    from django.core.management import call_command
+
+    SensorData.objects.bulk_create([
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),
         SensorData(sensor=sensors[0], location=locations[0]),
     ])
+
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    sensordata = list(SensorData.objects.order_by('-id')[:3])[::-1]
 
     SensorDataValue.objects.bulk_create([
         # Dar es salaam today's additional datavalues avg 4 for P2
@@ -225,13 +254,14 @@ def additional_sensorsdatastats(sensors, locations, sensorsdatastats):
         SensorDataValue(sensordata=sensordata[2], value="4", value_type="P2"),
     ])
 
-    from django.core.management import call_command
-
     call_command("calculate_data_statistics")
 
 
 @pytest.fixture
 def large_sensorsdatastats(sensors, locations):
+    from django.utils import timezone
+    from feinstaub.sensors.models import SensorData, SensorDataValue
+    from django.core.management import call_command
 
     now = timezone.now()
     months = 6
@@ -246,8 +276,6 @@ def large_sensorsdatastats(sensors, locations):
 
         last_date = created_sv.created
 
-    from django.core.management import call_command
-
     call_command("calculate_data_statistics")
 
     return {
@@ -259,12 +287,16 @@ def large_sensorsdatastats(sensors, locations):
 
 @pytest.fixture
 def last_active(sensors, locations, sensorsdatastats):
+    from django.utils import timezone
+    from feinstaub.sensors.models import SensorData, SensorDataValue
+    from django.core.management import call_command
+
     timestamps = [
         timezone.now(),
         timezone.now() + datetime.timedelta(minutes=2),
         timezone.now() + datetime.timedelta(minutes=4)
     ]
-    sensordata = SensorData.objects.bulk_create([
+    SensorData.objects.bulk_create([
         SensorData(
             sensor=sensors[0], location=locations[0], timestamp=timestamps[0]),
         SensorData(
@@ -272,6 +304,9 @@ def last_active(sensors, locations, sensorsdatastats):
         SensorData(
             sensor=sensors[4], location=locations[4], timestamp=timestamps[2]),
     ])
+
+    # Re-fetch to get IDs (SQLite doesn't return PKs from bulk_create in Django 1.11)
+    sensordata = list(SensorData.objects.order_by('-id')[:3])[::-1]
 
     SensorDataValue.objects.bulk_create([
         SensorDataValue(
@@ -282,8 +317,6 @@ def last_active(sensors, locations, sensorsdatastats):
         SensorDataValue(
             sensordata=sensordata[2], value="4", value_type="Temp"),
     ])
-
-    from django.core.management import call_command
 
     call_command("cache_lastactive_nodes")
 
